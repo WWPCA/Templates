@@ -1,0 +1,184 @@
+{% extends "layout.html" %}
+
+{% block title %}Consent Settings - IELTS GenAI Prep{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">Consent Settings</h1>
+                </div>
+                <div class="card-body">
+                    <p class="lead">
+                        Control how we use your data. These settings help us respect your privacy while providing our services.
+                    </p>
+                    
+                    <form action="{{ url_for('gdpr.update_consent') }}" method="post">
+                        <div class="consent-categories">
+                            <!-- Essential Data Processing - Always Required -->
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h2 class="h5 mb-0">Data Processing</h2>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" 
+                                                id="data_processing" 
+                                                name="data_processing"
+                                                checked disabled>
+                                            <label class="form-check-label" for="data_processing">
+                                                Required
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted mt-2 mb-0">
+                                        This essential data processing is required to provide our core services and cannot be disabled.
+                                        It includes storing your account information, test results, and basic usage data.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Audio Processing -->
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h2 class="h5 mb-0">Audio Processing</h2>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" 
+                                                id="audio_processing" 
+                                                name="audio_processing"
+                                                {% if consent.audio_processing %}checked{% endif %}>
+                                            <label class="form-check-label" for="audio_processing">
+                                                Optional
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted mt-2 mb-0">
+                                        Consent to process your audio recordings for speaking assessment. 
+                                        Your audio is only used for immediate assessment and is not permanently stored.
+                                        Transcripts are kept for 6 months and then automatically deleted.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Marketing Emails -->
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h2 class="h5 mb-0">Marketing Emails</h2>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" 
+                                                id="marketing_emails" 
+                                                name="marketing_emails"
+                                                {% if consent.marketing_emails %}checked{% endif %}>
+                                            <label class="form-check-label" for="marketing_emails">
+                                                Optional
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted mt-2 mb-0">
+                                        Receive marketing emails about new features, special offers, and updates.
+                                        You can unsubscribe at any time using the link in each email.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Analytics -->
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h2 class="h5 mb-0">Analytics</h2>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" 
+                                                id="analytics" 
+                                                name="analytics"
+                                                {% if consent.analytics %}checked{% endif %}>
+                                            <label class="form-check-label" for="analytics">
+                                                Optional
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted mt-2 mb-0">
+                                        Allow us to collect anonymous usage data to improve our services.
+                                        This helps us understand how users interact with our platform.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Third-Party Sharing -->
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h2 class="h5 mb-0">Third-Party Sharing</h2>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" 
+                                                id="third_party_sharing" 
+                                                name="third_party_sharing"
+                                                {% if consent.third_party_sharing %}checked{% endif %}>
+                                            <label class="form-check-label" for="third_party_sharing">
+                                                Optional
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted mt-2 mb-0">
+                                        Allow us to share aggregated, anonymized data with trusted third parties
+                                        for research purposes. No personally identifiable information is shared.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" id="select-all" class="btn btn-outline-primary">Select All</button>
+                            <button type="button" id="deselect-all" class="btn btn-outline-secondary">Deselect All</button>
+                            <button type="submit" class="btn btn-primary">Save Preferences</button>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <h3 class="h5">Consent History</h3>
+                        <p class="text-muted small">
+                            Last updated: {{ current_user.last_consent_update.strftime('%d %b %Y %H:%M:%S') if current_user.last_consent_update else 'Never' }}
+                        </p>
+                        <p class="text-muted small">
+                            Consent version: {{ consent.consent_version if consent.consent_version else '1.0' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('gdpr.my_data') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Back to My Data
+                </a>
+                <a href="{{ url_for('gdpr.privacy_policy') }}" class="btn btn-link">
+                    View Privacy Policy
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Select all optional consents
+        document.getElementById('select-all').addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.form-check-input:not([disabled])');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+        
+        // Deselect all optional consents
+        document.getElementById('deselect-all').addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.form-check-input:not([disabled])');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+    });
+</script>
+{% endblock %}
