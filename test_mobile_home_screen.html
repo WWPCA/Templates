@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS GenAI Prep - Mobile Home Screen Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .mobile-simulator {
+            max-width: 375px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .status-bar {
+            display: none;
+        }
+        #home-screen {
+            height: 100vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-simulator">
+        <div class="status-bar">
+            <div>9:41</div>
+            <div>100%</div>
+        </div>
+        <div id="home-screen"></div>
+    </div>
+
+    <script>
+        // Mock Capacitor APIs for testing
+        window.Device = {
+            getInfo: async () => ({
+                platform: 'ios',
+                locale: 'en-US'
+            })
+        };
+
+        window.Network = {
+            getStatus: async () => ({
+                connected: true,
+                connectionType: 'wifi'
+            }),
+            addListener: () => {}
+        };
+
+        window.Toast = {
+            show: async (options) => {
+                console.log('Toast:', options.text);
+                alert(options.text);
+            }
+        };
+
+        window.App = {
+            addListener: () => {}
+        };
+
+        // Mock mobile API client
+        class MobileAPIClient {
+            constructor() {
+                this.baseURL = window.location.origin;
+                this.region = 'us-east-1';
+                this.sessionToken = null;
+                this.qrAuthToken = null;
+            }
+
+            async makeAPICall(endpoint, method = 'POST', data = null) {
+                console.log(`API Call: ${method} ${endpoint}`, data);
+                
+                try {
+                    const response = await fetch(`${this.baseURL}${endpoint}`, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: data ? JSON.stringify(data) : null
+                    });
+
+                    const responseData = await response.json();
+                    
+                    if (response.ok) {
+                        return responseData;
+                    } else {
+                        throw new Error(responseData.message || `HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error(`API Call failed for ${endpoint}:`, error);
+                    throw error;
+                }
+            }
+
+            async registerUser(name, email, password) {
+                return this.makeAPICall('/api/register', 'POST', { name, email, password });
+            }
+
+            async loginUser(email, password) {
+                return this.makeAPICall('/api/login', 'POST', { email, password });
+            }
+
+            async generateQRTokenAfterPurchase(userEmail, productId) {
+                return this.makeAPICall('/auth/generate-qr', 'POST', { userEmail, productId });
+            }
+
+            async verifyApplePurchase(receiptData, productId) {
+                return this.makeAPICall('/purchase/verify-apple', 'POST', { receiptData, productId });
+            }
+
+            async submitSpeechAssessment(audioData, assessmentType) {
+                return this.makeAPICall('/assessment/speech', 'POST', { audioData, assessmentType });
+            }
+
+            async submitWritingAssessment(essayText, prompt, assessmentType) {
+                return this.makeAPICall('/assessment/writing', 'POST', { essayText, prompt, assessmentType });
+            }
+        }
+
+        // Mock purchase manager
+        class iOSPurchaseManager {
+            constructor(apiClient, appInstance) {
+                this.apiClient = apiClient;
+                this.appInstance = appInstance;
+                this.products = [
+                    'academic_speaking_assessment',
+                    'academic_writing_assessment', 
+                    'general_speaking_assessment',
+                    'general_writing_assessment'
+                ];
+            }
+
+            async initializePurchases() {
+                console.log('Purchase system initialized');
+            }
+
+            async purchaseProduct(productId, userEmail) {
+                console.log(`Mock purchase: ${productId} for ${userEmail}`);
+                
+                // Add the product to purchased list BEFORE showing modal
+                if (!this.appInstance.currentUser.products.includes(productId)) {
+                    this.appInstance.currentUser.products.push(productId);
+                    console.log(`Added ${productId} to user products`);
+                }
+                
+                // Simulate purchase success with QR code
+                const qrData = {
+                    success: true,
+                    qr_code_image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+                    token_id: 'mock-token-123',
+                    user_email: userEmail,
+                    product_id: productId
+                };
+
+                await this.showPurchaseSuccessWithQR(productId, qrData);
+                return { success: true };
+            }
+
+            async showPurchaseSuccessWithQR(productId, qrData) {
+                const productNames = {
+                    'academic_speaking_assessment': 'Academic Speaking Assessment',
+                    'academic_writing_assessment': 'Academic Writing Assessment',
+                    'general_speaking_assessment': 'General Speaking Assessment',
+                    'general_writing_assessment': 'General Writing Assessment'
+                };
+
+                const productName = productNames[productId] || 'Assessment';
+
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: white; border-radius: 16px; padding: 24px; max-width: 350px; width: 100%; text-align: center;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+                            <h3 style="font-size: 20px; font-weight: bold; color: #28a745; margin: 0 0 16px 0;">
+                                Purchase Successful!
+                            </h3>
+                            <p style="font-size: 14px; color: #666; margin: 0 0 20px 0;">
+                                ${productName} is now available
+                            </p>
+                            
+                            <div style="background: #e8f5e8; padding: 16px; border-radius: 12px; margin: 16px 0;">
+                                <h4 style="font-size: 16px; color: #333; margin: 0 0 12px 0;">
+                                    🚀 Start Assessment Now
+                                </h4>
+                                <p style="font-size: 13px; color: #666; margin-bottom: 16px;">
+                                    Your assessment is ready! Choose how you'd like to begin:
+                                </p>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+                                    <button class="btn-start-mobile" data-product="${productId}" style="background: #28a745; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 500;">
+                                        Start in App
+                                    </button>
+                                    <button class="btn-use-web" data-product="${productId}" style="background: white; color: #28a745; border: 2px solid #28a745; padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 500;">
+                                        Use on Desktop
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin: 16px 0; border-top: 1px solid #eee;">
+                                <h4 style="font-size: 14px; color: #333; margin: 0 0 12px 0;">
+                                    🖥️ Desktop Access
+                                </h4>
+                                <div style="background: white; padding: 12px; border-radius: 8px; margin: 12px 0;">
+                                    <div style="width: 100px; height: 100px; background: #ddd; margin: 0 auto 12px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #666;">
+                                        QR Code
+                                    </div>
+                                </div>
+                                <p style="font-size: 11px; color: #666; margin: 8px 0;">
+                                    1. Visit <strong>ieltsaiprep.com</strong> on your computer<br>
+                                    2. Scan this QR code with your mobile app<br>
+                                    3. Access your assessment on the web
+                                </p>
+                            </div>
+                            
+                            <button class="btn-close-modal" style="background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; margin-top: 16px;">
+                                Got it!
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+
+                // Add event listeners for the new buttons
+                const startMobileBtn = modal.querySelector('.btn-start-mobile');
+                const useWebBtn = modal.querySelector('.btn-use-web');
+                const closeBtn = modal.querySelector('.btn-close-modal');
+
+                // Use the app instance to call methods
+                if (startMobileBtn) {
+                    startMobileBtn.addEventListener('click', () => {
+                        modal.remove();
+                        const assessmentType = productId.includes('speaking') ? 'speaking' : 'writing';
+                        this.appInstance.startAssessmentInApp(productId, assessmentType);
+                    });
+                }
+
+                if (useWebBtn) {
+                    useWebBtn.addEventListener('click', () => {
+                        modal.remove();
+                        this.appInstance.showWebAccessGuide(productId);
+                    });
+                }
+
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        modal.remove();
+                        // Refresh home screen to show purchased assessment
+                        this.appInstance.renderHomeScreen();
+                    });
+                }
+            }
+
+            async restorePurchases() {
+                return [];
+            }
+        }
+
+        // Mock QR scanner
+        class QRCodeScanner {
+            constructor(apiClient) {
+                this.apiClient = apiClient;
+                this.isScanning = false;
+            }
+
+            async startScanning() {
+                if (this.isScanning) {
+                    throw new Error('Already scanning');
+                }
+
+                this.isScanning = true;
+                
+                try {
+                    alert('QR Scanner would open here.\n\nIn the real app, this would use the device camera to scan QR codes from ieltsaiprep.com');
+                    return 'mock-qr-token-123';
+                } finally {
+                    this.isScanning = false;
+                }
+            }
+
+            async authenticateWithWebsite(token, userEmail) {
+                console.log(`Authenticating ${userEmail} with token ${token}`);
+                return true;
+            }
+        }
+
+        // Main app class
+        class IELTSGenAIPrepApp {
+            constructor() {
+                this.apiClient = new MobileAPIClient();
+                this.purchaseManager = new iOSPurchaseManager(this.apiClient, this);
+                this.qrScanner = new QRCodeScanner(this.apiClient);
+                this.currentUser = null; // No user logged in initially
+                
+                // Store global reference for purchase flow
+                window.appInstance = this;
+            }
+
+            async initialize() {
+                try {
+                    await this.purchaseManager.initializePurchases();
+                    
+                    // Check for existing user session
+                    const savedUser = localStorage.getItem('ielts_user');
+                    if (savedUser) {
+                        this.currentUser = JSON.parse(savedUser);
+                        this.setupHomeScreen();
+                    } else {
+                        this.showAuthScreen();
+                    }
+                    
+                    console.log('IELTS GenAI Prep app initialized successfully');
+                } catch (error) {
+                    console.error('App initialization failed:', error);
+                }
+            }
+
+            async addPurchasedProduct(userEmail, productId) {
+                if (!this.currentUser.products.includes(productId)) {
+                    this.currentUser.products.push(productId);
+                    console.log(`Added ${productId} to user products`);
+                    
+                    // Refresh home screen to show purchased assessments
+                    this.setupHomeScreen();
+                }
+            }
+
+            startAssessmentInApp(productId, assessmentType) {
+                const productNames = {
+                    'academic_speaking_assessment': 'Academic Speaking',
+                    'academic_writing_assessment': 'Academic Writing',
+                    'general_speaking_assessment': 'General Speaking',
+                    'general_writing_assessment': 'General Writing'
+                };
+
+                const productName = productNames[productId] || 'Assessment';
+                
+                // Simulate starting assessment in mobile app
+                alert(`Starting ${productName} assessment in mobile app!\n\nThis would launch the native assessment interface with:\n• ${assessmentType === 'speaking' ? 'AI examiner Maya conversation' : 'Writing prompt and editor'}\n• Real-time feedback\n• Progress tracking\n• Offline capability`);
+                
+                // Refresh home screen to show purchased assessment
+                this.renderHomeScreen();
+            }
+
+            showWebAccessGuide(productId) {
+                alert(`Web access guide for ${productId}: Visit ieltsaiprep.com and scan QR code with this app.`);
+            }
+
+            generatePurchasedAssessmentCards() {
+                const assessmentMap = {
+                    'academic_speaking_assessment': {
+                        title: 'ClearScore® GenAI Speaking',
+                        subtitle: 'Academic Training',
+                        icon: '🗣️',
+                        type: 'speaking',
+                        color: '#007bff'
+                    },
+                    'academic_writing_assessment': {
+                        title: 'TrueScore® GenAI Writing',
+                        subtitle: 'Academic Training', 
+                        icon: '✍️',
+                        type: 'writing',
+                        color: '#28a745'
+                    },
+                    'general_speaking_assessment': {
+                        title: 'ClearScore® GenAI Speaking',
+                        subtitle: 'General Training',
+                        icon: '🗣️',
+                        type: 'speaking',
+                        color: '#007bff'
+                    },
+                    'general_writing_assessment': {
+                        title: 'TrueScore® GenAI Writing',
+                        subtitle: 'General Training',
+                        icon: '✍️', 
+                        type: 'writing',
+                        color: '#28a745'
+                    }
+                };
+
+                return this.currentUser.products.map(productId => {
+                    const assessment = assessmentMap[productId];
+                    if (!assessment) return '';
+
+                    return `
+                        <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                                <div style="font-size: 24px; margin-right: 12px;">${assessment.icon}</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 16px; font-weight: bold; color: #333;">${assessment.title}</div>
+                                    <div style="font-size: 14px; color: #666;">${assessment.subtitle}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <button class="start-assessment-btn" data-product="${productId}" data-type="${assessment.type}" 
+                                        style="background: ${assessment.color}; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;">
+                                    Start in App
+                                </button>
+                                <button class="web-access-btn" data-product="${productId}" 
+                                        style="background: white; color: ${assessment.color}; border: 2px solid ${assessment.color}; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;">
+                                    Use on Web
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            setupHomeScreen() {
+                const homeContainer = document.getElementById('home-screen');
+                
+                // Generate purchased assessments section
+                const purchasedAssessmentsHTML = this.currentUser.products.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <h2 style="font-size: 20px; font-weight: bold; color: #333; margin-bottom: 16px;">
+                            My Assessments
+                        </h2>
+                        ${this.generatePurchasedAssessmentCards()}
+                    </div>
+                ` : '';
+
+                const homeScreenHTML = `
+                    <div id="ielts-home-screen" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                        ${purchasedAssessmentsHTML}
+                        
+                        <!-- User Header with Logout -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <div>
+                                <h1 style="font-size: 24px; font-weight: bold; color: #333; margin: 0;">
+                                    Hello, ${this.currentUser.name}!
+                                </h1>
+                                <p style="font-size: 14px; color: #666; margin: 4px 0 0 0;">
+                                    ${this.currentUser.email}
+                                </p>
+                            </div>
+                            <button id="logout-button" style="background: #f8f9fa; color: #666; border: 1px solid #ddd; padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer;">
+                                Logout
+                            </button>
+                        </div>
+
+                        <!-- Top Half: Web Version Access Information -->
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; border-radius: 16px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; margin-bottom: 12px;">
+                                📱 ➜ 💻 Access Anywhere
+                            </div>
+                            <div style="font-size: 16px; line-height: 1.5; margin-bottom: 16px;">
+                                Use your mobile purchases on desktop and laptop too!
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                                <div style="font-size: 14px; margin-bottom: 8px;">
+                                    <strong>After purchasing assessments:</strong>
+                                </div>
+                                <div style="font-size: 14px; line-height: 1.4;">
+                                    1. Get your QR code from the purchase confirmation<br>
+                                    2. Visit <strong>ieltsaiprep.com</strong> on your computer<br>
+                                    3. Scan the QR code to access your assessments
+                                </div>
+                            </div>
+                            <button id="learn-more-web-access" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                                Learn More About Web Access
+                            </button>
+                        </div>
+
+                        <!-- Assessment Products Section -->
+                        <div style="margin-bottom: 20px;">
+                            <h2 style="font-size: 20px; font-weight: bold; color: #333; margin-bottom: 16px;">
+                                IELTS Assessment Products
+                            </h2>
+                            <div style="display: grid; gap: 12px;">
+                                ${this.generateProductCards()}
+                            </div>
+                        </div>
+
+                        <!-- QR Scanner Section -->
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; text-align: center;">
+                            <h3 style="font-size: 18px; color: #333; margin-bottom: 12px;">
+                                Already have web access?
+                            </h3>
+                            <p style="font-size: 14px; color: #666; margin-bottom: 16px;">
+                                Scan QR codes from ieltsaiprep.com to authenticate
+                            </p>
+                            <button id="qr-scan-button" style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600;">
+                                Scan QR Code
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                homeContainer.innerHTML = homeScreenHTML;
+                this.setupHomeScreenListeners();
+            }
+
+            setupHomeScreenListeners() {
+                // Logout button
+                const logoutBtn = document.getElementById('logout-button');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        this.logout();
+                    });
+                }
+
+                // Learn more about web access
+                const learnMoreBtn = document.getElementById('learn-more-web-access');
+                if (learnMoreBtn) {
+                    learnMoreBtn.addEventListener('click', () => {
+                        this.showWebAccessInfo();
+                    });
+                }
+
+                // QR scanner button
+                const qrScanBtn = document.getElementById('qr-scan-button');
+                if (qrScanBtn) {
+                    qrScanBtn.addEventListener('click', () => {
+                        this.handleQRScan();
+                    });
+                }
+
+                // Purchase buttons
+                const purchaseBtns = document.querySelectorAll('.purchase-btn');
+                purchaseBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const productId = e.target.getAttribute('data-product');
+                        if (productId) {
+                            this.handlePurchase(productId);
+                        }
+                    });
+                });
+
+                // Learn more buttons
+                const learnMoreBtns = document.querySelectorAll('.learn-more-btn');
+                learnMoreBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const productId = e.target.getAttribute('data-product');
+                        if (productId) {
+                            this.showProductDetails(productId);
+                        }
+                    });
+                });
+
+                // Start assessment in app buttons
+                const startBtns = document.querySelectorAll('.start-assessment-btn');
+                startBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const productId = e.target.getAttribute('data-product');
+                        const assessmentType = e.target.getAttribute('data-type');
+                        if (productId && assessmentType) {
+                            this.startAssessmentInApp(productId, assessmentType);
+                        }
+                    });
+                });
+
+                // Web access buttons
+                const webBtns = document.querySelectorAll('.web-access-btn');
+                webBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const productId = e.target.getAttribute('data-product');
+                        if (productId) {
+                            this.showWebAccessGuide(productId);
+                        }
+                    });
+                });
+            }
+
+            generateProductCards() {
+                const writingProducts = [
+                    {
+                        id: 'academic_writing_assessment',
+                        title: 'Academic Writing',
+                        brand: 'TrueScore® GenAI',
+                        icon: '📝',
+                        brandColor: '#28a745',
+                        description: 'Professional-grade GenAI assessment of IELTS Academic writing tasks',
+                        features: [
+                            'Task 1: Graph/chart description',
+                            'Task 2: Academic essay writing',
+                            'TrueScore® GenAI detailed feedback'
+                        ],
+                        sets: '4 complete assessment sets',
+                        price: '$36.49'
+                    },
+                    {
+                        id: 'general_writing_assessment',
+                        title: 'General Writing',
+                        brand: 'TrueScore® GenAI',
+                        icon: '✍️',
+                        brandColor: '#28a745',
+                        description: 'Expert GenAI assessment for IELTS General Training writing',
+                        features: [
+                            'Task 1: Formal & informal letters',
+                            'Task 2: General essay writing',
+                            'TrueScore® GenAI detailed feedback'
+                        ],
+                        sets: '4 complete assessment sets',
+                        price: '$36.49'
+                    }
+                ];
+
+                const speakingProducts = [
+                    {
+                        id: 'academic_speaking_assessment',
+                        title: 'Academic Speaking',
+                        brand: 'ClearScore® GenAI',
+                        icon: '🎤',
+                        brandColor: '#007bff',
+                        description: 'Advanced GenAI speech analysis for IELTS Academic speaking',
+                        features: [
+                            'All 3 speaking parts covered',
+                            'ClearScore® GenAI speech analysis',
+                            'Real-time speech feedback'
+                        ],
+                        sets: '4 complete assessment sets',
+                        price: '$36.49'
+                    },
+                    {
+                        id: 'general_speaking_assessment',
+                        title: 'General Speaking',
+                        brand: 'ClearScore® GenAI',
+                        icon: '🗣️',
+                        brandColor: '#007bff',
+                        description: 'Professional GenAI speaking assessment for General Training',
+                        features: [
+                            'All 3 speaking parts covered',
+                            'ClearScore® GenAI analysis',
+                            'Pronunciation & fluency feedback'
+                        ],
+                        sets: '4 complete assessment sets',
+                        price: '$36.49'
+                    }
+                ];
+
+                const generateSection = (title, products, brandInfo) => `
+                    <div style="margin-bottom: 32px;">
+                        <div style="text-align: center; margin-bottom: 20px; padding: 16px; background: ${brandInfo.bgColor}; border-radius: 12px;">
+                            <div style="font-size: 32px; margin-bottom: 8px;">${brandInfo.icon}</div>
+                            <h3 style="font-size: 20px; font-weight: bold; color: ${brandInfo.color}; margin: 0 0 8px 0;">
+                                ${brandInfo.brand} ${title}
+                            </h3>
+                            <p style="font-size: 14px; color: ${brandInfo.textColor}; margin: 0; line-height: 1.4;">
+                                ${brandInfo.tagline}
+                            </p>
+                        </div>
+                        ${products.map(product => `
+                            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                            <span style="font-size: 20px; margin-right: 8px;">${product.icon}</span>
+                                            <h4 style="font-size: 16px; font-weight: 600; color: #333; margin: 0;">
+                                                ${product.title}
+                                            </h4>
+                                        </div>
+                                        <div style="font-size: 12px; font-weight: 600; color: ${product.brandColor}; margin-bottom: 8px;">
+                                            ${product.brand} Technology
+                                        </div>
+                                        <p style="font-size: 13px; color: #666; margin: 0 0 12px 0; line-height: 1.4;">
+                                            ${product.description}
+                                        </p>
+                                    </div>
+                                    <div style="font-size: 16px; font-weight: bold; color: ${product.brandColor}; margin-left: 12px;">
+                                        ${product.price}
+                                    </div>
+                                </div>
+                                
+                                <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                                    <div style="font-size: 12px; font-weight: 600; color: #333; margin-bottom: 6px;">What's included:</div>
+                                    <ul style="font-size: 11px; color: #666; margin: 0; padding-left: 16px; line-height: 1.3;">
+                                        ${product.features.map(feature => `<li>${feature}</li>`).join('')}
+                                    </ul>
+                                    <div style="font-size: 11px; color: #28a745; font-weight: 600; margin-top: 6px;">
+                                        ✓ ${product.sets}
+                                    </div>
+                                </div>
+                                
+                                <button class="purchase-btn" data-product="${product.id}" style="width: 100%; background: ${product.brandColor}; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600;">
+                                    Purchase ${product.title}
+                                </button>
+                                
+                                <button class="learn-more-btn" data-product="${product.id}" style="width: 100%; background: transparent; color: ${product.brandColor}; border: 1px solid ${product.brandColor}; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 500; margin-top: 8px;">
+                                    Learn More Details
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                return generateSection('Writing Assessment', writingProducts, {
+                    brand: 'TrueScore® GenAI',
+                    icon: '📝',
+                    color: '#28a745',
+                    bgColor: '#e8f5e8',
+                    textColor: '#155724',
+                    tagline: 'Professional-grade GenAI assessment with detailed feedback and scoring'
+                }) + generateSection('Speaking Assessment', speakingProducts, {
+                    brand: 'ClearScore® GenAI',
+                    icon: '🎤',
+                    color: '#007bff',
+                    bgColor: '#e3f2fd',
+                    textColor: '#1976d2',
+                    tagline: 'Advanced GenAI speech analysis to improve your speaking performance'
+                });
+            }
+
+            setupHomeScreenListeners() {
+                const learnMoreBtn = document.getElementById('learn-more-web-access');
+                if (learnMoreBtn) {
+                    learnMoreBtn.addEventListener('click', () => {
+                        this.showWebAccessInfo();
+                    });
+                }
+
+                const qrScanBtn = document.getElementById('qr-scan-button');
+                if (qrScanBtn) {
+                    qrScanBtn.addEventListener('click', () => {
+                        this.handleQRScan();
+                    });
+                }
+
+                const purchaseBtns = document.querySelectorAll('.purchase-btn');
+                purchaseBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const productId = e.target.getAttribute('data-product');
+                        if (productId) {
+                            this.handlePurchase(productId);
+                        }
+                    });
+                });
+
+                const learnMoreBtns = document.querySelectorAll('.learn-more-btn');
+                learnMoreBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const productId = e.target.getAttribute('data-product');
+                        if (productId) {
+                            this.showProductDetails(productId);
+                        }
+                    });
+                });
+            }
+
+            showProductDetails(productId) {
+                const productDetails = {
+                    academic_writing_assessment: {
+                        title: 'Academic Writing Assessment',
+                        brand: 'TrueScore® GenAI',
+                        color: '#28a745',
+                        icon: '📝',
+                        description: 'Professional-grade GenAI assessment designed specifically for IELTS Academic Writing tasks',
+                        features: [
+                            'Task 1: Data interpretation from graphs, charts, tables, and diagrams',
+                            'Task 2: Academic essay writing with argumentative structure',
+                            'TrueScore® GenAI provides detailed feedback on all 4 criteria',
+                            'Band score prediction with accuracy explanation',
+                            'Vocabulary enhancement suggestions',
+                            'Grammar and coherence analysis'
+                        ],
+                        whatYouGet: [
+                            '4 complete assessment sets (8 writing tasks total)',
+                            'Detailed feedback report for each task',
+                            'Band score breakdown by criteria',
+                            'Improvement recommendations',
+                            'Sample answers for comparison'
+                        ],
+                        technology: 'Uses advanced GenAI to analyze your writing across Task Achievement, Coherence & Cohesion, Lexical Resource, and Grammatical Range & Accuracy - the same criteria used by IELTS examiners.'
+                    },
+                    general_writing_assessment: {
+                        title: 'General Writing Assessment',
+                        brand: 'TrueScore® GenAI',
+                        color: '#28a745',
+                        icon: '✍️',
+                        description: 'Expert GenAI assessment designed for IELTS General Training Writing tasks',
+                        features: [
+                            'Task 1: Formal, semi-formal, and informal letter writing',
+                            'Task 2: General essay writing on everyday topics',
+                            'TrueScore® GenAI detailed feedback on all criteria',
+                            'Tone and register analysis for letters',
+                            'Practical writing improvement tips',
+                            'Real-world writing scenarios'
+                        ],
+                        whatYouGet: [
+                            '4 complete assessment sets (8 writing tasks total)',
+                            'Letter format and structure guidance',
+                            'Essay organization feedback',
+                            'Band score prediction with explanations',
+                            'Practical improvement strategies'
+                        ],
+                        technology: 'Specialized GenAI trained on General Training writing patterns, analyzing tone appropriateness, task completion, and practical communication effectiveness.'
+                    },
+                    academic_speaking_assessment: {
+                        title: 'Academic Speaking Assessment',
+                        brand: 'ClearScore® GenAI',
+                        color: '#007bff',
+                        icon: '🎤',
+                        description: 'Advanced GenAI speech analysis technology for IELTS Academic Speaking preparation',
+                        features: [
+                            'Part 1: Personal questions and familiar topics',
+                            'Part 2: Long turn speaking with preparation time',
+                            'Part 3: Abstract discussion and analysis',
+                            'ClearScore® GenAI real-time speech analysis',
+                            'Pronunciation accuracy assessment',
+                            'Fluency and coherence evaluation'
+                        ],
+                        whatYouGet: [
+                            '4 complete speaking test simulations',
+                            'Detailed pronunciation feedback',
+                            'Fluency analysis with timing insights',
+                            'Vocabulary usage assessment',
+                            'Improvement recommendations for each part'
+                        ],
+                        technology: 'State-of-the-art GenAI speech recognition analyzes pronunciation, intonation, fluency, and lexical resource usage in real-time, providing immediate feedback.'
+                    },
+                    general_speaking_assessment: {
+                        title: 'General Speaking Assessment',
+                        brand: 'ClearScore® GenAI',
+                        color: '#007bff',
+                        icon: '🗣️',
+                        description: 'Professional GenAI speaking assessment for IELTS General Training preparation',
+                        features: [
+                            'Part 1: Personal information and everyday topics',
+                            'Part 2: Describe experiences and situations',
+                            'Part 3: Practical discussions and opinions',
+                            'ClearScore® GenAI speech analysis',
+                            'Natural conversation flow assessment',
+                            'Practical communication evaluation'
+                        ],
+                        whatYouGet: [
+                            '4 complete speaking assessments',
+                            'Natural speech pattern analysis',
+                            'Communication effectiveness feedback',
+                            'Confidence building recommendations',
+                            'Real-world speaking practice scenarios'
+                        ],
+                        technology: 'Advanced GenAI specifically trained on General Training speaking patterns, focusing on everyday communication skills and practical language use.'
+                    }
+                };
+
+                const product = productDetails[productId];
+                if (!product) return;
+
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: white; border-radius: 16px; padding: 20px; max-width: 350px; width: 100%; max-height: 85vh; overflow-y: auto;">
+                            <div style="text-align: center; margin-bottom: 16px;">
+                                <div style="font-size: 40px; margin-bottom: 8px;">${product.icon}</div>
+                                <h3 style="font-size: 18px; font-weight: bold; color: ${product.color}; margin: 0 0 4px 0;">
+                                    ${product.brand} Technology
+                                </h3>
+                                <h4 style="font-size: 16px; font-weight: 600; color: #333; margin: 0 0 12px 0;">
+                                    ${product.title}
+                                </h4>
+                                <p style="font-size: 13px; color: #666; line-height: 1.4; margin: 0;">
+                                    ${product.description}
+                                </p>
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                                <h5 style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 8px 0;">
+                                    Assessment Features:
+                                </h5>
+                                <ul style="font-size: 12px; color: #666; margin: 0; padding-left: 16px; line-height: 1.4;">
+                                    ${product.features.map(feature => `<li style="margin-bottom: 4px;">${feature}</li>`).join('')}
+                                </ul>
+                            </div>
+
+                            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                                <h5 style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 8px 0;">
+                                    What You Get:
+                                </h5>
+                                <ul style="font-size: 12px; color: #666; margin: 0; padding-left: 16px; line-height: 1.4;">
+                                    ${product.whatYouGet.map(item => `<li style="margin-bottom: 4px;">${item}</li>`).join('')}
+                                </ul>
+                            </div>
+
+                            <div style="background: ${product.color}15; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                                <h5 style="font-size: 14px; font-weight: 600; color: ${product.color}; margin: 0 0 8px 0;">
+                                    How It Works:
+                                </h5>
+                                <p style="font-size: 12px; color: #555; line-height: 1.4; margin: 0;">
+                                    ${product.technology}
+                                </p>
+                            </div>
+
+                            <div style="text-align: center;">
+                                <button class="purchase-btn" data-product="${productId}" style="width: 100%; background: ${product.color}; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; margin-bottom: 8px;">
+                                    Purchase Now - $36.00
+                                </button>
+                                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: transparent; color: #666; border: 1px solid #ddd; padding: 8px 16px; border-radius: 6px; font-size: 12px;">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                // Add purchase functionality to the modal button
+                const modalPurchaseBtn = modal.querySelector('.purchase-btn');
+                if (modalPurchaseBtn) {
+                    modalPurchaseBtn.addEventListener('click', (e) => {
+                        modal.remove();
+                        this.handlePurchase(productId);
+                    });
+                }
+
+                // Close on backdrop click
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+
+            async showWebAccessInfo() {
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: white; border-radius: 16px; padding: 24px; max-width: 350px; width: 100%; max-height: 80vh; overflow-y: auto;">
+                            <h3 style="font-size: 20px; font-weight: bold; color: #333; margin: 0 0 16px 0; text-align: center;">
+                                🖥️ Web Access Guide
+                            </h3>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="font-size: 16px; font-weight: 600; color: #333; margin: 0 0 8px 0;">
+                                    How it works:
+                                </h4>
+                                <ol style="font-size: 14px; line-height: 1.6; color: #666; padding-left: 20px;">
+                                    <li>Purchase any assessment product in this mobile app</li>
+                                    <li>After successful purchase, you'll receive a QR code</li>
+                                    <li>Go to <strong>ieltsaiprep.com</strong> on your desktop or laptop</li>
+                                    <li>Scan the QR code with this mobile app</li>
+                                    <li>Access your purchased assessments on the web platform</li>
+                                </ol>
+                            </div>
+
+                            <div style="background: #e3f2fd; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                                <h4 style="font-size: 14px; font-weight: 600; color: #1976d2; margin: 0 0 8px 0;">
+                                    ✨ Benefits of Web Access:
+                                </h4>
+                                <ul style="font-size: 13px; line-height: 1.5; color: #1976d2; margin: 0; padding-left: 16px;">
+                                    <li>Larger screen for writing assessments</li>
+                                    <li>Full keyboard support</li>
+                                    <li>Better audio quality for speaking tests</li>
+                                    <li>Seamless sync between mobile and web</li>
+                                </ul>
+                            </div>
+
+                            <div style="text-align: center;">
+                                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600;">
+                                    Got it!
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+            }
+
+            async handlePurchase(productId) {
+                // Show terms and conditions acceptance before purchase
+                this.showTermsAcceptance(productId);
+            }
+
+            showTermsAcceptance(productId) {
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: white; border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; max-height: 80vh; overflow-y: auto;">
+                            <h3 style="font-size: 20px; font-weight: bold; color: #333; margin: 0 0 16px 0; text-align: center;">
+                                📋 Terms and Conditions
+                            </h3>
+                            
+                            <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 20px; max-height: 200px; overflow-y: auto;">
+                                <h4 style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 12px 0;">
+                                    Purchase Agreement:
+                                </h4>
+                                <ul style="font-size: 13px; line-height: 1.6; color: #555; margin: 0; padding-left: 16px;">
+                                    <li><strong>All purchases are final and non-refundable</strong></li>
+                                    <li>Assessment package costs $36.00 per product</li>
+                                    <li>Access works on both mobile app and desktop website</li>
+                                    <li>You must be at least 16 years old to purchase</li>
+                                    <li>Payment processed through secure app store billing</li>
+                                </ul>
+                                
+                                <h4 style="font-size: 14px; font-weight: 600; color: #333; margin: 16px 0 8px 0;">
+                                    Privacy & Data:
+                                </h4>
+                                <ul style="font-size: 13px; line-height: 1.6; color: #555; margin: 0; padding-left: 16px;">
+                                    <li>Assessment responses stored for feedback generation</li>
+                                    <li>Voice recordings processed in real-time, not stored</li>
+                                    <li>Data used to improve AI assessment accuracy</li>
+                                </ul>
+                            </div>
+
+                            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="font-size: 13px; color: #856404; margin: 0; font-weight: 500; text-align: center;">
+                                    ⚠️ By purchasing, you agree that all sales are final and non-refundable
+                                </p>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <div style="margin-bottom: 12px;">
+                                    <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 14px; color: #333;">
+                                        <input type="checkbox" id="terms-checkbox" style="margin: 4px 8px 0 0; transform: scale(1.2);">
+                                        <span>I have read and agree to the <a href="/terms-of-service" target="_blank" style="color: #007bff; text-decoration: none; font-weight: 600;">Terms of Service</a></span>
+                                    </label>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 14px; color: #333;">
+                                        <input type="checkbox" id="privacy-checkbox" style="margin: 4px 8px 0 0; transform: scale(1.2);">
+                                        <span>I have read and agree to the <a href="/privacy-policy" target="_blank" style="color: #007bff; text-decoration: none; font-weight: 600;">Privacy Policy</a></span>
+                                    </label>
+                                </div>
+                                <div style="padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #dc3545;">
+                                    <p style="margin: 0; font-size: 13px; color: #721c24; font-weight: 500;">
+                                        ✓ I understand that all purchases are final and non-refundable
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 12px;">
+                                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600;">
+                                    Cancel
+                                </button>
+                                <button id="proceed-purchase-btn" disabled style="flex: 1; background: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0.5; cursor: not-allowed;">
+                                    Accept Both Agreements
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                // Enable/disable purchase button based on both checkboxes
+                const termsCheckbox = modal.querySelector('#terms-checkbox');
+                const privacyCheckbox = modal.querySelector('#privacy-checkbox');
+                const proceedBtn = modal.querySelector('#proceed-purchase-btn');
+                
+                const updatePurchaseButton = () => {
+                    if (termsCheckbox.checked && privacyCheckbox.checked) {
+                        proceedBtn.disabled = false;
+                        proceedBtn.style.opacity = '1';
+                        proceedBtn.style.cursor = 'pointer';
+                        proceedBtn.textContent = 'Proceed to Purchase';
+                    } else {
+                        proceedBtn.disabled = true;
+                        proceedBtn.style.opacity = '0.5';
+                        proceedBtn.style.cursor = 'not-allowed';
+                        proceedBtn.textContent = 'Accept Both Agreements';
+                    }
+                };
+
+                termsCheckbox.addEventListener('change', updatePurchaseButton);
+                privacyCheckbox.addEventListener('change', updatePurchaseButton);
+
+                // Handle proceed to purchase
+                proceedBtn.addEventListener('click', () => {
+                    if (termsCheckbox.checked && privacyCheckbox.checked) {
+                        modal.remove();
+                        this.processPurchase(productId);
+                    }
+                });
+
+                // Close on backdrop click
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+
+            async processPurchase(productId) {
+                try {
+                    await this.purchaseManager.purchaseProduct(productId, this.currentUser.email);
+                } catch (error) {
+                    console.error('Purchase failed:', error);
+                    alert('Purchase failed: ' + error.message);
+                }
+            }
+
+            async handleQRScan() {
+                try {
+                    const token = await this.qrScanner.startScanning();
+                    const success = await this.qrScanner.authenticateWithWebsite(token, this.currentUser.email);
+                    
+                    if (success) {
+                        alert('Successfully authenticated with website!');
+                    } else {
+                        throw new Error('Authentication failed');
+                    }
+                } catch (error) {
+                    alert(`QR authentication failed: ${error.message}`);
+                }
+            }
+
+            startAssessmentInApp(productId, assessmentType) {
+                const productNames = {
+                    'academic_speaking_assessment': 'Academic Speaking',
+                    'academic_writing_assessment': 'Academic Writing',
+                    'general_speaking_assessment': 'General Speaking',
+                    'general_writing_assessment': 'General Writing'
+                };
+
+                const productName = productNames[productId] || 'Assessment';
+                
+                // Simulate starting assessment in mobile app
+                alert(`Starting ${productName} assessment in mobile app!\n\nThis would launch the native assessment interface with:\n• ${assessmentType === 'speaking' ? 'AI examiner Maya conversation' : 'Writing prompt and editor'}\n• Real-time feedback\n• Progress tracking\n• Offline capability`);
+            }
+
+            showWebAccessGuide(productId) {
+                const productNames = {
+                    'academic_speaking_assessment': 'Academic Speaking',
+                    'academic_writing_assessment': 'Academic Writing',
+                    'general_speaking_assessment': 'General Speaking',
+                    'general_writing_assessment': 'General Writing'
+                };
+
+                const productName = productNames[productId] || 'Assessment';
+
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: white; border-radius: 16px; padding: 24px; max-width: 350px; width: 100%; text-align: center;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🖥️</div>
+                            <h3 style="font-size: 20px; font-weight: bold; color: #007bff; margin: 0 0 16px 0;">
+                                Desktop Access Guide
+                            </h3>
+                            <p style="font-size: 14px; color: #666; margin: 0 0 20px 0;">
+                                ${productName} - Desktop Access
+                            </p>
+                            
+                            <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin: 16px 0; text-align: left;">
+                                <h4 style="font-size: 16px; color: #333; margin: 0 0 12px 0;">
+                                    📱 Steps to Access on Desktop:
+                                </h4>
+                                <ol style="font-size: 13px; color: #666; margin: 0; padding-left: 20px;">
+                                    <li style="margin-bottom: 8px;">Open <strong>ieltsaiprep.com</strong> on your computer</li>
+                                    <li style="margin-bottom: 8px;">Click "QR Login" or look for QR code</li>
+                                    <li style="margin-bottom: 8px;">Use this app to scan the QR code</li>
+                                    <li style="margin-bottom: 8px;">Your assessment will be available on desktop!</li>
+                                </ol>
+                            </div>
+
+                            <div style="background: #e8f5e8; padding: 16px; border-radius: 12px; margin: 16px 0;">
+                                <p style="font-size: 12px; color: #666; margin: 0;">
+                                    <strong>💡 Pro Tip:</strong> Desktop access gives you a larger screen for writing assessments and better audio quality for speaking tests.
+                                </p>
+                            </div>
+                            
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; margin-top: 16px;">
+                                Got it!
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            showWebAccessInfo() {
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: white; border-radius: 16px; padding: 24px; max-width: 350px; width: 100%; text-align: center;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">💻</div>
+                            <h3 style="font-size: 20px; font-weight: bold; color: #667eea; margin: 0 0 16px 0;">
+                                Why Use Desktop/Laptop?
+                            </h3>
+                            
+                            <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin: 16px 0; text-align: left;">
+                                <h4 style="font-size: 16px; color: #333; margin: 0 0 12px 0;">
+                                    ✅ Better Experience:
+                                </h4>
+                                <ul style="font-size: 13px; color: #666; margin: 0; padding-left: 20px;">
+                                    <li style="margin-bottom: 6px;">Larger screen for writing tasks</li>
+                                    <li style="margin-bottom: 6px;">Full keyboard for typing</li>
+                                    <li style="margin-bottom: 6px;">Better audio quality for speaking</li>
+                                    <li style="margin-bottom: 6px;">More stable internet connection</li>
+                                    <li style="margin-bottom: 6px;">IELTS test-like environment</li>
+                                </ul>
+                            </div>
+
+                            <div style="background: #e8f5e8; padding: 16px; border-radius: 12px; margin: 16px 0;">
+                                <p style="font-size: 12px; color: #666; margin: 0;">
+                                    <strong>📱 Mobile + 🖥️ Desktop = Perfect Combo!</strong><br>
+                                    Purchase on mobile, take assessments on desktop for the best preparation experience.
+                                </p>
+                            </div>
+                            
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; margin-top: 16px;">
+                                Understood!
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            showAuthScreen() {
+                const appContainer = document.getElementById('home-screen');
+                appContainer.innerHTML = `
+                    <div style="min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; display: flex; flex-direction: column; justify-content: center;">
+                        <div style="background: white; border-radius: 16px; padding: 24px; margin: 0 auto; max-width: 350px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                            <!-- Logo Section -->
+                            <div style="text-align: center; margin-bottom: 32px;">
+                                <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+                                <h1 style="font-size: 24px; font-weight: bold; color: #333; margin: 0 0 8px 0;">
+                                    IELTS GenAI Prep
+                                </h1>
+                                <p style="font-size: 14px; color: #666; margin: 0;">
+                                    AI-Powered Test Preparation
+                                </p>
+                            </div>
+
+                            <!-- Login/Register Toggle -->
+                            <div style="display: flex; background: #f8f9fa; border-radius: 8px; margin-bottom: 24px; padding: 4px;">
+                                <button id="login-tab" style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: 600; background: white; color: #333; transition: all 0.2s;">
+                                    Sign In
+                                </button>
+                                <button id="register-tab" style="flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: 600; background: transparent; color: #666; transition: all 0.2s;">
+                                    Create Account
+                                </button>
+                            </div>
+
+                            <!-- Login Form -->
+                            <div id="login-form">
+                                <form id="login-form-element">
+                                    <div style="margin-bottom: 16px;">
+                                        <label style="display: block; font-size: 14px; font-weight: 500; color: #333; margin-bottom: 6px;">
+                                            Email
+                                        </label>
+                                        <input type="email" id="login-email" required style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.2s;" placeholder="Enter your email">
+                                    </div>
+                                    <div style="margin-bottom: 20px;">
+                                        <label style="display: block; font-size: 14px; font-weight: 500; color: #333; margin-bottom: 6px;">
+                                            Password
+                                        </label>
+                                        <input type="password" id="login-password" required style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.2s;" placeholder="Enter your password">
+                                    </div>
+                                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                                        Sign In
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Register Form -->
+                            <div id="register-form" style="display: none;">
+                                <form id="register-form-element">
+                                    <div style="margin-bottom: 16px;">
+                                        <label style="display: block; font-size: 14px; font-weight: 500; color: #333; margin-bottom: 6px;">
+                                            Full Name
+                                        </label>
+                                        <input type="text" id="register-name" required style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.2s;" placeholder="Enter your full name">
+                                    </div>
+                                    <div style="margin-bottom: 16px;">
+                                        <label style="display: block; font-size: 14px; font-weight: 500; color: #333; margin-bottom: 6px;">
+                                            Email
+                                        </label>
+                                        <input type="email" id="register-email" required style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.2s;" placeholder="Enter your email">
+                                    </div>
+                                    <div style="margin-bottom: 20px;">
+                                        <label style="display: block; font-size: 14px; font-weight: 500; color: #333; margin-bottom: 6px;">
+                                            Password
+                                        </label>
+                                        <input type="password" id="register-password" required style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.2s;" placeholder="Create a password (min 6 characters)" minlength="6">
+                                    </div>
+                                    <p style="font-size: 12px; color: #666; text-align: center; margin-bottom: 16px; line-height: 1.4;">
+                                        By creating an account, you agree to our 
+                                        <a href="/terms-of-service" target="_blank" style="color: #667eea; text-decoration: none;">Terms of Service</a> 
+                                        and 
+                                        <a href="/privacy-policy" target="_blank" style="color: #667eea; text-decoration: none;">Privacy Policy</a>
+                                    </p>
+                                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                                        Create Account
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Footer -->
+                            <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid #e1e5e9;">
+                                <p style="font-size: 12px; color: #666; margin: 0;">
+                                    By signing in, you agree to our Terms of Service and Privacy Policy
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                this.setupAuthListeners();
+            }
+
+            setupAuthListeners() {
+                const loginTab = document.getElementById('login-tab');
+                const registerTab = document.getElementById('register-tab');
+                const loginForm = document.getElementById('login-form');
+                const registerForm = document.getElementById('register-form');
+
+                // Tab switching
+                loginTab.addEventListener('click', () => {
+                    loginTab.style.background = 'white';
+                    loginTab.style.color = '#333';
+                    registerTab.style.background = 'transparent';
+                    registerTab.style.color = '#666';
+                    loginForm.style.display = 'block';
+                    registerForm.style.display = 'none';
+                });
+
+                registerTab.addEventListener('click', () => {
+                    registerTab.style.background = 'white';
+                    registerTab.style.color = '#333';
+                    loginTab.style.background = 'transparent';
+                    loginTab.style.color = '#666';
+                    loginForm.style.display = 'none';
+                    registerForm.style.display = 'block';
+                });
+
+                // Form submissions
+                document.getElementById('login-form-element').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+
+                document.getElementById('register-form-element').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleRegister();
+                });
+            }
+
+            async handleLogin() {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                try {
+                    const response = await this.apiClient.loginUser(email, password);
+                    if (response.success) {
+                        this.currentUser = {
+                            email: email,
+                            name: response.user.name || email.split('@')[0],
+                            products: response.user.products || []
+                        };
+                        
+                        // Save user session
+                        localStorage.setItem('ielts_user', JSON.stringify(this.currentUser));
+                        
+                        // Navigate to home screen
+                        this.setupHomeScreen();
+                    } else {
+                        alert('Login failed: ' + (response.message || 'Invalid credentials'));
+                    }
+                } catch (error) {
+                    alert('Login error: ' + error.message);
+                }
+            }
+
+            async handleRegister() {
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+
+                try {
+                    const response = await this.apiClient.registerUser(name, email, password);
+                    if (response.success) {
+                        this.currentUser = {
+                            email: email,
+                            name: name,
+                            products: []
+                        };
+                        
+                        // Save user session
+                        localStorage.setItem('ielts_user', JSON.stringify(this.currentUser));
+                        
+                        // Navigate to home screen
+                        this.setupHomeScreen();
+                    } else {
+                        alert('Registration failed: ' + (response.message || 'Please try again'));
+                    }
+                } catch (error) {
+                    alert('Registration error: ' + error.message);
+                }
+            }
+
+            logout() {
+                this.currentUser = null;
+                localStorage.removeItem('ielts_user');
+                this.showAuthScreen();
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', async () => {
+            const app = new IELTSGenAIPrepApp();
+            await app.initialize();
+        });
+    </script>
+</body>
+</html>
