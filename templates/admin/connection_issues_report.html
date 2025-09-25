@@ -1,0 +1,448 @@
+{% extends "layout.html" %}
+
+{% block title %}Connection Issues Report{% endblock %}
+
+{% block styles %}
+<style>
+    .report-header {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-container {
+        height: 300px;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-card {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stats-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+    
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .period-select .btn {
+        min-width: 100px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+    
+    <!-- Report Header -->
+    <div class="report-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2>Connection Issues Report</h2>
+                <p class="text-muted mb-0">
+                    Detailed analysis of connection issues: {{ title }}
+                </p>
+            </div>
+            <div class="col-md-4 text-right">
+                <div class="btn-group period-select">
+                    <a href="{{ url_for('admin.connection_issues_report', period='day') }}" class="btn btn-outline-primary {{ 'active' if period == 'day' else '' }}">
+                        24 Hours
+                    </a>
+                    <a href="{{ url_for('admin.connection_issues_report', period='week') }}" class="btn btn-outline-primary {{ 'active' if period == 'week' else '' }}">
+                        7 Days
+                    </a>
+                    <a href="{{ url_for('admin.connection_issues_report', period='month') }}" class="btn btn-outline-primary {{ 'active' if period == 'month' else '' }}">
+                        30 Days
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="stats-value text-primary">{{ total_issues }}</div>
+                    <div class="stats-label">Total Issues</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="stats-value text-success">{{ resolved_issues }}</div>
+                    <div class="stats-label">Resolved Issues</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="stats-value text-warning">{{ total_issues - resolved_issues }}</div>
+                    <div class="stats-label">Open Issues</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="stats-value text-info">{{ "%.1f"|format(resolution_rate) }}%</div>
+                    <div class="stats-label">Resolution Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Issues by Type</h5>
+                </div>
+                <div class="card-body">
+                    <div id="issuesByTypeChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Issues by Product</h5>
+                </div>
+                <div class="card-body">
+                    <div id="issuesByProductChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Daily Issues</h5>
+                </div>
+                <div class="card-body">
+                    <div id="dailyIssuesChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Top Countries</h5>
+                </div>
+                <div class="card-body">
+                    <div id="issuesByCountryChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed Tables -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Issues by Type</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Issue Type</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for issue_type, count in issues_by_type %}
+                                <tr>
+                                    <td>
+                                        {% if issue_type == 'disconnect' %}
+                                        <span class="badge badge-danger">Disconnection</span>
+                                        {% elif issue_type == 'reconnect' %}
+                                        <span class="badge badge-success">Reconnection</span>
+                                        {% elif issue_type == 'session_restart' %}
+                                        <span class="badge badge-warning">Session Restart</span>
+                                        {% else %}
+                                        <span class="badge badge-secondary">{{ issue_type }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ "%.1f"|format(count / total_issues * 100) if total_issues else 0 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Issues by Assessment Type</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Assessment Type</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product_id, count in issues_by_product %}
+                                <tr>
+                                    <td>
+                                        {% if product_id == 'academic_writing' %}
+                                        Academic Writing
+                                        {% elif product_id == 'general_writing' %}
+                                        General Writing
+                                        {% elif product_id == 'academic_speaking' %}
+                                        Academic Speaking
+                                        {% elif product_id == 'general_speaking' %}
+                                        General Speaking
+                                        {% else %}
+                                        {{ product_id }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ "%.1f"|format(count / total_issues * 100) if total_issues else 0 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Issues by Country</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Country</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for country, count in issues_by_country %}
+                                <tr>
+                                    <td>{{ country }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ "%.1f"|format(count / total_issues * 100) if total_issues else 0 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Issues by Type chart
+    const issueTypeCtx = document.getElementById('issuesByTypeChart').getContext('2d');
+    const issueTypeChart = new Chart(issueTypeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {% for issue_type, _ in issues_by_type %}
+                    {% if issue_type == 'disconnect' %}
+                    'Disconnections',
+                    {% elif issue_type == 'reconnect' %}
+                    'Reconnections',
+                    {% elif issue_type == 'session_restart' %}
+                    'Session Restarts',
+                    {% else %}
+                    '{{ issue_type }}',
+                    {% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for _, count in issues_by_type %}
+                        {{ count }},
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    '#dc3545',
+                    '#28a745',
+                    '#ffc107',
+                    '#6c757d',
+                    '#17a2b8'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+    
+    // Issues by Product chart
+    const issueProductCtx = document.getElementById('issuesByProductChart').getContext('2d');
+    const issueProductChart = new Chart(issueProductCtx, {
+        type: 'pie',
+        data: {
+            labels: [
+                {% for product_id, _ in issues_by_product %}
+                    {% if product_id == 'academic_writing' %}
+                    'Academic Writing',
+                    {% elif product_id == 'general_writing' %}
+                    'General Writing',
+                    {% elif product_id == 'academic_speaking' %}
+                    'Academic Speaking',
+                    {% elif product_id == 'general_speaking' %}
+                    'General Speaking',
+                    {% else %}
+                    '{{ product_id }}',
+                    {% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for _, count in issues_by_product %}
+                        {{ count }},
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    '#4e73df',
+                    '#1cc88a',
+                    '#36b9cc',
+                    '#f6c23e',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+    
+    // Daily Issues Chart
+    fetch('{{ url_for("admin.connection_issues_summary_api", days=(30 if period=="month" else (7 if period=="week" else 1))) }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const dailyIssuesCtx = document.getElementById('dailyIssuesChart').getContext('2d');
+                const dailyIssuesChart = new Chart(dailyIssuesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.data.map(item => item.date),
+                        datasets: [{
+                            label: 'Connection Issues',
+                            data: data.data.map(item => item.count),
+                            backgroundColor: '#4e73df',
+                            borderColor: '#4e73df',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    
+    // Issues by Country chart
+    const countryCtx = document.getElementById('issuesByCountryChart').getContext('2d');
+    const countryChart = new Chart(countryCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for country, _ in issues_by_country %}
+                    '{{ country }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Issues by Country',
+                data: [
+                    {% for _, count in issues_by_country %}
+                        {{ count }},
+                    {% endfor %}
+                ],
+                backgroundColor: '#4e73df',
+                borderColor: '#4e73df',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
