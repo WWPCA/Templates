@@ -1,0 +1,188 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">IELTS Test Structure</h1>
+            
+            <div class="alert alert-info mb-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-info-circle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4>About the IELTS Test</h4>
+                        <p class="mb-0">{{ ielts_info }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="lead">IELTS is available in different formats to suit your specific needs and goals. Below you can explore the various test types and their unique features.</p>
+        </div>
+    </div>
+    
+    <div class="assessment-structure-nav mb-4">
+        <a href="{{ url_for('assessment_structure_detail', assessment_type='academic') }}" class="btn btn-primary me-2">Academic Test</a>
+        <a href="{{ url_for('assessment_structure_detail', assessment_type='general_training') }}" class="btn btn-primary">General Training Test</a>
+    </div>
+    
+    <div class="row mt-5">
+        <!-- Academic IELTS -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">IELTS Academic</h3>
+                </div>
+                <div class="card-body">
+                    <p>For study at undergraduate or postgraduate levels, and for professional registration.</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-headphones me-3 text-primary"></i>
+                            <div>
+                                <strong>Listening:</strong> 30 minutes + 10 minutes transfer time
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-book-open me-3 text-primary"></i>
+                            <div>
+                                <strong>Reading:</strong> 60 minutes, academic texts
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-pencil-alt me-3 text-primary"></i>
+                            <div>
+                                <strong>Writing:</strong> 60 minutes, includes describing visual information
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-comment me-3 text-primary"></i>
+                            <div>
+                                <strong>Speaking:</strong> 11-14 minutes, face-to-face interview
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="text-center">
+                        <a href="{{ url_for('assessment_structure_detail', assessment_type='academic') }}" class="btn btn-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- General Training IELTS -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">IELTS General Training</h3>
+                </div>
+                <div class="card-body">
+                    <p>For work, migration, or training programs in English-speaking environments.</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-headphones me-3 text-primary"></i>
+                            <div>
+                                <strong>Listening:</strong> 30 minutes + 10 minutes transfer time
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-book-open me-3 text-primary"></i>
+                            <div>
+                                <strong>Reading:</strong> 60 minutes, everyday texts
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-pencil-alt me-3 text-primary"></i>
+                            <div>
+                                <strong>Writing:</strong> 60 minutes, includes writing a letter
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-comment me-3 text-primary"></i>
+                            <div>
+                                <strong>Speaking:</strong> 11-14 minutes, face-to-face interview
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="text-center">
+                        <a href="{{ url_for('assessment_structure_detail', assessment_type='general_training') }}" class="btn btn-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h3>Common Questions About IELTS</h3>
+                    
+                    <div class="accordion mt-3" id="accordionFAQ">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    Which IELTS test should I take?
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body">
+                                    <p>The test you choose depends on your purpose:</p>
+                                    <ul>
+                                        <li><strong>IELTS Academic:</strong> For university admission or professional registration.</li>
+                                        <li><strong>IELTS General Training:</strong> For work experience, training programs, or migration to English-speaking countries.</li>
+                                    </ul>
+                                    <p>Always check with your receiving organization (university, employer, immigration authority) to confirm which test they require.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    How is the IELTS test scored?
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body">
+                                    <p>IELTS results are reported on a 9-band scale:</p>
+                                    <ul>
+                                        <li><strong>Band 9:</strong> Expert user</li>
+                                        <li><strong>Band 8:</strong> Very good user</li>
+                                        <li><strong>Band 7:</strong> Good user</li>
+                                        <li><strong>Band 6:</strong> Competent user</li>
+                                        <li><strong>Band 5:</strong> Modest user</li>
+                                        <li><strong>Band 4:</strong> Limited user</li>
+                                        <li><strong>Band 3:</strong> Extremely limited user</li>
+                                        <li><strong>Band 2:</strong> Intermittent user</li>
+                                        <li><strong>Band 1:</strong> Non-user</li>
+                                        <li><strong>Band 0:</strong> Did not attempt the test</li>
+                                    </ul>
+                                    <p>You receive individual scores for Listening, Reading, Writing, and Speaking. These are averaged to give your Overall Band Score. Scores are reported in whole and half bands (e.g., 6.5).</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    How long are IELTS results valid?
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionFAQ">
+                                <div class="accordion-body">
+                                    <p>IELTS results are officially valid for 2 years from the date of the test.</p>
+                                    <p>However, some organizations may have their own policies regarding the validity period. For example, some universities or immigration authorities might require a more recent test result if your English proficiency is critical for your intended purpose.</p>
+                                    <p>Always check with your receiving organization for their specific requirements.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- "Start Practicing Now" button removed -->
+</div>
+{% endblock %}
