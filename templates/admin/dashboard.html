@@ -1,0 +1,318 @@
+{% extends "layout.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    .stats-card {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stats-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+    
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .menu-card {
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .menu-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        background-color: #f8f9fa;
+    }
+    
+    .menu-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #6c757d;
+    }
+    
+    .issue-item {
+        border-left: 4px solid #ccc;
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+    }
+    
+    .issue-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .issue-item.disconnect {
+        border-left-color: #dc3545;
+    }
+    
+    .issue-item.reconnect {
+        border-left-color: #28a745;
+    }
+    
+    .issue-item.session_restart {
+        border-left-color: #ffc107;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <h1>IELTS GenAI Prep Admin Dashboard</h1>
+            <p class="text-muted">Welcome to the administration panel</p>
+        </div>
+        <div class="col-lg-6 text-right">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Site
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="stats-value text-primary">{{ total_users }}</div>
+                    <div class="stats-label">Total Users</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="stats-value text-success">{{ new_users }}</div>
+                    <div class="stats-label">New Users (Last 7 Days)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="stats-value text-warning">{{ total_issues }}</div>
+                    <div class="stats-label">Total Connection Issues</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="stats-value text-danger">{{ open_issues }}</div>
+                    <div class="stats-label">Open Issues</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Admin Menu -->
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.connection_issues') }}" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <h5>Connection Issues</h5>
+                    <p class="text-muted small mb-0">Track and resolve connection problems</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.api_issues') }}" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fas fa-plug"></i>
+                    </div>
+                    <h5>API Issues</h5>
+                    <p class="text-muted small mb-0">Monitor external API performance</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.auth_issues') }}" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h5>Login Issues</h5>
+                    <p class="text-muted small mb-0">Track authentication problems</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.connection_issues_report') }}" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h5>Performance Reports</h5>
+                    <p class="text-muted small mb-0">View detailed reports and analytics</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <a href="#" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h5>User Management</h5>
+                    <p class="text-muted small mb-0">Manage user accounts and permissions</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="#" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h5>Payment History</h5>
+                    <p class="text-muted small mb-0">Review payments and transactions</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('setup_intent.payment_test_home') }}" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h5>Payment Testing</h5>
+                    <p class="text-muted small mb-0">Test Stripe payment integration</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="#" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h5>System Status</h5>
+                    <p class="text-muted small mb-0">View system health and metrics</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="#" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h5>Settings</h5>
+                    <p class="text-muted small mb-0">Configure application settings</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('stripe_integration_guide') }}" class="text-decoration-none">
+                <div class="card menu-card mb-3">
+                    <div class="menu-icon">
+                        <i class="fab fa-stripe"></i>
+                    </div>
+                    <h5>Stripe Integration Guide</h5>
+                    <p class="text-muted small mb-0">Documentation on payment and tax features</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+    
+    <!-- Recent Issues -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Connection Issues</h5>
+                        <a href="{{ url_for('admin.connection_issues') }}" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_issues %}
+                    <div class="list-group">
+                        {% for issue in recent_issues %}
+                        <div class="issue-item {{ issue.issue_type }}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">
+                                        {% if issue.issue_type == 'disconnect' %}
+                                        <span class="badge badge-danger">Disconnection</span>
+                                        {% elif issue.issue_type == 'reconnect' %}
+                                        <span class="badge badge-success">Reconnection</span>
+                                        {% elif issue.issue_type == 'session_restart' %}
+                                        <span class="badge badge-warning">Restart</span>
+                                        {% else %}
+                                        <span class="badge badge-secondary">{{ issue.issue_type }}</span>
+                                        {% endif %}
+                                        {% if issue.user %}
+                                        by <a href="{{ url_for('admin.user_profile', user_id=issue.user_id) }}">{{ issue.user.username }}</a>
+                                        {% else %}
+                                        by Unknown User
+                                        {% endif %}
+                                    </h6>
+                                    <p class="mb-1">
+                                        {% if issue.product_id %}
+                                        <small class="text-muted">
+                                            Product: 
+                                            {% if issue.product_id == 'academic_writing' %}
+                                            Academic Writing
+                                            {% elif issue.product_id == 'general_writing' %}
+                                            General Writing
+                                            {% elif issue.product_id == 'academic_speaking' %}
+                                            Academic Speaking
+                                            {% elif issue.product_id == 'general_speaking' %}
+                                            General Speaking
+                                            {% else %}
+                                            {{ issue.product_id }}
+                                            {% endif %}
+                                        </small>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <small class="text-muted">{{ issue.occurred_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                    {% if issue.city and issue.country %}
+                                    <br>
+                                    <small>{{ issue.city }}, {{ issue.country }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <p>No connection issues recorded recently.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
