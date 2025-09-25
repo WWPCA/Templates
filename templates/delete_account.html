@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+
+{% block title %}Delete My Account{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Delete My Account</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading"><i class="fas fa-warning me-2"></i>Warning: This Action Cannot Be Undone!</h4>
+                        <p>You are about to permanently delete your IELTS GenAI Prep account. This action is <strong>irreversible</strong> and will result in the complete loss of all your data.</p>
+                    </div>
+                    
+                    <h3 class="text-danger mb-3">What Will Be Deleted:</h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-times text-danger me-2"></i>Your account and profile information</li>
+                        <li class="mb-2"><i class="fas fa-times text-danger me-2"></i>All purchased assessment packages and access</li>
+                        <li class="mb-2"><i class="fas fa-times text-danger me-2"></i>All GenAI feedback and assessment history</li>
+                        <li class="mb-2"><i class="fas fa-times text-danger me-2"></i>All speaking and writing assessment results</li>
+                        <li class="mb-2"><i class="fas fa-times text-danger me-2"></i>Your login credentials and access to this platform</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning mt-4">
+                        <h5><i class="fas fa-info-circle me-2"></i>Important Information:</h5>
+                        <ul class="mb-0">
+                            <li>You will lose access to all purchased assessments immediately</li>
+                            <li>Any unused assessments cannot be refunded or transferred</li>
+                            <li>To use our services again, you must create a new account and repurchase</li>
+                            <li>Payment records will be anonymized and retained for tax compliance only</li>
+                        </ul>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <form method="POST" id="delete-form">
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Enter your password to confirm:</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirmation" class="form-label">Type "DELETE MY ACCOUNT" to confirm (case sensitive):</label>
+                            <input type="text" class="form-control" id="confirmation" name="confirmation" 
+                                   placeholder="DELETE MY ACCOUNT" required>
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="understand" required>
+                            <label class="form-check-label" for="understand">
+                                I understand that this action is permanent and cannot be undone. I will lose access to all my assessments and feedback.
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg" id="delete-btn" disabled>
+                                <i class="fas fa-trash me-2"></i>Permanently Delete My Account
+                            </button>
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel and Go Back to Profile
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <p class="text-muted">
+                    <i class="fas fa-question-circle me-1"></i>
+                    Need help instead? <a href="{{ url_for('contact') }}">Contact our support team</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('delete-form');
+    const deleteBtn = document.getElementById('delete-btn');
+    const understandCheck = document.getElementById('understand');
+    const confirmationInput = document.getElementById('confirmation');
+    const passwordInput = document.getElementById('password');
+    
+    function checkFormValidity() {
+        const isUnderstandChecked = understandCheck.checked;
+        const isConfirmationCorrect = confirmationInput.value === 'DELETE MY ACCOUNT';
+        const isPasswordFilled = passwordInput.value.length > 0;
+        
+        deleteBtn.disabled = !(isUnderstandChecked && isConfirmationCorrect && isPasswordFilled);
+    }
+    
+    understandCheck.addEventListener('change', checkFormValidity);
+    confirmationInput.addEventListener('input', checkFormValidity);
+    passwordInput.addEventListener('input', checkFormValidity);
+    
+    form.addEventListener('submit', function(e) {
+        if (!confirm('Are you absolutely sure? This cannot be undone and you will lose all your assessments!')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
