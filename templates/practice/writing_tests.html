@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">IELTS Writing Practice Tests</h1>
+    <p class="lead mb-4">
+        Practice your IELTS writing skills with GenAI-powered assessment. Our system will evaluate your writing based on the official IELTS criteria and provide detailed feedback to help you improve.
+    </p>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0">Academic Writing</h2>
+                </div>
+                <div class="card-body">
+                    <p>Academic Writing tests include:</p>
+                    <ul>
+                        <li>Task 1: Describing graphs, tables, charts, or processes</li>
+                        <li>Task 2: Essay writing on academic topics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0">General Training Writing</h2>
+                </div>
+                <div class="card-body">
+                    <p>General Training Writing tests include:</p>
+                    <ul>
+                        <li>Task 1: Letter writing for everyday situations</li>
+                        <li>Task 2: Essay writing on general topics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header bg-primary text-white">
+            <h2 class="h5 mb-0">Available Writing Tests</h2>
+        </div>
+        <div class="card-body">
+            {% if tests %}
+                <div class="row">
+                    {% for test in tests %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 {% if test.taken %}border-success{% endif %}">
+                                <div class="card-header {% if test.taken %}bg-success text-white{% endif %}">
+                                    <h3 class="h6 mb-0">{{ test.title }}</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ test.description }}</p>
+                                    <p class="mb-2"><strong>Time Allowed:</strong> {% if 'Task 1' in test.title %}20 minutes{% else %}40 minutes{% endif %}</p>
+                                    <p class="mb-2"><strong>Word Count:</strong> {% if 'Task 1' in test.title %}Minimum 150 words{% else %}Minimum 250 words{% endif %}</p>
+                                    
+                                    {% if test.taken %}
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle"></i> You have completed this test
+                                        </div>
+                                        <a href="{{ url_for('practice_test_list', test_type='writing') }}" class="btn btn-secondary">View Other Practice Tests</a>
+                                    {% else %}
+                                        <a href="{{ url_for('take_practice_test', test_type='writing', test_id=test.id) }}" class="btn btn-primary">Start Test</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No writing tests are currently available. Please check back later.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if current_user.is_authenticated %}
+        <div class="text-center mb-5">
+            <a href="{{ url_for('practice_index') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Practice Tests
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="card mb-5">
+        <div class="card-header bg-primary text-white">
+            <h2 class="h5 mb-0">IELTS Writing Tips</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="h6">Task 1 Tips</h3>
+                    <ul>
+                        <li>Spend about 20 minutes on this task</li>
+                        <li>Include an introduction, overview, and 2-3 detailed paragraphs</li>
+                        <li>Describe key trends, don't explain reasons</li>
+                        <li>Use appropriate data vocabulary (increase, decrease, fluctuate)</li>
+                        <li>Use a variety of sentence structures</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h3 class="h6">Task 2 Tips</h3>
+                    <ul>
+                        <li>Spend about 40 minutes on this task</li>
+                        <li>Include an introduction, 2-3 body paragraphs, and conclusion</li>
+                        <li>Fully address all parts of the question</li>
+                        <li>Support your ideas with examples and reasoning</li>
+                        <li>Use paragraphs effectively to organize ideas</li>
+                        <li>Use a range of vocabulary and grammatical structures</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
