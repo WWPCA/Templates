@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-4 mb-4">500 - Server Error</h1>
+            <p class="lead mb-4">Something went wrong on our server. Please try again later or contact support if the problem persists.</p>
+            <img src="{{ url_for('static', filename='img/500.svg') }}" alt="Server error" class="img-fluid mb-4" style="max-width: 300px;">
+            <div>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Return to Homepage</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
