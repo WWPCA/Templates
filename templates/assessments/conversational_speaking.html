@@ -1,0 +1,1125 @@
+{% extends "layout.html" %}
+
+{% block title %}Conversational Speaking Assessment - ClearScore{% endblock %}
+
+{% block head %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<!-- jQuery - Required for button functionality -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- THREE.js - Required for particle globe visualization -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Left Sidebar - Assessment Info -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>Live Conversation
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Part Progress -->
+                    <div class="mb-3">
+                        <h6>Assessment Parts</h6>
+                        <div class="d-flex flex-column gap-2">
+                            <div id="part1" class="d-flex justify-content-between align-items-center">
+                                <span class="small">Part 1: Introduction</span>
+                                <span class="badge bg-primary">Current</span>
+                            </div>
+                            <div id="part2" class="d-flex justify-content-between align-items-center">
+                                <span class="small">Part 2: Long Turn</span>
+                                <span class="badge bg-secondary">Upcoming</span>
+                            </div>
+                            <div id="part3" class="d-flex justify-content-between align-items-center">
+                                <span class="small">Part 3: Discussion</span>
+                                <span class="badge bg-secondary">Upcoming</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timer -->
+                    <div class="mb-3">
+                        <h6>Assessment Time</h6>
+                        <div class="text-center">
+                            <div class="h4 text-primary" id="timerDisplay">00:00</div>
+                        </div>
+                    </div>
+
+                    <!-- Connection Status -->
+                    <div class="mb-3">
+                        <h6>Connection Status</h6>
+                        <div id="connectionStatus" class="text-success">
+                            <i class="fas fa-circle me-1"></i>Connected
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Conversation Area -->
+        <div class="col-md-9">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-tie me-2"></i>Conversation with Maya (ClearScore)
+                        </h5>
+                        <div class="text-end">
+                            <small>Powered by ClearScore Technology - The world's only AI IELTS speaking examiner</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body d-flex flex-column">
+                    <!-- Conversation History -->
+                    <div class="conversation-area flex-grow-1 mb-3" id="conversationArea">
+                        <div class="conversation-history" id="conversationHistory">
+                            <div class="message examiner-message">
+                                <div class="message-header">
+                                    <strong>Maya (ClearScore IELTS Examiner)</strong>
+                                    <small class="text-muted">Just now</small>
+                                </div>
+                                <div class="message-content">
+                                    Good morning! My name is Maya, and I'll be your ClearScore AI examiner today. I'm ready to begin your IELTS speaking assessment. When you're ready, click "Start Conversation" and we can begin with some questions about yourself.
+                                </div>
+                            </div>
+                            <div class="alert alert-info mt-3">
+                                <h6><i class="fas fa-microphone me-2"></i>Microphone Access</h6>
+                                <p class="small mb-0">Maya needs to hear you speak. Please allow microphone access when prompted by your browser.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice Visualization Globe -->
+                    <div class="voice-globe-container mb-3" id="voiceGlobeContainer">
+                        <canvas id="voiceGlobe" width="300" height="300"></canvas>
+                        <div class="globe-controls">
+                            <button class="btn btn-sm btn-outline-secondary" id="toggleGlobe" title="Toggle Visualization">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" id="globeSettings" title="Visualization Settings">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Conversation Controls -->
+                    <div class="conversation-controls">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="text-center mb-3" id="conversationStatus">
+                                    <div class="h5 text-muted">Ready to begin conversation</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-success btn-lg" id="startConversationBtn">
+                                        <i class="fas fa-play me-2"></i>Start a conversation with Maya
+                                    </button>
+                                    <button class="btn btn-primary" id="speakBtn" style="display: none;">
+                                        <i class="fas fa-microphone me-2"></i>Speak to Maya
+                                    </button>
+                                    <button class="btn btn-warning" id="pauseBtn" style="display: none;">
+                                        <i class="fas fa-pause me-2"></i>Pause
+                                    </button>
+                                    <button class="btn btn-danger" id="endBtn" style="display: none;">
+                                        <i class="fas fa-stop me-2"></i>End Assessment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audio Visualization -->
+<div class="audio-visualizer d-none" id="audioVisualizer">
+    <div class="wave-container">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+    </div>
+</div>
+
+<style>
+.conversation-area {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+}
+
+.message {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 80%;
+}
+
+.examiner-message {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    margin-right: auto;
+    border-left: 4px solid #2196f3;
+}
+
+.user-message {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    margin-left: auto;
+    border-right: 4px solid #9c27b0;
+}
+
+.message-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.message-content {
+    font-size: 1.1em;
+    line-height: 1.4;
+}
+
+.audio-visualizer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    z-index: 1000;
+}
+
+.wave-container {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.wave-bar {
+    width: 4px;
+    height: 20px;
+    background: #4caf50;
+    border-radius: 2px;
+    animation: wave 1.2s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes wave {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.3); }
+}
+
+.conversation-controls {
+    background: #fff;
+    border-top: 1px solid #dee2e6;
+    padding-top: 15px;
+}
+
+#conversationStatus {
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.listening-mode {
+    background: #e8f5e8 !important;
+    border-color: #4caf50 !important;
+}
+
+.speaking-mode {
+    background: #fff3e0 !important;
+    border-color: #ff9800 !important;
+}
+
+.voice-globe-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+#voiceGlobe {
+    border-radius: 50%;
+    box-shadow: 0 0 50px rgba(100, 200, 255, 0.3);
+    background: radial-gradient(circle, rgba(26, 26, 46, 0.8) 0%, rgba(15, 52, 96, 0.9) 100%);
+}
+
+.globe-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.globe-controls .btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.globe-controls .btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.voice-globe-container.hidden {
+    display: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Conversation state
+    let conversationActive = false;
+    let currentPart = 1;
+    let conversationHistory = [];
+    let mediaRecorder = null;
+    let audioStream = null;
+    let isListening = false;
+    let conversationTimer = 0;
+    let timerInterval = null;
+    
+    // Timeout and API management
+    let speakingTimeout = null;
+    let micActivityTimeout = null;
+    let apiCallInProgress = false;
+    const SPEAKING_TIMEOUT = 30000; // 30 seconds max speaking time
+    const MIC_ACTIVITY_TIMEOUT = 5000; // 5 seconds of silence detection
+    const API_TIMEOUT = 15000; // 15 seconds max API response time
+    
+    // Local speech recognition
+    let speechRecognition = null;
+    let localTranscription = '';
+    let isLocalSpeechActive = false;
+
+    // Get CSRF token for API requests
+    const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+    
+
+    // Debug CSRF token
+    console.log("CSRF Token:", csrfToken);
+    if (!csrfToken) {
+        console.error("CSRF token is missing from meta tag");
+    }
+    
+    // Enhanced helper function with better error handling
+    function getAPIHeaders() {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        // Get fresh CSRF token from meta tag
+        const freshToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+        if (freshToken) {
+            headers['X-CSRFToken'] = freshToken;
+            console.log("Adding CSRF token to request headers");
+        } else {
+            console.error("No CSRF token available for API request");
+        }
+        
+        return headers;
+    }
+
+    // Voice Globe Visualization
+    let scene, camera, renderer, particles;
+    let audioContext, analyser, dataArray, audioSource;
+    let globeSettings = {
+        particleCount: 1000,
+        globeRadius: 100,
+        sensitivity: 1.0,
+        colorScheme: 'default',
+        enabled: true
+    };
+    let isGlobeInitialized = false;
+
+    // DOM elements
+    const startConversationBtn = document.getElementById('startConversationBtn');
+    const speakBtn = document.getElementById('speakBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const endBtn = document.getElementById('endBtn');
+    const conversationStatus = document.getElementById('conversationStatus');
+    const conversationHistoryEl = document.getElementById('conversationHistory');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const audioVisualizer = document.getElementById('audioVisualizer');
+    const voiceGlobeCanvas = document.getElementById('voiceGlobe');
+    const toggleGlobeBtn = document.getElementById('toggleGlobe');
+    const globeSettingsBtn = document.getElementById('globeSettings');
+
+    // Initialize Voice Globe
+    function initVoiceGlobe() {
+        if (isGlobeInitialized) return;
+        
+        // Check if THREE.js is properly loaded
+        if (typeof THREE === 'undefined' || !voiceGlobeCanvas) {
+            console.log('THREE.js or canvas not available - skipping globe initialization');
+            return;
+        }
+
+        // Scene setup
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({
+            canvas: voiceGlobeCanvas,
+            alpha: true,
+            antialias: true
+        });
+        
+        renderer.setSize(300, 300);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        camera.position.z = 200;
+
+        // Create particle system
+        createParticleGlobe();
+        
+        // Start render loop
+        animate();
+        
+        isGlobeInitialized = true;
+    }
+
+    function createParticleGlobe() {
+        const geometry = new THREE.BufferGeometry();
+        const positions = [];
+        const colors = [];
+        const originalPositions = [];
+
+        // Generate particles in spherical distribution
+        for (let i = 0; i < globeSettings.particleCount; i++) {
+            // Fibonacci sphere distribution for even particle spacing
+            const theta = Math.acos(1 - 2 * (i + 0.5) / globeSettings.particleCount);
+            const phi = Math.PI * (1 + Math.sqrt(5)) * i;
+            
+            const x = Math.sin(theta) * Math.cos(phi) * globeSettings.globeRadius;
+            const y = Math.sin(theta) * Math.sin(phi) * globeSettings.globeRadius;
+            const z = Math.cos(theta) * globeSettings.globeRadius;
+
+            positions.push(x, y, z);
+            originalPositions.push(x, y, z);
+
+            // Color based on position and scheme
+            const color = getParticleColor(x, y, z);
+            colors.push(color.r, color.g, color.b);
+        }
+
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        geometry.setAttribute('originalPosition', new THREE.Float32BufferAttribute(originalPositions, 3));
+
+        const material = new THREE.PointsMaterial({
+            size: 2,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+    }
+
+    function getParticleColor(x, y, z) {
+        const schemes = {
+            default: { r: 0.4 + Math.abs(x) * 0.006, g: 0.6 + Math.abs(y) * 0.004, b: 0.8 + Math.abs(z) * 0.002 },
+            aurora: { r: 0.2 + Math.abs(y) * 0.008, g: 0.8 + Math.abs(x) * 0.002, b: 0.4 + Math.abs(z) * 0.006 },
+            fire: { r: 1.0, g: 0.4 + Math.abs(y) * 0.006, b: 0.1 + Math.abs(z) * 0.002 },
+            ocean: { r: 0.1, g: 0.4 + Math.abs(x) * 0.004, b: 0.9 + Math.abs(y) * 0.001 }
+        };
+        return schemes[globeSettings.colorScheme] || schemes.default;
+    }
+
+    function animate() {
+        if (!isGlobeInitialized || !globeSettings.enabled) return;
+        
+        requestAnimationFrame(animate);
+
+        // Rotate globe slowly when idle
+        if (particles) {
+            particles.rotation.y += 0.005;
+            
+            // Apply audio reactivity if available
+            if (analyser && dataArray) {
+                analyser.getByteFrequencyData(dataArray);
+                updateParticlesWithAudio();
+            }
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    function updateParticlesWithAudio() {
+        const positions = particles.geometry.attributes.position.array;
+        const originalPositions = particles.geometry.attributes.originalPosition.array;
+        const colors = particles.geometry.attributes.color.array;
+
+        // Calculate audio metrics
+        let sum = 0;
+        let maxFreq = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+            maxFreq = Math.max(maxFreq, dataArray[i]);
+        }
+        
+        const avgVolume = sum / dataArray.length;
+        const normalizedVolume = (avgVolume / 255) * globeSettings.sensitivity;
+        const intensity = (maxFreq / 255) * globeSettings.sensitivity;
+
+        // Update particles based on audio
+        for (let i = 0; i < globeSettings.particleCount; i++) {
+            const i3 = i * 3;
+            
+            // Get frequency for this particle (map particle index to frequency range)
+            const freqIndex = Math.floor((i / globeSettings.particleCount) * dataArray.length);
+            const frequency = dataArray[freqIndex] || 0;
+            const normalizedFreq = frequency / 255;
+
+            // Apply audio-reactive movement
+            const displacement = normalizedFreq * 20 * globeSettings.sensitivity;
+            const originalX = originalPositions[i3];
+            const originalY = originalPositions[i3 + 1];
+            const originalZ = originalPositions[i3 + 2];
+
+            // Expand particles outward based on frequency
+            const distance = Math.sqrt(originalX * originalX + originalY * originalY + originalZ * originalZ);
+            const expansion = 1 + displacement / 100;
+            
+            positions[i3] = originalX * expansion;
+            positions[i3 + 1] = originalY * expansion;
+            positions[i3 + 2] = originalZ * expansion;
+
+            // Update colors based on frequency ranges
+            const bassFreq = dataArray[Math.floor(dataArray.length * 0.1)] / 255;
+            const midFreq = dataArray[Math.floor(dataArray.length * 0.5)] / 255;
+            const trebleFreq = dataArray[Math.floor(dataArray.length * 0.9)] / 255;
+
+            colors[i3] = Math.min(1, colors[i3] + bassFreq * 0.5); // Red
+            colors[i3 + 1] = Math.min(1, colors[i3 + 1] + midFreq * 0.5); // Green
+            colors[i3 + 2] = Math.min(1, colors[i3 + 2] + trebleFreq * 0.5); // Blue
+        }
+
+        particles.geometry.attributes.position.needsUpdate = true;
+        particles.geometry.attributes.color.needsUpdate = true;
+
+        // Update particle size based on overall volume
+        particles.material.size = 2 + normalizedVolume * 3;
+    }
+
+    function setupAudioAnalyzer(audioElement) {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+        }
+
+        if (audioSource) {
+            audioSource.disconnect();
+        }
+
+        audioSource = audioContext.createMediaElementSource(audioElement);
+        audioSource.connect(analyser);
+        analyser.connect(audioContext.destination);
+    }
+
+    // Globe controls
+    toggleGlobeBtn.addEventListener('click', function() {
+        globeSettings.enabled = !globeSettings.enabled;
+        const container = document.getElementById('voiceGlobeContainer');
+        
+        if (globeSettings.enabled) {
+            container.classList.remove('hidden');
+            toggleGlobeBtn.innerHTML = '<i class="fas fa-eye"></i>';
+            if (!isGlobeInitialized) initVoiceGlobe();
+            animate();
+        } else {
+            container.classList.add('hidden');
+            toggleGlobeBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        }
+    });
+
+    globeSettingsBtn.addEventListener('click', function() {
+        showGlobeSettings();
+    });
+
+    function showGlobeSettings() {
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+            <div class="modal fade" id="globeSettingsModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Voice Globe Settings</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Particle Count: <span id="particleCountValue">${globeSettings.particleCount}</span></label>
+                                <input type="range" class="form-range" id="particleCount" min="500" max="2000" step="100" value="${globeSettings.particleCount}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Sensitivity: <span id="sensitivityValue">${globeSettings.sensitivity}</span></label>
+                                <input type="range" class="form-range" id="sensitivity" min="0.5" max="3.0" step="0.1" value="${globeSettings.sensitivity}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Color Scheme</label>
+                                <select class="form-select" id="colorScheme">
+                                    <option value="default" ${globeSettings.colorScheme === 'default' ? 'selected' : ''}>Default</option>
+                                    <option value="aurora" ${globeSettings.colorScheme === 'aurora' ? 'selected' : ''}>Aurora</option>
+                                    <option value="fire" ${globeSettings.colorScheme === 'fire' ? 'selected' : ''}>Fire</option>
+                                    <option value="ocean" ${globeSettings.colorScheme === 'ocean' ? 'selected' : ''}>Ocean</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="applyGlobeSettings()" data-bs-dismiss="modal">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Add event listeners for real-time updates
+        document.getElementById('particleCount').addEventListener('input', function() {
+            document.getElementById('particleCountValue').textContent = this.value;
+        });
+        
+        document.getElementById('sensitivity').addEventListener('input', function() {
+            document.getElementById('sensitivityValue').textContent = this.value;
+        });
+
+        window.applyGlobeSettings = function() {
+            globeSettings.particleCount = parseInt(document.getElementById('particleCount').value);
+            globeSettings.sensitivity = parseFloat(document.getElementById('sensitivity').value);
+            globeSettings.colorScheme = document.getElementById('colorScheme').value;
+            
+            // Recreate particle system with new settings
+            if (particles) {
+                scene.remove(particles);
+                createParticleGlobe();
+            }
+        };
+
+        const modalInstance = new bootstrap.Modal(document.getElementById('globeSettingsModal'));
+        modalInstance.show();
+    }
+
+    // Initialize local speech recognition
+    function initializeLocalSpeechRecognition() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            speechRecognition = new SpeechRecognition();
+            
+            speechRecognition.continuous = true;
+            speechRecognition.interimResults = true;
+            speechRecognition.lang = 'en-US';
+            
+            speechRecognition.onstart = function() {
+                isLocalSpeechActive = true;
+                localTranscription = '';
+                console.log('Local speech recognition started');
+            };
+            
+            speechRecognition.onresult = function(event) {
+                let finalTranscript = '';
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                localTranscription = finalTranscript;
+                
+                // Show interim results to user
+                if (interimTranscript) {
+                    conversationStatus.innerHTML = `<div class="h5 text-info">🎤 Listening: "${interimTranscript}"</div>`;
+                }
+            };
+            
+            speechRecognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'not-allowed') {
+                    conversationStatus.innerHTML = '<div class="h5 text-warning">🎤 Please allow microphone access and try again</div>';
+                } else if (event.error === 'no-speech') {
+                    conversationStatus.innerHTML = '<div class="h5 text-warning">🔇 No speech detected - Click "Speak" to try again</div>';
+                } else {
+                    conversationStatus.innerHTML = '<div class="h5 text-danger">❌ Microphone error - Please try again</div>';
+                }
+                isLocalSpeechActive = false;
+            };
+            
+            speechRecognition.onend = function() {
+                isLocalSpeechActive = false;
+                console.log('Local speech recognition ended');
+                
+                if (localTranscription.trim()) {
+                    processLocalTranscription(localTranscription.trim());
+                }
+            };
+            
+            return true;
+        } else {
+            console.warn('Speech recognition not supported in this browser');
+            return false;
+        }
+    }
+
+    // Process locally transcribed speech without sending audio to server
+    async function processLocalTranscription(transcriptText) {
+        if (apiCallInProgress) {
+            console.log('API call already in progress, skipping');
+            return;
+        }
+
+        if (transcriptText.length < 3) {
+            conversationStatus.innerHTML = '<div class="h5 text-warning">🎤 Please speak more clearly - Click "Speak" to try again</div>';
+            return;
+        }
+
+        apiCallInProgress = true;
+        speakBtn.disabled = true;
+
+        try {
+            addMessageToHistory('You', transcriptText);
+            conversationStatus.innerHTML = '<div class="h5 text-info">🤖 Maya is thinking...</div>';
+            
+            // Get Maya response using only the transcript (no audio file)
+            const conversationResponse = await Promise.race([
+                fetch('/api/continue_conversation', {
+                    method: 'POST',
+                    headers: getAPIHeaders(),
+                    body: JSON.stringify({
+                        user_message: transcriptText,
+                        conversation_history: conversationHistory,
+                        current_part: currentPart
+                    })
+                }),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Conversation API timeout')), API_TIMEOUT)
+                )
+            ]);
+            
+            const mayaResult = await conversationResponse.json();
+            
+            if (mayaResult.success && mayaResult.response) {
+                conversationStatus.innerHTML = '<div class="h5 text-info">🔊 Maya is responding...</div>';
+                await playMayaResponse(mayaResult.response);
+                addMessageToHistory('Maya (ClearScore)', mayaResult.response);
+                
+                if (mayaResult.next_part && mayaResult.next_part !== currentPart) {
+                    currentPart = mayaResult.next_part;
+                    updatePartProgress();
+                }
+                
+                conversationStatus.innerHTML = '<div class="h5 text-primary">✅ Maya has responded - Click "Speak" to continue</div>';
+            } else {
+                conversationStatus.innerHTML = '<div class="h5 text-danger">❌ Maya could not respond - Please try again</div>';
+            }
+            
+        } catch (error) {
+            console.error('Error processing local transcription:', error);
+            
+            if (error.message.includes('timeout')) {
+                conversationStatus.innerHTML = '<div class="h5 text-warning">⏰ Response took too long - Please try again</div>';
+            } else {
+                conversationStatus.innerHTML = '<div class="h5 text-danger">❌ Could not process speech - Please try again</div>';
+            }
+        } finally {
+            apiCallInProgress = false;
+            speakBtn.disabled = false;
+        }
+    }
+
+    // Initialize globe on page load - check if THREE.js is available
+    if (typeof THREE !== 'undefined') {
+        initVoiceGlobe();
+    } else {
+        console.log('THREE.js not available - globe visualization disabled');
+        // Hide the globe container
+        if (voiceGlobeCanvas) {
+            voiceGlobeCanvas.style.display = 'none';
+        }
+    }
+
+    // Start conversation
+    startConversationBtn.addEventListener('click', async function() {
+        console.log('Start conversation button clicked!');
+        try {
+            // Check if speech recognition is available
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                alert('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.');
+                return;
+            }
+            
+            conversationActive = true;
+            startConversationBtn.style.display = 'none';
+            speakBtn.style.display = 'block';
+            pauseBtn.style.display = 'block';
+            endBtn.style.display = 'block';
+            
+            conversationStatus.innerHTML = '<div class="h5 text-success">Conversation Active - Click "Speak" when ready</div>';
+            
+            // Initialize local speech recognition
+            initializeLocalSpeechRecognition();
+            
+            // Start timer
+            startTimer();
+            
+            // Begin conversation with Maya
+            await startConversationWithMaya();
+            
+        } catch (error) {
+            console.error('Failed to start conversation:', error);
+            alert('Could not initialize speech recognition. Please try again.');
+        }
+    });
+
+    // Speak to Maya
+    speakBtn.addEventListener('click', function() {
+        if (!isListening) {
+            startListening();
+        } else {
+            stopListening();
+        }
+    });
+
+    // Pause conversation
+    pauseBtn.addEventListener('click', function() {
+        pauseConversation();
+    });
+
+    // End assessment
+    endBtn.addEventListener('click', function() {
+        endConversation();
+    });
+
+    async function startConversationWithMaya() {
+        try {
+            const response = await fetch('/api/start_conversation', {
+                method: 'POST',
+                headers: getAPIHeaders(),
+                body: JSON.stringify({
+                    assessment_type: '{{ assessment_type }}',
+                    part: currentPart
+                })
+            });
+
+            if (response.status === 400) {
+                console.error('CSRF token validation failed');
+                alert('Security token expired. Please refresh the page and try again.');
+                return;
+            }
+
+            const result = await response.json();
+            console.log('Start conversation API result:', result);
+            
+            if (result.success) {
+                // Maya speaks her opening
+                const openingMessage = result.opening_message || result.response || result.message;
+                console.log('Opening message to synthesize:', openingMessage);
+                await playMayaResponse(openingMessage);
+                addMessageToHistory('Maya (ClearScore IELTS Examiner)', openingMessage);
+                
+                conversationStatus.innerHTML = '<div class="h5 text-primary">Maya has spoken - Click "Speak" to respond</div>';
+            }
+        } catch (error) {
+            console.error('Failed to start conversation with Maya:', error);
+        }
+    }
+
+    async function startListening() {
+        if (apiCallInProgress) return;
+        
+        // Initialize local speech recognition if not done yet
+        if (!speechRecognition && !initializeLocalSpeechRecognition()) {
+            conversationStatus.innerHTML = '<div class="h5 text-danger">❌ Speech recognition not supported in this browser</div>';
+            return;
+        }
+        
+        isListening = true;
+        speakBtn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Speaking';
+        speakBtn.className = 'btn btn-danger';
+        conversationStatus.innerHTML = '<div class="h5 text-warning">🎤 Listening... Speak now (30s max)</div>';
+        audioVisualizer.classList.remove('d-none');
+        
+        // Set speaking timeout (30 seconds max)
+        speakingTimeout = setTimeout(() => {
+            if (isListening) {
+                console.log('Speaking timeout reached - stopping recognition');
+                stopListening();
+                conversationStatus.innerHTML = '<div class="h5 text-warning">⏰ Speaking time limit reached - Click "Speak" to try again</div>';
+            }
+        }, SPEAKING_TIMEOUT);
+        
+        // Start local speech recognition (no audio recording)
+        try {
+            speechRecognition.start();
+        } catch (error) {
+            console.error('Failed to start speech recognition:', error);
+            conversationStatus.innerHTML = '<div class="h5 text-danger">❌ Could not start speech recognition - Please try again</div>';
+            isListening = false;
+            speakBtn.innerHTML = '<i class="fas fa-microphone me-2"></i>Speak to Maya';
+            speakBtn.className = 'btn btn-primary';
+        }
+    }
+
+    async function stopListening() {
+        if (!isListening) return;
+        
+        isListening = false;
+        speakBtn.innerHTML = '<i class="fas fa-microphone me-2"></i>Speak to Maya';
+        speakBtn.className = 'btn btn-primary';
+        conversationStatus.innerHTML = '<div class="h5 text-info">Processing your response...</div>';
+        audioVisualizer.classList.add('d-none');
+        
+        // Clear timeouts
+        clearTimeout(speakingTimeout);
+        clearTimeout(micActivityTimeout);
+        
+        // Stop local speech recognition instead of media recorder
+        if (speechRecognition && isLocalSpeechActive) {
+            speechRecognition.stop();
+        }
+    }
+
+    // Legacy audio processing function removed - now using local speech recognition
+
+    async function playMayaResponse(text) {
+        try {
+            // Use Nova Sonic for professional British voice
+            console.log('Calling Nova Sonic API for speech generation...');
+            console.log('Text to synthesize:', text);
+            console.log('Text length:', text ? text.length : 'undefined');
+            
+            if (!text || text.trim() === '') {
+                console.error('Empty text provided to playMayaResponse');
+                return;
+            }
+            
+            const response = await fetch('/api/generate_speech', {
+                method: 'POST',
+                headers: getAPIHeaders(),
+                body: JSON.stringify({
+                    text: text.trim()
+                })
+            });
+            
+            console.log('Nova Sonic API response status:', response.status);
+            const result = await response.json();
+            console.log('Nova Sonic API result:', result);
+            
+            if (result.success && result.audio_url) {
+                const audio = new Audio(result.audio_url);
+                
+                // Setup audio analyzer for Nova Sonic's enhanced voice visualization
+                setupNovaAudioAnalyzer(audio);
+                
+                conversationStatus.innerHTML = '<div class="h5 text-info">🔊 Maya is speaking...</div>';
+                
+                return new Promise((resolve) => {
+                    audio.onplay = () => {
+                        console.log('Maya is speaking - activating particle globe');
+                        // Ensure particle globe is active when Maya speaks
+                        if (globeSettings.enabled && isGlobeInitialized) {
+                            animate();
+                        }
+                    };
+                    
+                    audio.onended = () => {
+                        console.log('Maya finished speaking');
+                        resolve();
+                    };
+                    audio.onerror = () => {
+                        console.error('Audio playback error');
+                        resolve();
+                    };
+                    audio.play();
+                });
+            } else {
+                console.error('Nova Sonic speech generation failed:', result.error || 'Unknown error');
+                conversationStatus.innerHTML = '<div class="h5 text-danger">Speech generation failed - Check your connection</div>';
+                return Promise.resolve();
+            }
+        } catch (error) {
+            console.error('Error with Nova Sonic speech generation:', error);
+            conversationStatus.innerHTML = '<div class="h5 text-danger">Speech generation error - Please try again</div>';
+        }
+        return Promise.resolve();
+    }
+
+    // Enhanced audio analyzer for Nova Sonic integration
+    function setupNovaAudioAnalyzer(audioElement) {
+        try {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 512; // Higher resolution for Nova Sonic's prosody analysis
+                analyser.smoothingTimeConstant = 0.8; // Smoother transitions
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+            }
+
+            // Resume audio context if needed (browser security)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            if (audioSource) {
+                audioSource.disconnect();
+            }
+
+            // Connect Nova Sonic audio to analyzer
+            audioSource = audioContext.createMediaElementSource(audioElement);
+            audioSource.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            // Enhanced particle reactivity during speech
+            audioElement.addEventListener('play', () => {
+                if (particles) {
+                    particles.material.opacity = 1.0;
+                    particles.material.size = 3;
+                }
+            });
+
+            audioElement.addEventListener('ended', () => {
+                if (particles) {
+                    particles.material.opacity = 0.6;
+                    particles.material.size = 2;
+                }
+            });
+
+        } catch (error) {
+            console.warn('Audio analysis setup failed:', error);
+        }
+    }
+
+    function addMessageToHistory(speaker, message) {
+        const messageEl = document.createElement('div');
+        messageEl.className = `message ${speaker.includes('Maya') ? 'examiner-message' : 'user-message'}`;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        
+        messageEl.innerHTML = `
+            <div class="message-header">
+                <strong>${speaker}</strong>
+                <small class="text-muted">${timestamp}</small>
+            </div>
+            <div class="message-content">${message}</div>
+        `;
+        
+        conversationHistoryEl.appendChild(messageEl);
+        conversationHistoryEl.scrollTop = conversationHistoryEl.scrollHeight;
+        
+        // Store in conversation history
+        conversationHistory.push({
+            speaker: speaker,
+            message: message,
+            timestamp: timestamp
+        });
+    }
+
+    function updatePartProgress() {
+        for (let i = 1; i <= 3; i++) {
+            const partEl = document.getElementById(`part${i}`);
+            const badge = partEl.querySelector('.badge');
+            
+            if (i < currentPart) {
+                badge.className = 'badge bg-success';
+                badge.textContent = 'Completed';
+            } else if (i === currentPart) {
+                badge.className = 'badge bg-primary';
+                badge.textContent = 'Current';
+            } else {
+                badge.className = 'badge bg-secondary';
+                badge.textContent = 'Upcoming';
+            }
+        }
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            conversationTimer++;
+            const minutes = Math.floor(conversationTimer / 60);
+            const seconds = conversationTimer % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+    }
+
+    function pauseConversation() {
+        // Implementation for pause functionality
+        alert('Conversation paused. Click resume to continue.');
+    }
+
+    async function endConversation() {
+        if (confirm('Are you sure you want to end the assessment? Your conversation will be assessed immediately.')) {
+            conversationActive = false;
+            
+            // Stop all audio
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
+            }
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            // Process final assessment
+            conversationStatus.innerHTML = '<div class="h5 text-warning">Processing your assessment...</div>';
+            
+            try {
+                const assessmentResponse = await fetch('/api/assess_conversation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        conversation_history: conversationHistory,
+                        total_time: conversationTimer
+                    })
+                });
+                
+                const result = await assessmentResponse.json();
+                
+                if (result.success) {
+                    // Redirect to results
+                    window.location.href = `/assessments/{{ assessment_type }}/{{ assessment_id }}/results`;
+                } else {
+                    alert('Assessment processing failed. Please contact support.');
+                }
+                
+            } catch (error) {
+                console.error('Assessment error:', error);
+                alert('Assessment processing failed. Please contact support.');
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
