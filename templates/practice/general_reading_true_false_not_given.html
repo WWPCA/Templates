@@ -1,0 +1,268 @@
+{% extends "layout.html" %}
+
+{% block title %}IELTS General Training Reading: True / False / Not Given{% endblock %}
+
+{% block styles %}
+<style>
+  .reading-container {
+    display: flex;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    height: calc(100vh - 200px);
+    min-height: 500px;
+  }
+  
+  .reading-passage {
+    flex: 1;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    background-color: #fff;
+  }
+  
+  .questions-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+  }
+  
+  .question-header {
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  
+  .question-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+  }
+  
+  .option-cell {
+    text-align: center;
+    padding: 5px;
+  }
+  
+  .option-label {
+    font-weight: bold;
+  }
+  
+  .radio-option {
+    margin: 0 auto;
+    display: block;
+  }
+  
+  .navigation {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .test-header {
+    background-color: #f1f1f1;
+    padding: 15px;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .test-info {
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .timer {
+    font-weight: bold;
+    color: #d9534f;
+  }
+  
+  .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    justify-content: center;
+  }
+  
+  .pagination li {
+    margin: 0 5px;
+  }
+  
+  .pagination a {
+    display: block;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .pagination a.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  
+  .notice-text {
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="test-header">
+    <div>
+      <h5>Test taker ID: {{ current_user.id }}</h5>
+    </div>
+    <div class="test-info">
+      <span class="timer" id="timer">Time remaining: 60:00</span>
+    </div>
+    <div>
+      <i class="fas fa-wifi"></i>
+      <i class="fas fa-bell"></i>
+      <i class="fas fa-bars ml-2"></i>
+    </div>
+  </div>
+  
+  <div class="bg-light p-3">
+    <h6 class="m-0">Part 2</h6>
+    <small>{{ test.description }}</small>
+  </div>
+  
+  <div class="reading-container">
+    <div class="reading-passage">
+      <h5>{{ test.title }}</h5>
+      
+      <!-- The reading passage populated from database -->
+      <div id="passage-content">
+        {% if passage %}
+          <pre style="white-space: pre-wrap; font-family: inherit;">{{ passage }}</pre>
+        {% else %}
+          <p>The reading passage is not available.</p>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="questions-container">
+      <div class="question-header">
+        Questions 1-6
+        <p class="notice-text">Do the following statements agree with the information given in the text?</p>
+        <p class="notice-text">In boxes 1-6 on your answer sheet, write:</p>
+        <p class="notice-text"><strong>TRUE</strong> if the statement agrees with the information<br>
+           <strong>FALSE</strong> if the statement contradicts the information<br>
+           <strong>NOT GIVEN</strong> if there is no information on this</p>
+      </div>
+      
+      <form id="reading-form" method="post" action="{{ url_for('submit_general_reading_test', test_id=test.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <!-- Questions populated from database -->
+        <div id="questions-list">
+          {% for i in range(0, 6) %}
+          <div class="question-item">
+            <div class="d-flex">
+              <div class="mr-2">{{ i+1 }}</div>
+              <div>
+                {% if questions and i < questions|length %}
+                  {{ questions[i][10:] }} <!-- Remove "Question X: " prefix -->
+                {% else %}
+                  Statement {{ i+1 }} will appear here.
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="options-grid">
+              <div class="option-cell option-label">TRUE</div>
+              <div class="option-cell option-label">FALSE</div>
+              <div class="option-cell option-label">NOT GIVEN</div>
+              
+              <div class="option-cell">
+                <input type="radio" name="q{{ i+1 }}" value="TRUE" class="radio-option" required>
+              </div>
+              <div class="option-cell">
+                <input type="radio" name="q{{ i+1 }}" value="FALSE" class="radio-option">
+              </div>
+              <div class="option-cell">
+                <input type="radio" name="q{{ i+1 }}" value="NOT GIVEN" class="radio-option">
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        
+        <div class="navigation">
+          <button type="button" class="btn btn-secondary prev-btn">
+            <i class="fas fa-arrow-left"></i> Previous
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Submit Test
+          </button>
+          <button type="button" class="btn btn-secondary next-btn">
+            Next <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+    <div>
+      <span>Part 2</span>
+      <ul class="pagination d-inline-flex ml-2 mb-0">
+        <li><a href="#" class="active">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+        <li><a href="#">4</a></li>
+        <li><a href="#">5</a></li>
+        <li><a href="#">6</a></li>
+      </ul>
+    </div>
+    <div>
+      <button class="btn btn-outline-secondary">
+        <i class="fas fa-chevron-down"></i>
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Timer functionality
+  function startTimer(duration, display) {
+    let timer = duration, minutes, seconds;
+    const interval = setInterval(function () {
+      minutes = parseInt(timer / 60, 10);
+      seconds = parseInt(timer % 60, 10);
+
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      seconds = seconds < 10 ? "0" + seconds : seconds;
+
+      display.textContent = "Time remaining: " + minutes + ":" + seconds;
+
+      if (--timer < 0) {
+        clearInterval(interval);
+        display.textContent = "Time's up!";
+        // Automatically submit the form when time is up
+        document.getElementById('reading-form').submit();
+      }
+    }, 1000);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Start a 60-minute timer when the page loads
+    const sixtyMinutes = 60 * 60;
+    const display = document.getElementById('timer');
+    startTimer(sixtyMinutes, display);
+  });
+</script>
+{% endblock %}
