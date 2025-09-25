@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Recovery - IELTS GenAI Prep</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .recovery-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        .progress-indicator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        .recovery-option {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .recovery-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+        .recovery-option.recommended {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
+        }
+        .recovery-option.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        .cost-impact {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .cost-impact.minimal { background: #d4edda; color: #155724; }
+        .cost-impact.low { background: #fff3cd; color: #856404; }
+        .cost-impact.medium { background: #f8d7da; color: #721c24; }
+        .cost-impact.none { background: #e2e3e5; color: #383d41; }
+        .btn-recovery {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-recovery:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+        .assessment-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .time-remaining {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container recovery-container">
+        <div class="text-center mb-4">
+            <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+            <h1 class="mt-3">Assessment Interrupted</h1>
+            <p class="lead text-muted">Don't worry! We've saved your progress and you have options to continue.</p>
+        </div>
+
+        {% if recovery_data.available %}
+        <!-- Progress Information -->
+        <div class="progress-indicator">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4><i class="fas fa-chart-line me-2"></i>Your Progress</h4>
+                    <p class="mb-1">Part {{ recovery_data.progress.current_part }} - {{ recovery_data.progress.percent_complete }}% Complete</p>
+                    <p class="mb-0">{{ recovery_data.progress.questions_completed }} questions answered • {{ recovery_data.progress.time_elapsed }} elapsed</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="time-remaining">
+                        <i class="fas fa-clock me-1"></i>
+                        Recovery expires in 24 hours
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Details -->
+        <div class="assessment-info">
+            <h5><i class="fas fa-info-circle me-2"></i>Assessment Details</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Saved:</strong> {{ recovery_data.saved_at | format_datetime }}</p>
+                    <p><strong>Assessment:</strong> Speaking Assessment {{ assessment_number }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Current Part:</strong> Part {{ recovery_data.progress.current_part }}</p>
+                    <p><strong>Questions Completed:</strong> {{ recovery_data.progress.questions_completed }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recovery Options -->
+        <h4 class="mb-3"><i class="fas fa-route me-2"></i>Choose Your Recovery Option</h4>
+        
+        <form id="recoveryForm" method="POST">
+            <input type="hidden" name="recovery_token" value="{{ recovery_data.recovery_token }}">
+            
+            <!-- Resume Option -->
+            <div class="recovery-option {% if recovery_data.options.resume.recommended %}recommended{% endif %}" 
+                 onclick="selectOption('resume')">
+                <div class="row align-items-center">
+                    <div class="col-1">
+                        <input type="radio" name="recovery_choice" value="resume" 
+                               {% if recovery_data.options.resume.recommended %}checked{% endif %}>
+                    </div>
+                    <div class="col-8">
+                        <h5><i class="fas fa-play me-2"></i>Resume Assessment</h5>
+                        <p class="mb-1">{{ recovery_data.options.resume.description }}</p>
+                        <small class="text-muted">Continue exactly where you left off with all your progress intact</small>
+                    </div>
+                    <div class="col-3 text-end">
+                        {% if recovery_data.options.resume.recommended %}
+                            <span class="badge bg-success mb-2">Recommended</span><br>
+                        {% endif %}
+                        <span class="cost-impact {{ recovery_data.options.resume.cost_impact }}">
+                            {{ recovery_data.options.resume.cost_impact | title }} Impact
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restart Option -->
+            <div class="recovery-option {% if recovery_data.options.restart.recommended %}recommended{% endif %}"
+                 onclick="selectOption('restart')">
+                <div class="row align-items-center">
+                    <div class="col-1">
+                        <input type="radio" name="recovery_choice" value="restart"
+                               {% if recovery_data.options.restart.recommended %}checked{% endif %}>
+                    </div>
+                    <div class="col-8">
+                        <h5><i class="fas fa-refresh me-2"></i>Start Fresh Assessment</h5>
+                        <p class="mb-1">{{ recovery_data.options.restart.description }}</p>
+                        <small class="text-muted">Begin a completely new assessment with different questions</small>
+                    </div>
+                    <div class="col-3 text-end">
+                        {% if recovery_data.options.restart.recommended %}
+                            <span class="badge bg-success mb-2">Recommended</span><br>
+                        {% endif %}
+                        <span class="cost-impact {{ recovery_data.options.restart.cost_impact }}">
+                            No Additional Cost
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-recovery btn-lg">
+                    <i class="fas fa-arrow-right me-2"></i>Continue Assessment
+                </button>
+            </div>
+        </form>
+
+        <!-- Help Information -->
+        <div class="mt-5 p-4 bg-light rounded">
+            <h6><i class="fas fa-question-circle me-2"></i>Need Help?</h6>
+            <p class="mb-0">
+                <strong>Resume:</strong> Perfect if you want to continue from where you stopped. All your previous answers are saved.<br>
+                <strong>Restart:</strong> Best if you prefer a fresh start or experienced technical issues during the assessment.<br>
+                <em>Both options are included in your package with no additional charges.</em>
+            </p>
+        </div>
+
+        {% else %}
+        <!-- No Recovery Available -->
+        <div class="text-center">
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-triangle me-2"></i>Recovery Not Available</h5>
+                <p>{{ recovery_data.reason }}</p>
+                <a href="{{ url_for('assessment_routes.speaking_assessments') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Assessments
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function selectOption(option) {
+            // Remove selected class from all options
+            document.querySelectorAll('.recovery-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            event.currentTarget.classList.add('selected');
+            
+            // Check the radio button
+            document.querySelector(`input[value="${option}"]`).checked = true;
+        }
+
+        // Form submission with confirmation
+        document.getElementById('recoveryForm').addEventListener('submit', function(e) {
+            const selectedOption = document.querySelector('input[name="recovery_choice"]:checked').value;
+            const confirmMessage = selectedOption === 'restart' 
+                ? 'Are you sure you want to start a fresh assessment? Your current progress will be lost.'
+                : 'Continue with your saved assessment from where you left off?';
+            
+            if (!confirm(confirmMessage)) {
+                e.preventDefault();
+            }
+        });
+
+        // Auto-select recommended option
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkedRadio = document.querySelector('input[name="recovery_choice"]:checked');
+            if (checkedRadio) {
+                selectOption(checkedRadio.value);
+            }
+        });
+    </script>
+</body>
+</html>
