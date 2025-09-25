@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+{% block title %}Request Data Export - IELTS GenAI Prep{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">Request Data Export</h1>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h4>About Data Exports</h4>
+                                <p class="mb-0">
+                                    You can download a copy of your personal data in a portable format.
+                                    This helps you exercise your right to data portability under privacy regulations.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h2 class="h4 mt-4 mb-3">Data Export Options</h2>
+                    
+                    <form action="{{ url_for('gdpr.request_data_export') }}" method="post">
+                        <div class="mb-4">
+                            <label class="form-label">Export Format</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="format" id="format-json" value="json" checked>
+                                <label class="form-check-label" for="format-json">
+                                    JSON (recommended for complete data)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="format" id="format-csv" value="csv">
+                                <label class="form-check-label" for="format-csv">
+                                    CSV (better for spreadsheet programs)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Data to Include</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="include_assessments" name="include_assessments" checked>
+                                <label class="form-check-label" for="include_assessments">
+                                    Include detailed assessment data
+                                </label>
+                                <div class="form-text text-muted">
+                                    This includes detailed feedback and scores from your practice tests.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-shield-alt fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h4>Security Verification</h4>
+                                    <p class="mb-0">
+                                        For your security, we'll send a verification code to complete this request.
+                                        This helps ensure that only you can access your personal data.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">Request Verification Code</button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <h2 class="h4 mb-3">What's Included in Your Export</h2>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Data Category</th>
+                                    <th>Description</th>
+                                    <th>Included</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Account Information</td>
+                                    <td>Your basic account details (name, email, etc.)</td>
+                                    <td><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>Test History</td>
+                                    <td>Summary of tests taken and scores</td>
+                                    <td><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>Assessment Results</td>
+                                    <td>Detailed assessment feedback</td>
+                                    <td><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>Transcripts</td>
+                                    <td>Transcripts of speaking test responses</td>
+                                    <td><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>Subscription Details</td>
+                                    <td>Information about your subscription</td>
+                                    <td><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>Payment History</td>
+                                    <td>Record of transactions</td>
+                                    <td><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>Audio Recordings</td>
+                                    <td>Your original voice recordings</td>
+                                    <td><i class="fas fa-times text-danger"></i> Not stored</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('gdpr.my_data') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Back to My Data
+                </a>
+                <a href="{{ url_for('gdpr.privacy_policy') }}" class="btn btn-link">
+                    View Privacy Policy
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
