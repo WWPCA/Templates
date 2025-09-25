@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Authentication - IELTS GenAI Prep</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        .qr-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px dashed #007bff;
+        }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .instructions {
+            color: #666;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status-waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .mobile-steps {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .step-number {
+            background: #007bff;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .brand-header {
+            margin-bottom: 30px;
+        }
+        .brand-icon {
+            font-size: 48px;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="brand-header">
+            <div class="brand-icon">
+                <i class="fas fa-qrcode"></i>
+            </div>
+            <h2>Mobile Authentication</h2>
+            <p class="text-muted">Access your assessments using your mobile app</p>
+        </div>
+
+        <div id="qr-container" class="qr-container">
+            <div id="qr-code" class="qr-code">
+                <div class="loading-spinner"></div>
+            </div>
+            <div class="instructions">
+                <strong>Waiting for authentication request...</strong><br>
+                Click "Request QR Code" below to generate your access code
+            </div>
+        </div>
+
+        <div class="mobile-steps">
+            <h6 style="color: #007bff; margin-bottom: 15px; font-weight: 600;">
+                <i class="fas fa-mobile-alt"></i> How to authenticate:
+            </h6>
+            <div class="step">
+                <div class="step-number">1</div>
+                <span>Open IELTS GenAI Prep app on your mobile device</span>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <span>Tap "Scan QR Code" in the app</span>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <span>Point your camera at the QR code displayed above</span>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <span>You'll be automatically logged in to access your assessments</span>
+            </div>
+        </div>
+
+        <div id="status-message" class="status-message status-waiting" style="display: none;">
+            <i class="fas fa-clock"></i> Waiting for mobile app to scan QR code...
+        </div>
+
+        <div class="d-grid gap-2">
+            <button id="request-qr-btn" class="btn btn-primary btn-lg">
+                <i class="fas fa-qrcode me-2"></i>Request QR Code
+            </button>
+            <button id="refresh-btn" class="btn btn-outline-secondary" style="display: none;">
+                <i class="fas fa-sync-alt me-2"></i>Generate New Code
+            </button>
+        </div>
+
+        <div class="mt-4">
+            <small class="text-muted">
+                <i class="fas fa-shield-alt"></i> 
+                QR codes expire in 10 minutes for security
+            </small>
+        </div>
+    </div>
+
+    <script>
+        let authInterval;
+        let qrToken = null;
+
+        document.getElementById('request-qr-btn').addEventListener('click', requestQRCode);
+        document.getElementById('refresh-btn').addEventListener('click', requestQRCode);
+
+        async function requestQRCode() {
+            try {
+                document.getElementById('request-qr-btn').style.display = 'none';
+                document.getElementById('refresh-btn').style.display = 'none';
+                
+                // Show loading state
+                document.getElementById('qr-code').innerHTML = '<div class="loading-spinner"></div>';
+                document.querySelector('.instructions').innerHTML = '<strong>Generating QR code...</strong>';
+                
+                // Request QR code from backend
+                const response = await fetch('/api/website/request-qr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        request_type: 'website_auth',
+                        timestamp: Date.now()
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    qrToken = result.token_id;
+                    
+                    // Display QR code
+                    document.getElementById('qr-code').innerHTML = 
+                        `<img src="${result.qr_code_image}" alt="QR Code" style="width: 180px; height: 180px;">`;
+                    
+                    document.querySelector('.instructions').innerHTML = 
+                        `<strong>Scan with your mobile app</strong><br>Code expires in 10 minutes`;
+                    
+                    // Show status and refresh button
+                    const statusElement = document.getElementById('status-message');
+                    statusElement.style.display = 'block';
+                    statusElement.className = 'status-message status-waiting';
+                    statusElement.innerHTML = '<i class="fas fa-clock"></i> Waiting for mobile app to scan QR code...';
+                    
+                    document.getElementById('refresh-btn').style.display = 'block';
+                    
+                    // Start polling for authentication
+                    startAuthPolling(result.token_id);
+                    
+                    // Auto-refresh after 9 minutes
+                    setTimeout(() => {
+                        if (qrToken === result.token_id) {
+                            requestQRCode();
+                        }
+                    }, 540000); // 9 minutes
+                } else {
+                    throw new Error(result.error || 'Failed to generate QR code');
+                }
+            } catch (error) {
+                console.error('QR code generation failed:', error);
+                document.getElementById('qr-code').innerHTML = 
+                    '<div style="color: #dc3545;"><i class="fas fa-exclamation-triangle"></i><br>Failed to generate</div>';
+                document.querySelector('.instructions').innerHTML = 
+                    '<strong style="color: #dc3545;">Error generating QR code</strong><br>Please try again';
+                document.getElementById('request-qr-btn').style.display = 'block';
+            }
+        }
+
+        function startAuthPolling(tokenId) {
+            // Clear any existing interval
+            if (authInterval) {
+                clearInterval(authInterval);
+            }
+
+            authInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/website/check-auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            token_id: tokenId
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.authenticated) {
+                        // Authentication successful
+                        clearInterval(authInterval);
+                        
+                        const statusElement = document.getElementById('status-message');
+                        statusElement.className = 'status-message status-success';
+                        statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Authentication successful! Redirecting...';
+                        
+                        // Store user info in session storage for profile page
+                        sessionStorage.setItem('user_info', JSON.stringify({
+                            email: result.user_email,
+                            products: result.products
+                        }));
+                        
+                        // Redirect to user's assessments
+                        setTimeout(() => {
+                            window.location.href = '/profile';
+                        }, 2000);
+                    } else if (result.expired) {
+                        // Token expired
+                        clearInterval(authInterval);
+                        
+                        const statusElement = document.getElementById('status-message');
+                        statusElement.className = 'status-message status-error';
+                        statusElement.innerHTML = '<i class="fas fa-clock"></i> QR code expired. Please generate a new one.';
+                        
+                        document.getElementById('refresh-btn').style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Auth polling error:', error);
+                }
+            }, 3000); // Check every 3 seconds
+        }
+
+        // Cleanup interval on page unload
+        window.addEventListener('beforeunload', () => {
+            if (authInterval) {
+                clearInterval(authInterval);
+            }
+        });
+    </script>
+</body>
+</html>
