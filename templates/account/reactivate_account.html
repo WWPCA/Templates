@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h2 class="mb-0">
+                        <i class="fas fa-undo me-2"></i>Reactivate Account
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-check fa-3x text-success mb-3"></i>
+                        <h4>Welcome Back!</h4>
+                        <p class="text-muted">Click the button below to reactivate your account and restore access to all your assessments.</p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>What happens when you reactivate:
+                        </h6>
+                        <ul class="mb-0">
+                            <li>Your account will be fully restored</li>
+                            <li>All your assessment packages will be available</li>
+                            <li>Your test history and progress will remain intact</li>
+                            <li>The deletion request will be cancelled</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success btn-lg" id="reactivateButton">
+                            <i class="fas fa-check me-2"></i>Reactivate My Account
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Return to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('#reactivateButton').click(function() {
+        const button = $(this);
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Processing...');
+        
+        window.location.href = '{{ url_for("reactivate_account", token=token) }}';
+    });
+});
+</script>
+{% endblock %}
