@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+
+{% block title %}My Data - IELTS GenAI Prep{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <h1 class="mb-4">My Data</h1>
+            
+            <div class="alert alert-info">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-info-circle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4>Your Privacy Matters</h4>
+                        <p class="mb-0">This dashboard helps you exercise your data privacy rights. You can access, export, or delete your data at any time.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h5 mb-0"><i class="fas fa-cogs me-2"></i> Consent Settings</h2>
+                        </div>
+                        <div class="card-body">
+                            <p>Manage how we use your data and what you consent to.</p>
+                            <p class="text-muted small">Last updated: {{ current_user.last_consent_update.strftime('%d %b %Y') if current_user.last_consent_update else 'Never' }}</p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <a href="{{ url_for('gdpr.consent_settings') }}" class="btn btn-primary btn-sm w-100">Manage Consent</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h5 mb-0"><i class="fas fa-download me-2"></i> Export Data</h2>
+                        </div>
+                        <div class="card-body">
+                            <p>Download a copy of your personal data in a portable format.</p>
+                            <p class="text-muted small">Available formats: JSON, CSV</p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <a href="{{ url_for('gdpr.request_data_export') }}" class="btn btn-primary btn-sm w-100">Export My Data</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h2 class="h5 mb-0"><i class="fas fa-trash-alt me-2"></i> Delete Data</h2>
+                        </div>
+                        <div class="card-body">
+                            <p>Request deletion of your personal data from our systems.</p>
+                            <p class="text-muted small">You can choose partial or complete deletion.</p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <a href="{{ url_for('gdpr.request_data_deletion') }}" class="btn btn-outline-danger btn-sm w-100">Request Deletion</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h2 class="h5 mb-0">Data We Store</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Account Information</h5>
+                                <p class="mb-0 text-muted">Your name, email, and account settings</p>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">Active</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Test Results</h5>
+                                <p class="mb-0 text-muted">Your practice test results and assessments</p>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">Active</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Speaking Test Transcripts</h5>
+                                <p class="mb-0 text-muted">Transcripts of your speaking test responses</p>
+                            </div>
+                            <span class="badge bg-info rounded-pill">6 months</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Payment Information</h5>
+                                <p class="mb-0 text-muted">Your payment history and subscription details</p>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">Active</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Customer Address</h5>
+                                <p class="mb-0 text-muted">Your billing address for tax compliance <a href="{{ url_for('privacy_policy') }}#address-info" class="small text-decoration-underline">More info</a></p>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">Active</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Audio Recordings</h5>
+                                <p class="mb-0 text-muted">Your speaking test audio recordings</p>
+                            </div>
+                            <span class="badge bg-secondary rounded-pill">Not stored</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h2 class="h5 mb-0">Your Rights</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <strong>Right to Access</strong>: You can access all your personal data.
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <strong>Right to Rectification</strong>: You can correct inaccurate data.
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <strong>Right to Erasure</strong>: You can request deletion of your data.
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <strong>Right to Restriction</strong>: You can limit how we use your data.
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <strong>Right to Data Portability</strong>: You can export your data.
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <strong>Right to Object</strong>: You can opt out of data processing.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="mt-4 text-muted">
+                For more information about how we handle your data, please read our 
+                <a href="{{ url_for('gdpr.privacy_policy') }}">Privacy Policy</a>.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
