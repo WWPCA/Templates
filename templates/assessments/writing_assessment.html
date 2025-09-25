@@ -1,0 +1,317 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .truescore-header {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .writing-interface {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .task-display {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        font-size: 14px;
+    }
+    
+    .writing-area {
+        background: white;
+        border: 1px solid #dee2e6;
+        padding: 0;
+        margin: 1rem 0;
+    }
+    
+    .word-counter {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+        text-align: center;
+    }
+    
+    .timer-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        margin: 1rem 0;
+    }
+    
+    .task-tabs {
+        margin-bottom: 2rem;
+    }
+    
+    .task-tab {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 0.5rem;
+        border: 2px solid #dee2e6;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .task-tab.active {
+        border-color: #28a745;
+        background: #f8fff9;
+    }
+    
+    .task-tab:hover {
+        border-color: #28a745;
+    }
+    
+    .writing-textarea {
+        width: 100%;
+        min-height: 400px;
+        border: none;
+        padding: 1rem;
+        font-family: 'Arial', sans-serif;
+        font-size: 13px;
+        line-height: 1.5;
+        resize: none;
+        outline: none;
+    }
+    
+    .word-counter {
+        background: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 0.5rem 1rem;
+        font-size: 12px;
+        text-align: right;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- TrueScore Header -->
+    <div class="truescore-header">
+        <h2><i class="fas fa-pen-nib me-2"></i>Assessment {{ assessment_number }} - {{ assessment_type.replace('_', ' ').title() }}</h2>
+        <p class="mb-0">Powered by TrueScore® GenAI Technology - The world's only AI IELTS writing examiner</p>
+    </div>
+
+    <!-- Simple Task Navigation -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-primary active" id="task1Btn" onclick="switchTask(1)">
+                    Writing Task 1
+                </button>
+                <button type="button" class="btn btn-outline-primary" id="task2Btn" onclick="switchTask(2)">
+                    Writing Task 2
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Display -->
+    <div class="timer-display" id="timerDisplay">
+        Total Time: 60:00 | Current Task: 00:00
+    </div>
+
+    <!-- Main Writing Interface -->
+    <div class="writing-interface">
+        <!-- Task 1 Content -->
+        <div id="task1Content">
+            <div class="task-display">
+                <strong>Writing Task 1</strong><br>
+                You should spend about 20 minutes on this task.
+                <br><br>
+                {% if 'academic' in assessment_type %}
+                The chart below shows the percentage of households in owned and rented accommodation in England and Wales between 1918 and 2011.
+                <br><br>
+                <strong>Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</strong>
+                <br><br>
+                Write at least 150 words.
+                {% else %}
+                You recently bought a piece of equipment for your kitchen but it did not work. You phoned the shop but no action was taken.
+                <br><br>
+                <strong>Write a letter to the shop manager. In your letter:</strong>
+                <ul style="margin: 10px 0;">
+                    <li>describe the problem with the equipment</li>
+                    <li>explain what happened when you phoned the shop</li>
+                    <li>say what you would like the manager to do</li>
+                </ul>
+                Write at least 150 words.
+                {% endif %}
+            </div>
+
+            <div class="writing-area">
+                <textarea class="writing-textarea" id="task1Text" placeholder=""></textarea>
+                <div class="word-counter">
+                    Words: <span id="task1WordCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task 2 Content -->
+        <div id="task2Content" style="display: none;">
+            <div class="task-display">
+                <strong>Writing Task 2</strong><br>
+                You should spend about 40 minutes on this task.
+                <br><br>
+                Some people think that universities should provide graduates with the knowledge and skills needed in the workplace. Others think that the true function of a university is to give access to knowledge for its own sake, regardless of whether the course is useful to an employer.
+                <br><br>
+                <strong>What, in your opinion, should be the main function of a university?</strong>
+                <br><br>
+                Give reasons for your answer and include any relevant examples from your own knowledge or experience.
+                <br><br>
+                Write at least 250 words.
+            </div>
+
+            <div class="writing-area">
+                <textarea class="writing-textarea" id="task2Text" placeholder=""></textarea>
+                <div class="word-counter">
+                    Words: <span id="task2WordCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="text-center mt-4">
+            <button class="btn btn-outline-secondary me-2" id="saveProgressBtn">
+                <i class="fas fa-save me-2"></i>Save Progress
+            </button>
+            <button class="btn btn-success me-2" id="submitBtn">
+                <i class="fas fa-paper-plane me-2"></i>Submit for Assessment
+            </button>
+            <button class="btn btn-outline-danger" id="exitBtn">
+                <i class="fas fa-times me-2"></i>Exit Assessment
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let totalSeconds = 0;
+    let taskStartTime = 0;
+    let currentTask = 1;
+    let timer = null;
+    
+    const timerDisplay = document.getElementById('timerDisplay');
+    const task1Text = document.getElementById('task1Text');
+    const task2Text = document.getElementById('task2Text');
+    const task1WordCount = document.getElementById('task1WordCount');
+    const task2WordCount = document.getElementById('task2WordCount');
+    const task1Status = document.getElementById('task1Status');
+    const task2Status = document.getElementById('task2Status');
+    const submitBtn = document.getElementById('submitBtn');
+    const saveProgressBtn = document.getElementById('saveProgressBtn');
+    const exitBtn = document.getElementById('exitBtn');
+    
+    // Start timer
+    function startTimer() {
+        timer = setInterval(() => {
+            totalSeconds++;
+            const currentTaskSeconds = totalSeconds - taskStartTime;
+            
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            const totalRemainingSeconds = totalSeconds % 60;
+            const taskMinutes = Math.floor(currentTaskSeconds / 60);
+            const taskRemainingSeconds = currentTaskSeconds % 60;
+            
+            timerDisplay.textContent = `Total Time: ${totalMinutes.toString().padStart(2, '0')}:${totalRemainingSeconds.toString().padStart(2, '0')} | Current Task: ${taskMinutes.toString().padStart(2, '0')}:${taskRemainingSeconds.toString().padStart(2, '0')}`;
+        }, 1000);
+    }
+    
+    // Word counting function
+    function countWords(text) {
+        return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    }
+    
+    // Update word count and status
+    function updateWordCount(taskNum) {
+        const textarea = taskNum === 1 ? task1Text : task2Text;
+        const countElement = taskNum === 1 ? task1WordCount : task2WordCount;
+        const statusElement = taskNum === 1 ? task1Status : task2Status;
+        const minWords = taskNum === 1 ? 150 : 250;
+        
+        const wordCount = countWords(textarea.value);
+        countElement.textContent = wordCount;
+        
+        if (wordCount >= minWords) {
+            statusElement.textContent = 'Requirements met';
+            statusElement.className = 'text-success';
+        } else {
+            statusElement.textContent = `${minWords - wordCount} words needed`;
+            statusElement.className = 'text-warning';
+        }
+    }
+    
+    // Task switching function
+    window.switchTask = function(taskNum) {
+        if (taskNum === currentTask) return;
+        
+        currentTask = taskNum;
+        taskStartTime = totalSeconds;
+        
+        // Update UI
+        document.getElementById('task1Btn').classList.toggle('active', taskNum === 1);
+        document.getElementById('task2Btn').classList.toggle('active', taskNum === 2);
+        document.getElementById('task1Content').style.display = taskNum === 1 ? 'block' : 'none';
+        document.getElementById('task2Content').style.display = taskNum === 2 ? 'block' : 'none';
+    };
+    
+    // Event listeners for word counting
+    task1Text.addEventListener('input', () => updateWordCount(1));
+    task2Text.addEventListener('input', () => updateWordCount(2));
+    
+    // Save progress
+    saveProgressBtn.addEventListener('click', function() {
+        // In a real implementation, this would save to the server
+        alert('Progress saved! You can return to complete this assessment later.');
+    });
+    
+    // Submit assessment
+    submitBtn.addEventListener('click', function() {
+        const task1Words = countWords(task1Text.value);
+        const task2Words = countWords(task2Text.value);
+        
+        if (task1Words < 150 || task2Words < 250) {
+            if (!confirm('You have not met the minimum word requirements. Are you sure you want to submit?')) {
+                return;
+            }
+        }
+        
+        clearInterval(timer);
+        
+        // In a real implementation, this would submit to TrueScore® for assessment
+        alert('Assessment submitted successfully! Your writing will be evaluated by TrueScore® AI and results will be available in your profile within minutes.');
+        window.location.href = '/profile';
+    });
+    
+    // Exit assessment
+    exitBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to exit? Your progress will be lost unless you save it first.')) {
+            clearInterval(timer);
+            window.location.href = '/profile';
+        }
+    });
+    
+    // Initialize
+    startTimer();
+    updateWordCount(1);
+    updateWordCount(2);
+    
+    // Auto-save every 2 minutes
+    setInterval(() => {
+        console.log('Auto-saving progress...');
+        // In a real implementation, this would auto-save to the server
+    }, 120000);
+});
+</script>
+{% endblock %}
