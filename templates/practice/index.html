@@ -1,0 +1,218 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">IELTS GenAI Assessment Modules</h1>
+            
+            <div class="alert alert-info mb-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-graduation-cap fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4>GenAI-Powered Feedback for Writing and Speaking</h4>
+                        <p class="mb-0">Our specialized GenAI assessment technology evaluates your writing and speaking practice using the same criteria as official IELTS examiners. Get detailed feedback on your performance to target your areas for improvement effectively.</p>
+                    </div>
+                </div>
+            </div>
+            
+            {% if not current_user.is_authenticated %}
+                <div class="alert alert-warning mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-user-lock fa-2x"></i>
+                        </div>
+                        <div>
+                            <h4>Login to Access GenAI Assessment Modules</h4>
+                            <p>Please <a href="{{ url_for('login') }}">login</a> or <a href="{{ url_for('register') }}">register</a> to access our GenAI-powered Writing and Speaking assessment modules. You'll need to purchase assessment packages to access these materials.</p>
+                            <a href="{{ url_for('login') }}" class="btn btn-primary">Login</a>
+                            <a href="{{ url_for('register') }}" class="btn btn-secondary">Register</a>
+                        </div>
+                    </div>
+                </div>
+            {% elif not current_user.is_subscribed() %}
+                <div class="alert alert-warning mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-graduation-cap fa-2x"></i>
+                        </div>
+                        <div>
+                            <h4>Purchase Assessment Modules</h4>
+                            <p>Get personalized GenAI feedback on your writing and speaking skills with our assessment modules. Choose from our Academic or General Training packages to practice effectively.</p>
+                            <a href="{{ url_for('assessment_products_page') }}" class="btn btn-primary">View Assessment Modules</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Package information for subscribed users -->
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <!-- All users now use the assessment-based model instead of subscriptions -->
+                            <h4>GenAI Assessment Access</h4>
+                            <p>You have access to specific GenAI assessment modules that provide detailed feedback using TrueScore® and ClearScore® technology. Each assessment can only be taken once.</p>
+                            
+                            {% if current_user.subscription_expiry %}
+                                <p><strong>Expires:</strong> {{ current_user.subscription_expiry.strftime('%B %d, %Y') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Test preference info -->
+            {% if current_user.is_authenticated %}
+            <div class="alert alert-success mb-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-clipboard-check fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4>Your IELTS Test Preference</h4>
+                        <p class="mb-0">
+                            You are currently preparing for 
+                            <strong>
+                                {% if current_user.test_preference == 'academic' %}
+                                    IELTS Academic
+                                {% elif current_user.test_preference == 'general' %}
+                                    IELTS General Training
+                                {% endif %}
+                            </strong>. 
+                            Your practice materials will be customized for this test type.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Complete Practice Tests Section -->
+            <!-- Temporarily hidden as requested by the client -->
+            <!--
+            <h2 class="mb-4 mt-5">IELTS Reading Practice</h2>
+            <p class="lead mb-4">Each reading test includes authentic passages and questions, following the official IELTS format.</p>
+            
+            <div class="row">
+                {% if complete_tests %}
+                    {% for test in complete_tests %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h2 class="h4 mb-0">{{ test.title }}</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center mb-4">
+                                        <i class="fas fa-clipboard-list fa-4x text-primary"></i>
+                                    </div>
+                                    
+                                    <h3 class="h5">
+                                        {% if test.ielts_test_type == 'academic' %}
+                                            IELTS Academic Test {{ test.test_number }}
+                                        {% elif test.ielts_test_type == 'general' %}
+                                            IELTS General Training Test {{ test.test_number }}
+                                        {% endif %}
+                                    </h3>
+                                    
+                                    <p>{{ test.description }}</p>
+                                    
+                                    <div class="test-sections mt-3">
+                                        <h4 class="h6">Test Sections:</h4>
+                                        <div class="d-flex flex-wrap">
+                                            <span class="badge bg-primary me-2 mb-2 p-2">
+                                                <i class="fas fa-headphones me-1"></i> Listening
+                                            </span>
+                                            <span class="badge bg-primary me-2 mb-2 p-2">
+                                                <i class="fas fa-book-open me-1"></i> Reading
+                                            </span>
+                                            <span class="badge bg-primary me-2 mb-2 p-2">
+                                                <i class="fas fa-pencil-alt me-1"></i> Writing
+                                            </span>
+                                            <span class="badge bg-primary me-2 mb-2 p-2">
+                                                <i class="fas fa-microphone me-1"></i> Speaking
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if test_progress and test.id in test_progress %}
+                                        <div class="progress mt-3">
+                                            <div class="progress-bar progress-bar-striped bg-success" 
+                                                 role="progressbar" 
+                                                 style="width: {{ test_progress[test.id].progress_percent }}%;" 
+                                                 aria-valuenow="{{ test_progress[test.id].progress_percent }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                {{ test_progress[test.id].progress_percent }}%
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-2">
+                                            <small>{{ test_progress[test.id].status }}</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-white text-center">
+                                    {% if not current_user.is_authenticated %}
+                                        <a href="{{ url_for('login') }}" class="btn btn-primary">
+                                            <i class="fas fa-sign-in-alt me-1"></i> Login to Access
+                                        </a>
+                                    {% elif current_user.is_authenticated and not current_user.is_subscribed() %}
+                                        <a href="{{ url_for('subscribe') }}" class="btn btn-warning">
+                                            <i class="fas fa-crown me-1"></i> Subscribe to Access
+                                        </a>
+                                    {% elif test_progress and test.id in test_progress and test_progress[test.id].is_completed %}
+                                        <span class="badge bg-success p-2">
+                                            <i class="fas fa-check-circle me-1"></i> Completed
+                                        </span>
+                                        <span class="ms-2">Score: {{ test_progress[test.id].score }}</span>
+                                    {% elif test_progress and test.id in test_progress %}
+                                        <a href="{{ url_for('continue_complete_test', test_id=test.id) }}" class="btn btn-primary">
+                                            <i class="fas fa-play me-1"></i> Continue Test
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ url_for('start_complete_test', test_id=test.id) }}" class="btn btn-primary">
+                                            <i class="fas fa-play me-1"></i> Start Test
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-info-circle fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h4>Tests Coming Soon</h4>
+                                    <p class="mb-0">We're currently preparing reading practice tests for your selected test type. Check back soon!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            -->
+            
+            <!-- Individual section practice and Practice Test Features have been removed as requested -->
+            
+            <div class="text-center mt-5">
+                <h2 class="mb-4">Ready to start practicing?</h2>
+                <p class="lead mb-4">Access reading materials with GenAI-powered writing and speaking assessments to prepare for your IELTS exam.</p>
+                
+                {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">Create an Account</a>
+                {% elif not current_user.is_subscribed() %}
+                    <a href="{{ url_for('subscribe') }}" class="btn btn-primary btn-lg">Subscribe Now</a>
+                {% else %}
+                    <a href="{{ url_for('assessment_products') }}" class="btn btn-primary btn-lg">Browse Assessment Products</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
