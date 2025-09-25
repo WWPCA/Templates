@@ -1,0 +1,363 @@
+{% extends "layout.html" %}
+
+{% block head %}
+{{ super() }}
+<!-- Include Stripe Buy Button JavaScript -->
+<script async src="https://js.stripe.com/v3/buy-button.js"></script>
+
+<script>
+  // Fix for "ERROR: Invalid details" message that appears in bottom-right corner
+  document.addEventListener('DOMContentLoaded', function() {
+    // Remove any error notifications that might be showing
+    const cleanupErrors = function() {
+      // Find and remove any elements with error messages
+      document.querySelectorAll('div[style*="position:fixed"], div[style*="position: fixed"]').forEach(function(el) {
+        if (el.textContent && (el.textContent.includes('ERROR') || el.textContent.includes('Invalid details'))) {
+          el.remove();
+        }
+      });
+      
+      // Also remove any elements with error classes
+      document.querySelectorAll('.alert-danger, .alert-error').forEach(function(el) {
+        if (el.textContent && (el.textContent.includes('ERROR') || el.textContent.includes('Invalid details'))) {
+          el.remove();
+        }
+      });
+    };
+    
+    // Run cleanup immediately
+    cleanupErrors();
+    
+    // Also run cleanup periodically
+    setInterval(cleanupErrors, 500);
+  });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-brand-section {
+    margin-bottom: 60px;
+    padding: 20px 10px;
+}
+
+.brand-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.brand-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.brand-tagline {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+/* Stripe Buy Button styling */
+.stripe-buy-button-container {
+    width: 100%;
+}
+
+/* Make sure Stripe buttons fill their container */
+stripe-buy-button {
+    display: block;
+    width: 100%;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .ai-brand-section {
+        margin-bottom: 30px;
+        padding: 10px 5px;
+    }
+    
+    .brand-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .brand-title {
+        font-size: 1.6rem;
+    }
+    
+    .brand-tagline {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-body {
+        min-height: unset;
+        padding: 1rem;
+    }
+    
+    .card-body ul {
+        padding-left: 1.2rem;
+    }
+    
+    .card-body ul li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-footer .btn {
+        padding: 0.5rem 1rem;
+    }
+    
+    /* Stripe Buy Button container styling */
+    .stripe-buy-button-container {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mt-md-5">
+    <div class="row mb-4 mb-md-5">
+        <div class="col-12">
+            <h1 class="text-center">GenAI Assessed IELTS Modules</h1>
+            <p class="lead text-center">Our specialized GenAI technologies provide accurate assessment for IELTS preparation</p>
+        </div>
+    </div>
+    
+    <!-- TrueScore Section -->
+    <div class="ai-brand-section">
+        <div class="text-center mb-4">
+            <div class="brand-icon text-success">
+                <i class="fas fa-pencil-alt"></i>
+            </div>
+            <h2 class="brand-title">TrueScore® Writing Assessment</h2>
+            <p class="brand-tagline">Professional-grade assessment of IELTS writing tasks with detailed feedback and scoring</p>
+        </div>
+        
+        <div class="row equal-height-cards">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h3>Academic Writing</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Get expert assessment on your Academic Writing with TrueScore® GenAI technology.</p>
+                        <ul>
+                            <li>Task 1: Graph/chart description</li>
+                            <li>Task 2: Academic essay writing</li>
+                            <li>TrueScore® GenAI detailed feedback</li>
+                        </ul>
+                        <p class="mt-3">4 complete assessment sets</p>
+                        <p class="text-muted small"><i class="fas fa-info-circle"></i> Each assessment can only be taken once to ensure operational efficiency and cost control.</p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid">
+                            {% if current_user.is_authenticated %}
+                            <!-- Authenticated user - show purchase button -->
+                            <form action="/create-checkout-session" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="assessment_type" value="academic_writing">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-credit-card me-2"></i>Purchase Now - $49.99
+                                </button>
+                            </form>
+                            {% else %}
+                            <!-- Non-authenticated user - show login prompt -->
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-success">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Purchase - $49.99
+                            </a>
+                            <p class="text-center mt-2 mb-0 small text-muted">
+                                New user? <a href="{{ url_for('register') }}" class="text-decoration-none">Create account</a>
+                            </p>
+                            {% endif %}
+                        </div>
+                        <!-- Hidden Stripe Buy Button (not working yet) -->
+                        <div class="stripe-buy-button-container d-none">
+                            <stripe-buy-button
+                              buy-button-id="{{ academic_writing_button_id }}"
+                              publishable-key="{{ stripe_publishable_key }}"
+                            >
+                            </stripe-buy-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h3>General Writing</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Get expert assessment on your General Training Writing with TrueScore® GenAI technology.</p>
+                        <ul>
+                            <li>Task 1: Formal & informal letters</li>
+                            <li>Task 2: General essay writing</li>
+                            <li>TrueScore® GenAI detailed feedback</li>
+                        </ul>
+                        <p class="mt-3">4 complete assessment sets</p>
+                        <p class="text-muted small"><i class="fas fa-info-circle"></i> Each assessment can only be taken once to ensure operational efficiency and cost control.</p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid">
+                            {% if current_user.is_authenticated %}
+                            <!-- Authenticated user - show purchase button -->
+                            <form action="/create-checkout-session" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="assessment_type" value="general_writing">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-credit-card me-2"></i>Purchase Now - $49.99
+                                </button>
+                            </form>
+                            {% else %}
+                            <!-- Non-authenticated user - show login prompt -->
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-success">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Purchase - $49.99
+                            </a>
+                            <p class="text-center mt-2 mb-0 small text-muted">
+                                New user? <a href="{{ url_for('register') }}" class="text-decoration-none">Create account</a>
+                            </p>
+                            {% endif %}
+                        </div>
+                        <!-- Hidden Stripe Buy Button (not working yet) -->
+                        <div class="stripe-buy-button-container d-none">
+                            <stripe-buy-button
+                              buy-button-id="{{ general_writing_button_id }}"
+                              publishable-key="{{ stripe_publishable_key }}"
+                            >
+                            </stripe-buy-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ClearScore Section -->
+    <div class="ai-brand-section">
+        <div class="text-center mb-4">
+            <div class="brand-icon text-primary">
+                <i class="fas fa-microphone-alt"></i>
+            </div>
+            <h2 class="brand-title">ClearScore® Speaking Assessment</h2>
+            <p class="brand-tagline">Advanced speech analysis and feedback to improve your IELTS speaking performance</p>
+        </div>
+        
+        <div class="row equal-height-cards">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3>Academic Speaking</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Practice all three parts of the IELTS Academic Speaking test with ClearScore® GenAI technology.</p>
+                        <ul>
+                            <li>All 3 speaking parts covered</li>
+                            <li>ClearScore® GenAI speech analysis</li>
+                            <li>Real-time speech analysis</li>
+                        </ul>
+                        <p class="mt-3">4 complete assessment sets</p>
+                        <p class="text-muted small"><i class="fas fa-info-circle"></i> Each assessment can only be taken once to ensure operational efficiency and cost control.</p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid">
+                            {% if current_user.is_authenticated %}
+                            <!-- Authenticated user - show purchase button -->
+                            <form action="/create-checkout-session" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="assessment_type" value="academic_speaking">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-credit-card me-2"></i>Purchase Now - $49.99
+                                </button>
+                            </form>
+                            {% else %}
+                            <!-- Non-authenticated user - show login prompt -->
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Purchase - $49.99
+                            </a>
+                            <p class="text-center mt-2 mb-0 small text-muted">
+                                New user? <a href="{{ url_for('register') }}" class="text-decoration-none">Create account</a>
+                            </p>
+                            {% endif %}
+                        </div>
+                        <!-- Hidden Stripe Buy Button (not working yet) -->
+                        <div class="stripe-buy-button-container d-none">
+                            <stripe-buy-button
+                              buy-button-id="{{ academic_speaking_button_id }}"
+                              publishable-key="{{ stripe_publishable_key }}"
+                            >
+                            </stripe-buy-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3>General Speaking</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Practice all three parts of the IELTS General Training Speaking test with ClearScore® GenAI technology.</p>
+                        <ul>
+                            <li>All 3 speaking parts covered</li>
+                            <li>ClearScore® GenAI speech analysis</li>
+                            <li>Real-time speech analysis</li>
+                        </ul>
+                        <p class="mt-3">4 complete assessment sets</p>
+                        <p class="text-muted small"><i class="fas fa-info-circle"></i> Each assessment can only be taken once to ensure operational efficiency and cost control.</p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid">
+                            {% if current_user.is_authenticated %}
+                            <!-- Authenticated user - show purchase button -->
+                            <form action="/create-checkout-session" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="assessment_type" value="general_speaking">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-credit-card me-2"></i>Purchase Now - $49.99
+                                </button>
+                            </form>
+                            {% else %}
+                            <!-- Non-authenticated user - show login prompt -->
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Purchase - $49.99
+                            </a>
+                            <p class="text-center mt-2 mb-0 small text-muted">
+                                New user? <a href="{{ url_for('register') }}" class="text-decoration-none">Create account</a>
+                            </p>
+                            {% endif %}
+                        </div>
+                        <!-- Hidden Stripe Buy Button (not working yet) -->
+                        <div class="stripe-buy-button-container d-none">
+                            <stripe-buy-button
+                              buy-button-id="{{ general_speaking_button_id }}"
+                              publishable-key="{{ stripe_publishable_key }}"
+                            >
+                            </stripe-buy-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
