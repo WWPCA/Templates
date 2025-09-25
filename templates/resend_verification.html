@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Resend Email Verification{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="mb-0"><i class="fas fa-envelope-open-text me-2"></i>Resend Email Verification</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Email Verification Required</strong><br>
+                        To access your IELTS GenAI Prep account, you need to verify your email address first.
+                    </div>
+
+                    <form method="POST" action="{{ url_for('resend_verification') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="form-group mb-4">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="Enter your email address" required>
+                            <div class="form-text">Enter the email address you used to register</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Resend Verification Email
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="text-center">
+                        <p class="mb-2">Already verified your email?</p>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i>Try Logging In
+                        </a>
+                    </div>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Need help? <a href="{{ url_for('support') }}">Contact Support</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Troubleshooting</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-search me-1"></i>Check Your Spam Folder</h6>
+                            <p class="small">Verification emails sometimes end up in spam or junk folders. Please check there first.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-clock me-1"></i>Wait a Few Minutes</h6>
+                            <p class="small">Email delivery can take up to 10 minutes. Please wait before requesting a new verification email.</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-envelope me-1"></i>Check Email Address</h6>
+                            <p class="small">Make sure you're using the exact email address you registered with.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-shield-alt me-1"></i>Verify Email Provider</h6>
+                            <p class="small">Some email providers have strict spam filters. Try adding noreply@ieltsaiprep.com to your contacts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
