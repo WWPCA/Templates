@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Registration - IELTS GenAI Prep</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .registration-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .content {
+            padding: 30px;
+        }
+        .success-badge {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .purchase-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+        }
+        .password-requirements {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .password-requirements ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-container">
+        <div class="header">
+            <i class="fas fa-check-circle fa-2x mb-2"></i>
+            <h2>Payment Successful!</h2>
+            <p class="mb-0">Complete your account setup</p>
+        </div>
+        
+        <div class="content">
+            <div class="success-badge">
+                <i class="fas fa-shopping-cart me-2"></i>
+                <strong>Purchase Confirmed:</strong> Your assessment package is ready!
+            </div>
+            
+            <div class="purchase-info">
+                <h6><i class="fas fa-receipt me-2"></i>Purchase Details</h6>
+                <div id="purchaseDetails">
+                    <p class="mb-1"><strong>Product:</strong> <span id="productName">Academic Writing Assessment</span></p>
+                    <p class="mb-1"><strong>Price:</strong> $36.49 USD</p>
+                    <p class="mb-0"><strong>Assessments:</strong> 4 attempts included</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Final Step:</strong> Create your account to access your assessments
+            </div>
+            
+            <form id="registrationForm">
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-envelope me-2"></i>Email Address
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" required 
+                           placeholder="Enter your email address">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-lock me-2"></i>Create Password
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" required 
+                           placeholder="Create a secure password">
+                    <div class="password-requirements">
+                        <ul>
+                            <li>At least 8 characters long</li>
+                            <li>Mix of letters, numbers, and symbols</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-lock me-2"></i>Confirm Password
+                    </label>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required 
+                           placeholder="Confirm your password">
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                    <label class="form-check-label" for="termsCheck">
+                        I agree to the <a href="/terms-of-service" target="_blank">Terms of Service</a> and <a href="/privacy-policy" target="_blank">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-user-plus me-2"></i>Create Account & Start Assessments
+                </button>
+                
+                <div class="loading" id="loadingDiv">
+                    <i class="fas fa-spinner fa-spin me-2"></i>Creating your account...
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get purchase data from URL parameters or local storage
+        const urlParams = new URLSearchParams(window.location.search);
+        const purchaseData = {
+            productId: urlParams.get('productId') || localStorage.getItem('purchaseProductId'),
+            transactionId: urlParams.get('transactionId') || localStorage.getItem('purchaseTransactionId'),
+            orderId: urlParams.get('orderId') || localStorage.getItem('purchaseOrderId'),
+            platform: urlParams.get('platform') || localStorage.getItem('purchasePlatform') || 'mobile'
+        };
+        
+        // Verify that payment was actually confirmed before allowing registration
+        const paymentVerified = localStorage.getItem('purchaseVerified') === 'true';
+        if (!paymentVerified || !purchaseData.productId) {
+            alert('Payment verification required. Please complete your purchase through the mobile app first.');
+            window.location.href = '/';
+            return;
+        }
+        
+        // Additional security check: Verify this is running in mobile app context
+        if (!window.Capacitor || !window.Capacitor.isNativePlatform()) {
+            alert('Registration is only available through the mobile app after App Store or Google Play purchase.');
+            window.location.href = '/';
+            return;
+        }
+
+        // Update purchase details display
+        if (purchaseData.productId) {
+            const productNames = {
+                'com.ieltsaiprep.academic_writing': 'Academic Writing Assessment',
+                'com.ieltsaiprep.general_writing': 'General Writing Assessment',
+                'com.ieltsaiprep.academic_speaking': 'Academic Speaking Assessment',
+                'com.ieltsaiprep.general_speaking': 'General Speaking Assessment'
+            };
+            document.getElementById('productName').textContent = productNames[purchaseData.productId] || 'IELTS Assessment';
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate password match
+            if (password !== confirmPassword) {
+                alert('Passwords do not match. Please try again.');
+                return;
+            }
+            
+            // Validate password strength
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters long.');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('loadingDiv').style.display = 'block';
+            
+            try {
+                // Register user account
+                const registrationResponse = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        purchase_data: purchaseData
+                    })
+                });
+                
+                const registrationResult = await registrationResponse.json();
+                
+                if (registrationResult.success) {
+                    // Show success message
+                    alert('Account created successfully! You can now access your assessments.');
+                    
+                    // Clear stored purchase data
+                    localStorage.removeItem('purchaseProductId');
+                    localStorage.removeItem('purchaseTransactionId');
+                    localStorage.removeItem('purchasePlatform');
+                    
+                    // Redirect to login or dashboard
+                    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+                        // In mobile app - redirect to app dashboard
+                        window.location.href = '/mobile-dashboard';
+                    } else {
+                        // In web browser - redirect to login
+                        window.location.href = '/login?registered=true';
+                    }
+                } else {
+                    throw new Error(registrationResult.error || 'Registration failed');
+                }
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Registration failed: ' + error.message);
+                
+                // Show form again
+                document.getElementById('submitBtn').style.display = 'block';
+                document.getElementById('loadingDiv').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
