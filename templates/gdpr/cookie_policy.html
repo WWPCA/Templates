@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+
+{% block title %}Cookie Policy - IELTS GenAI Prep{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">Cookie Policy</h1>
+                </div>
+                <div class="card-body">
+                    <div class="last-updated mb-4">
+                        <p><em>Last Updated: May 11, 2025</em></p>
+                    </div>
+
+                    <section class="policy-section mb-4">
+                        <h2 class="h4">What Are Cookies</h2>
+                        <p>Cookies are small text files that are placed on your device when you visit a website. They are widely used to make websites work more efficiently and provide information to website owners.</p>
+                    </section>
+
+                    <section class="policy-section mb-4">
+                        <h2 class="h4">How We Use Cookies</h2>
+                        <p>IELTS GenAI Prep uses cookies for various purposes, including:</p>
+                        <ul>
+                            <li>Ensuring the website functions properly</li>
+                            <li>Remembering your preferences and settings</li>
+                            <li>Understanding how you use our website</li>
+                            <li>Improving our services</li>
+                            <li>Personalizing your experience</li>
+                        </ul>
+                    </section>
+
+                    <section class="policy-section mb-4">
+                        <h2 class="h4">Types of Cookies We Use</h2>
+                        
+                        <div class="cookie-categories mt-3">
+                            {% for category in cookie_categories %}
+                            <div class="card mb-3">
+                                <div class="card-header {% if category.required %}bg-primary text-white{% else %}bg-light{% endif %}">
+                                    <h3 class="h5 mb-0">{{ category.name }} Cookies</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ category.description }}</p>
+                                    {% if category.required %}
+                                    <div class="badge bg-primary">Required</div>
+                                    {% else %}
+                                    <div class="badge bg-secondary">Optional</div>
+                                    {% endif %}
+                                    
+                                    <div class="mt-3">
+                                        <h4 class="h6">Examples:</h4>
+                                        <ul class="small">
+                                            {% if category.id == 'essential' %}
+                                            <li><strong>Session Cookies</strong>: Used to keep you logged in</li>
+                                            <li><strong>CSRF Tokens</strong>: Protect against cross-site request forgery</li>
+                                            <li><strong>Preferences</strong>: Remember basic settings like language</li>
+                                            {% elif category.id == 'functional' %}
+                                            <li><strong>Audio Player Settings</strong>: Remember volume levels</li>
+                                            <li><strong>UI Preferences</strong>: Remember display preferences</li>
+                                            <li><strong>Test Progress</strong>: Track your position in a test</li>
+                                            {% elif category.id == 'analytics' %}
+                                            <li><strong>Usage Patterns</strong>: How you navigate our website</li>
+                                            <li><strong>Feature Usage</strong>: Which features you use most</li>
+                                            <li><strong>Performance Metrics</strong>: Page load times and errors</li>
+                                            {% elif category.id == 'marketing' %}
+                                            <li><strong>Ad Tracking</strong>: Measure ad effectiveness</li>
+                                            <li><strong>Remarketing</strong>: Show you relevant ads on other sites</li>
+                                            <li><strong>Campaign Performance</strong>: Track marketing campaign results</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="policy-section mb-4">
+                        <h2 class="h4">Third-Party Cookies</h2>
+                        <p>Some cookies are placed by third parties on our behalf. These third parties may include:</p>
+                        <ul>
+                            <li>Analytics providers (e.g., Google Analytics)</li>
+                            <li>Payment processors (e.g., Stripe)</li>
+                            <li>Customer support tools</li>
+                        </ul>
+                        <p>These third parties may use cookies, web beacons, and similar technologies to collect information about your use of our website.</p>
+                    </section>
+
+                    <section class="policy-section mb-4">
+                        <h2 class="h4">Managing Cookies</h2>
+                        <p>You can manage your cookie preferences in the following ways:</p>
+                        <ul>
+                            <li>Through our <a href="{{ url_for('gdpr.cookie_preferences') }}">Cookie Preferences</a> page</li>
+                            <li>By adjusting your browser settings</li>
+                            <li>By using browser extensions designed to block tracking</li>
+                        </ul>
+                        <p>Please note that blocking some types of cookies may impact your experience on our website and the services we are able to offer.</p>
+                    </section>
+
+                    <section class="policy-section mb-4">
+                        <h2 class="h4">Browser Settings</h2>
+                        <p>Most web browsers allow you to manage your cookie preferences. You can:</p>
+                        <ul>
+                            <li>Delete cookies from your device</li>
+                            <li>Block cookies by activating the setting on your browser that allows you to refuse all or some cookies</li>
+                            <li>Set your browser to notify you when you receive a cookie</li>
+                        </ul>
+                        <p>Please refer to your browser's help section for more information.</p>
+                    </section>
+
+                    <section class="policy-section mb-4">
+                        <h2 class="h4">Changes to Our Cookie Policy</h2>
+                        <p>We may update our Cookie Policy from time to time. We will notify you of any changes by posting the new Cookie Policy on this page and updating the "Last Updated" date.</p>
+                    </section>
+
+                    <section class="policy-section mb-4">
+                        <h2 class="h4">Contact Us</h2>
+                        <p>If you have questions about our Cookie Policy, please use our <a href="{{ url_for('contact') }}">Contact Us</a> form.</p>
+                    </section>
+
+                    <div class="text-center mt-5">
+                        <a href="{{ url_for('gdpr.cookie_preferences') }}" class="btn btn-primary">Manage Cookie Preferences</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
