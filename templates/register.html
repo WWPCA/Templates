@@ -1,0 +1,281 @@
+{% extends "layout.html" %}
+
+{% block title %}Register - IELTS GenAI Prep{% endblock %}
+
+{% block head %}
+<style>
+  .registration-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  
+  .form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .form-section:last-child {
+    border-bottom: none;
+  }
+  
+  .section-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .gdpr-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .recaptcha-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    margin: 3rem 0;
+    color: white;
+  }
+  
+  .recaptcha-container {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    display: inline-block;
+    margin: 1rem 0;
+  }
+  
+  .submit-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e9ecef;
+  }
+  
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="registration-container">
+        <div class="text-center mb-4">
+            <h2 class="text-primary">Create Your Account</h2>
+            <p class="text-muted">Join IELTS GenAI Prep for personalized test preparation</p>
+        </div>
+
+        <form method="POST" id="registration-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}"/>
+            
+            <!-- Personal Information -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-user"></i>
+                    Personal Information
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address *</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="form-text">Minimum 8 characters with letters and numbers</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="confirm_password" class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legal Agreements -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-check-circle"></i>
+                    Legal Agreements
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="age_verification" name="age_verification" required>
+                    <label class="form-check-label" for="age_verification">
+                        I confirm that I am at least 16 years of age *
+                    </label>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="agree_terms" name="agree_terms" required>
+                    <label class="form-check-label" for="agree_terms">
+                        I agree to the <a href="{{ url_for('terms_and_payment') }}" target="_blank">Terms of Service</a> and <a href="{{ url_for('privacy_policy') }}" target="_blank">Privacy Policy</a> *
+                    </label>
+                </div>
+            </div>
+
+            <!-- GDPR Data Processing Consent -->
+            <div class="gdpr-section">
+                <div class="section-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Data Processing Consent
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="data_processing_consent" name="data_processing_consent" required>
+                    <label class="form-check-label" for="data_processing_consent">
+                        I consent to the collection and processing of my personal data as described in the Privacy Policy *
+                    </label>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="assessment_data_consent" name="assessment_data_consent" required>
+                    <label class="form-check-label" for="assessment_data_consent">
+                        I understand that my assessment results will be stored to track my progress *
+                    </label>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="speaking_data_consent" name="speaking_data_consent" required>
+                    <label class="form-check-label" for="speaking_data_consent">
+                        I consent to the temporary processing of my speaking recordings for assessment purposes only (recordings are not stored permanently) *
+                    </label>
+                </div>
+                
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="marketing_consent" name="marketing_consent">
+                    <label class="form-check-label" for="marketing_consent">
+                        I agree to receive updates, tips, and promotional information about IELTS preparation (optional)
+                    </label>
+                </div>
+            </div>
+
+            <!-- Security Verification -->
+            <div class="recaptcha-section">
+                <h4><i class="fas fa-lock"></i> Security Verification</h4>
+                <p>Complete the verification below to secure your account</p>
+                <div class="recaptcha-container">
+                    <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}" data-callback="enableSubmitBtn" data-expired-callback="disableSubmitBtn"></div>
+                </div>
+                <small>Protected by Google reCAPTCHA v2</small>
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+            </div>
+
+            <!-- Submit Section -->
+            <div class="submit-section text-center">
+                <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                    By creating an account, you agree to our 
+                    <a href="{{ url_for('terms_of_service') }}" target="_blank" class="text-primary">Terms of Service</a> 
+                    and 
+                    <a href="{{ url_for('privacy_policy') }}" target="_blank" class="text-primary">Privacy Policy</a>
+                </p>
+                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+                    <i class="fas fa-user-plus me-2"></i>Create My Account
+                </button>
+                <div class="mt-3">
+                    <p class="text-muted small">
+                        Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+function enableSubmitBtn() {
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('g-recaptcha-response').value = grecaptcha.getResponse();
+}
+
+function disableSubmitBtn() {
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('g-recaptcha-response').value = '';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registration-form');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    
+    function validatePassword() {
+        const passwordValue = password.value;
+        const minLength = passwordValue.length >= 8;
+        const hasLetter = /[a-zA-Z]/.test(passwordValue);
+        const hasNumber = /\d/.test(passwordValue);
+        
+        if (passwordValue && (!minLength || !hasLetter || !hasNumber)) {
+            password.classList.add('is-invalid');
+            return false;
+        } else {
+            password.classList.remove('is-invalid');
+            return true;
+        }
+    }
+    
+    function validateConfirmPassword() {
+        if (confirmPassword.value && confirmPassword.value !== password.value) {
+            confirmPassword.classList.add('is-invalid');
+            return false;
+        } else {
+            confirmPassword.classList.remove('is-invalid');
+            return true;
+        }
+    }
+    
+    password.addEventListener('input', validatePassword);
+    confirmPassword.addEventListener('input', validateConfirmPassword);
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const passwordValid = validatePassword();
+        const confirmValid = validateConfirmPassword();
+        const recaptchaResponse = document.getElementById('g-recaptcha-response').value;
+        
+        if (!passwordValid || !confirmValid) {
+            alert('Please fix the password validation errors before submitting.');
+            return false;
+        }
+        
+        if (!recaptchaResponse) {
+            alert('Please complete the reCAPTCHA verification.');
+            return false;
+        }
+        
+        form.submit();
+    });
+});
+</script>
+{% endblock %}
