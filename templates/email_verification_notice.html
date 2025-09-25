@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Email Verification Required{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Email Verification Required</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info" role="alert">
+                        <h4 class="alert-heading">Please verify your email address!</h4>
+                        <p>To complete your registration and access your account, please verify your email address by clicking the link in the verification email we sent to <strong>{{ current_user.email }}</strong>.</p>
+                        <hr>
+                        <p class="mb-0">If you don't see the email in your inbox, please check your spam folder.</p>
+                    </div>
+                    
+                    <p>A verification email has been sent to your email address. Please click the link in the email to verify your account.</p>
+                    
+                    <p>Didn't receive the email? Check your spam folder or request a new verification email below:</p>
+                    
+                    <form action="{{ url_for('email_verification.resend_verification_email') }}" method="post">
+                        <button type="submit" class="btn btn-primary">Resend Verification Email</button>
+                    </form>
+                    
+                    <hr>
+                    
+                    <div class="mt-4">
+                        <h5>Why verification is required</h5>
+                        <p>Email verification helps us:</p>
+                        <ul>
+                            <li>Confirm your email address is valid and that you have access to it</li>
+                            <li>Protect your account from unauthorized access</li>
+                            <li>Communicate important information about your account</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Need help?</h5>
+                        <p>If you're having trouble verifying your email, please use our <a href="{{ url_for('contact') }}">Contact Us</a> form for assistance.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
