@@ -1,0 +1,23 @@
+{% if assessment.prompt_analysis %}
+<!-- Prompt Analysis Section -->
+<div class="card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="fas fa-search text-primary me-2"></i>
+            Prompt Analysis
+            {% if assessment.prompt_analysis.score %}
+            <span class="badge bg-primary ms-2">
+                {{ assessment.prompt_analysis.score }}/10
+            </span>
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <p class="card-text">{{ assessment.prompt_analysis.explanation | safe }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
