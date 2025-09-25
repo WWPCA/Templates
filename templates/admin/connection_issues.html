@@ -1,0 +1,412 @@
+{% extends "layout.html" %}
+
+{% block title %}Connection Issues Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    .filter-section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .issue-card {
+        border-left: 5px solid #ccc;
+        transition: all 0.2s ease;
+    }
+    
+    .issue-card.disconnect {
+        border-left-color: #dc3545;
+    }
+    
+    .issue-card.reconnect {
+        border-left-color: #28a745;
+    }
+    
+    .issue-card.session_restart {
+        border-left-color: #ffc107;
+    }
+    
+    .issue-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .metrics-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .metrics-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    
+    .metrics-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .metrics-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    
+    .issue-detail-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .detail-table th {
+        width: 140px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Connection Issues Dashboard</h1>
+            <p class="text-muted">Track and analyze connection issues during assessments</p>
+        </div>
+    </div>
+    
+    <!-- Metrics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card metrics-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="metrics-value text-danger">{{ metrics.total_disconnects }}</div>
+                    <div class="metrics-label">Total Disconnections</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metrics-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="metrics-value text-success">{{ metrics.total_reconnects }}</div>
+                    <div class="metrics-label">Total Reconnections</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metrics-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="metrics-value text-warning">{{ metrics.total_restarts }}</div>
+                    <div class="metrics-label">Assessment Restarts</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metrics-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="metrics-value text-primary">{{ metrics.unique_users }}</div>
+                    <div class="metrics-label">Affected Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="filter-section">
+                <form method="GET" action="{{ url_for('admin.connection_issues') }}">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="date_from">Date From</label>
+                                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ filters.date_from }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="date_to">Date To</label>
+                                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ filters.date_to }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="issue_type">Issue Type</label>
+                                <select class="form-control" id="issue_type" name="issue_type">
+                                    <option value="" {% if not filters.issue_type %}selected{% endif %}>All Issues</option>
+                                    <option value="disconnect" {% if filters.issue_type == 'disconnect' %}selected{% endif %}>Disconnections</option>
+                                    <option value="reconnect" {% if filters.issue_type == 'reconnect' %}selected{% endif %}>Reconnections</option>
+                                    <option value="session_restart" {% if filters.issue_type == 'session_restart' %}selected{% endif %}>Session Restarts</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="product_id">Assessment Type</label>
+                                <select class="form-control" id="product_id" name="product_id">
+                                    <option value="" {% if not filters.product_id %}selected{% endif %}>All Products</option>
+                                    <option value="academic_writing" {% if filters.product_id == 'academic_writing' %}selected{% endif %}>Academic Writing</option>
+                                    <option value="general_writing" {% if filters.product_id == 'general_writing' %}selected{% endif %}>General Writing</option>
+                                    <option value="academic_speaking" {% if filters.product_id == 'academic_speaking' %}selected{% endif %}>Academic Speaking</option>
+                                    <option value="general_speaking" {% if filters.product_id == 'general_speaking' %}selected{% endif %}>General Speaking</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="country">Country</label>
+                                <input type="text" class="form-control" id="country" name="country" value="{{ filters.country }}" placeholder="Filter by country">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <input type="text" class="form-control" id="city" name="city" value="{{ filters.city }}" placeholder="Filter by city">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="user_id">User ID</label>
+                                <input type="text" class="form-control" id="user_id" name="user_id" value="{{ filters.user_id }}" placeholder="Filter by user ID">
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Issues List -->
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">Connection Issues</h5>
+                        </div>
+                        <div class="col text-right">
+                            <span class="badge badge-primary">{{ issues|length }} Results</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if issues %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Time (UTC)</th>
+                                    <th>Issue Type</th>
+                                    <th>Product</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for issue in issues %}
+                                <tr class="issue-row" data-issue-id="{{ issue.id }}">
+                                    <td>#{{ issue.id }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.user_profile', user_id=issue.user_id) }}">
+                                            {{ issue.user.username if issue.user else 'Unknown' }}
+                                        </a>
+                                    </td>
+                                    <td>{{ issue.occurred_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>
+                                        {% if issue.issue_type == 'disconnect' %}
+                                        <span class="badge badge-danger">Disconnection</span>
+                                        {% elif issue.issue_type == 'reconnect' %}
+                                        <span class="badge badge-success">Reconnection</span>
+                                        {% elif issue.issue_type == 'session_restart' %}
+                                        <span class="badge badge-warning">Restart</span>
+                                        {% else %}
+                                        <span class="badge badge-secondary">{{ issue.issue_type }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if issue.product_id == 'academic_writing' %}
+                                        Academic Writing
+                                        {% elif issue.product_id == 'general_writing' %}
+                                        General Writing
+                                        {% elif issue.product_id == 'academic_speaking' %}
+                                        Academic Speaking
+                                        {% elif issue.product_id == 'general_speaking' %}
+                                        General Speaking
+                                        {% else %}
+                                        {{ issue.product_id or 'N/A' }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if issue.city and issue.country %}
+                                        {{ issue.city }}, {{ issue.country }}
+                                        {% elif issue.country %}
+                                        {{ issue.country }}
+                                        {% elif issue.city %}
+                                        {{ issue.city }}
+                                        {% else %}
+                                        Unknown
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if issue.resolved %}
+                                        <span class="badge badge-success status-badge">Resolved</span>
+                                        {% else %}
+                                        <span class="badge badge-warning status-badge">Open</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-primary view-details-btn" data-issue-id="{{ issue.id }}">
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr id="details-row-{{ issue.id }}" class="details-row" style="display: none;">
+                                    <td colspan="8">
+                                        <div class="issue-detail-section">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6>Issue Details</h6>
+                                                    <table class="table table-sm detail-table">
+                                                        <tbody>
+                                                            <tr>
+                                                                <th>Test ID:</th>
+                                                                <td>{{ issue.test_id or 'N/A' }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Session ID:</th>
+                                                                <td>{{ issue.session_id or 'N/A' }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>User Local Time:</th>
+                                                                <td>{{ issue.user_local_time or 'Unknown' }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>IP Address:</th>
+                                                                <td>{{ issue.ip_address or 'Unknown' }}</td>
+                                                            </tr>
+                                                            {% if issue.resolved %}
+                                                            <tr>
+                                                                <th>Resolved:</th>
+                                                                <td>{{ issue.resolved_at.strftime('%Y-%m-%d %H:%M:%S') }} ({{ issue.resolution_method }})</td>
+                                                            </tr>
+                                                            {% endif %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>Technical Information</h6>
+                                                    {% if issue.browser_info %}
+                                                    <div class="mb-3">
+                                                        <h6 class="small">Browser Info</h6>
+                                                        <pre class="small bg-light p-2 rounded">{{ issue.browser_info }}</pre>
+                                                    </div>
+                                                    {% endif %}
+                                                    
+                                                    {% if issue.connection_info %}
+                                                    <div>
+                                                        <h6 class="small">Connection Info</h6>
+                                                        <pre class="small bg-light p-2 rounded">{{ issue.connection_info }}</pre>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            
+                                            {% if not issue.resolved %}
+                                            <div class="row mt-3">
+                                                <div class="col">
+                                                    <form method="POST" action="{{ url_for('admin.mark_issue_resolved', issue_id=issue.id) }}">
+                                                        <div class="input-group">
+                                                            <select class="form-control" name="resolution_method">
+                                                                <option value="admin_action">Admin Action</option>
+                                                                <option value="auto_restart">Auto Restart</option>
+                                                                <option value="user_resolved">User Resolved</option>
+                                                                <option value="false_positive">False Positive</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-success" type="submit">Mark as Resolved</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-5 text-center">
+                        <div class="py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4>No connection issues found</h4>
+                            <p class="text-muted">Try adjusting your filters to see more results</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle issue details
+    const detailButtons = document.querySelectorAll('.view-details-btn');
+    detailButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const issueId = this.dataset.issueId;
+            const detailsRow = document.getElementById(`details-row-${issueId}`);
+            
+            if (detailsRow.style.display === 'none') {
+                // Hide all other open details first
+                document.querySelectorAll('.details-row').forEach(row => {
+                    row.style.display = 'none';
+                });
+                
+                // Show this detail row
+                detailsRow.style.display = 'table-row';
+                this.textContent = 'Hide Details';
+            } else {
+                detailsRow.style.display = 'none';
+                this.textContent = 'View Details';
+            }
+        });
+    });
+    
+    // Format JSON in browser/connection info sections
+    document.querySelectorAll('pre').forEach(pre => {
+        try {
+            const content = pre.textContent;
+            const json = JSON.parse(content);
+            pre.textContent = JSON.stringify(json, null, 2);
+        } catch (e) {
+            // Not valid JSON, leave as is
+        }
+    });
+});
+</script>
+{% endblock %}
