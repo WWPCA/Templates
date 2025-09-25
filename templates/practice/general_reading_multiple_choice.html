@@ -1,0 +1,293 @@
+{% extends "layout.html" %}
+
+{% block title %}IELTS General Training Reading: Multiple Choice{% endblock %}
+
+{% block styles %}
+<style>
+  .reading-container {
+    display: flex;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    height: calc(100vh - 200px);
+    min-height: 500px;
+  }
+  
+  .reading-passage {
+    flex: 1;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    background-color: #fff;
+  }
+  
+  .questions-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+  }
+  
+  .question-header {
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  
+  .question-item {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .option-item {
+    margin: 5px 0;
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .option-input {
+    margin-right: 10px;
+    margin-top: 3px;
+  }
+  
+  .option-label {
+    flex: 1;
+  }
+  
+  .navigation {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .test-header {
+    background-color: #f1f1f1;
+    padding: 15px;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .test-info {
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .timer {
+    font-weight: bold;
+    color: #d9534f;
+  }
+  
+  .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    justify-content: center;
+  }
+  
+  .pagination li {
+    margin: 0 5px;
+  }
+  
+  .pagination a {
+    display: block;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .pagination a.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  
+  .notice-text {
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="test-header">
+    <div>
+      <h5>Test taker ID: {{ current_user.id }}</h5>
+    </div>
+    <div class="test-info">
+      <span class="timer" id="timer">Time remaining: 60:00</span>
+    </div>
+    <div>
+      <i class="fas fa-wifi"></i>
+      <i class="fas fa-bell"></i>
+      <i class="fas fa-bars ml-2"></i>
+    </div>
+  </div>
+  
+  <div class="bg-light p-3">
+    <h6 class="m-0">Part 1</h6>
+    <small>{{ test.description }}</small>
+  </div>
+  
+  <div class="reading-container">
+    <div class="reading-passage">
+      <h5>{{ test.title }}</h5>
+      
+      <!-- The reading passage populated from database -->
+      <div id="passage-content">
+        {% if passage %}
+          <pre style="white-space: pre-wrap; font-family: inherit;">{{ passage }}</pre>
+        {% else %}
+          <p>The reading passage is not available.</p>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="questions-container">
+      <div class="question-header">
+        <p class="notice-text">Choose the TWO correct options for each question.</p>
+      </div>
+      
+      <form id="reading-form" method="post" action="{{ url_for('submit_general_reading_test', test_id=test.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <!-- Questions populated from database -->
+        <div id="questions-list">
+          {% for i in range(0, 5) %}
+          <div class="question-item">
+            <div class="d-flex">
+              <div class="mr-2">{{ i+1 }}</div>
+              <div>
+                <!-- Get the question text from test.description -->
+                {{ test.description.split('.')[1] if test.description and '.' in test.description else "Choose TWO correct options" }}
+              </div>
+            </div>
+            <div class="option-item">
+              <input type="radio" name="q{{ i+1 }}" value="A" class="option-input" id="q{{ i+1 }}_A">
+              <label for="q{{ i+1 }}_A" class="option-label">
+                {% if questions and i*5 < questions|length %}
+                  {{ questions[i*5][10:] }} <!-- Option A -->
+                {% else %}
+                  Option A
+                {% endif %}
+              </label>
+            </div>
+            
+            <div class="option-item">
+              <input type="radio" name="q{{ i+1 }}" value="B" class="option-input" id="q{{ i+1 }}_B">
+              <label for="q{{ i+1 }}_B" class="option-label">
+                {% if questions and i*5+1 < questions|length %}
+                  {{ questions[i*5+1][10:] }} <!-- Option B -->
+                {% else %}
+                  Option B
+                {% endif %}
+              </label>
+            </div>
+            
+            <div class="option-item">
+              <input type="radio" name="q{{ i+1 }}" value="C" class="option-input" id="q{{ i+1 }}_C">
+              <label for="q{{ i+1 }}_C" class="option-label">
+                {% if questions and i*5+2 < questions|length %}
+                  {{ questions[i*5+2][10:] }} <!-- Option C -->
+                {% else %}
+                  Option C
+                {% endif %}
+              </label>
+            </div>
+            
+            <div class="option-item">
+              <input type="radio" name="q{{ i+1 }}" value="D" class="option-input" id="q{{ i+1 }}_D">
+              <label for="q{{ i+1 }}_D" class="option-label">
+                {% if questions and i*5+3 < questions|length %}
+                  {{ questions[i*5+3][10:] }} <!-- Option D -->
+                {% else %}
+                  Option D
+                {% endif %}
+              </label>
+            </div>
+            
+            <div class="option-item">
+              <input type="radio" name="q{{ i+1 }}" value="E" class="option-input" id="q{{ i+1 }}_E">
+              <label for="q{{ i+1 }}_E" class="option-label">
+                {% if questions and i*5+4 < questions|length %}
+                  {{ questions[i*5+4][10:] }} <!-- Option E -->
+                {% else %}
+                  Option E
+                {% endif %}
+              </label>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        
+        <div class="navigation">
+          <button type="button" class="btn btn-secondary prev-btn">
+            <i class="fas fa-arrow-left"></i> Previous
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Submit Test
+          </button>
+          <button type="button" class="btn btn-secondary next-btn">
+            Next <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+    <div>
+      <span>Part 1</span>
+      <ul class="pagination d-inline-flex ml-2 mb-0">
+        <li><a href="#" class="active">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+        <li><a href="#">4</a></li>
+        <li><a href="#">5</a></li>
+      </ul>
+    </div>
+    <div>
+      <button class="btn btn-outline-secondary">
+        <i class="fas fa-chevron-down"></i>
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Timer functionality
+  function startTimer(duration, display) {
+    let timer = duration, minutes, seconds;
+    const interval = setInterval(function () {
+      minutes = parseInt(timer / 60, 10);
+      seconds = parseInt(timer % 60, 10);
+
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      seconds = seconds < 10 ? "0" + seconds : seconds;
+
+      display.textContent = "Time remaining: " + minutes + ":" + seconds;
+
+      if (--timer < 0) {
+        clearInterval(interval);
+        display.textContent = "Time's up!";
+        // Automatically submit the form when time is up
+        document.getElementById('reading-form').submit();
+      }
+    }, 1000);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Start a 60-minute timer when the page loads
+    const sixtyMinutes = 60 * 60;
+    const display = document.getElementById('timer');
+    startTimer(sixtyMinutes, display);
+    
+    // No need for checkbox limiting since we're using radio buttons
+  });
+</script>
+{% endblock %}
