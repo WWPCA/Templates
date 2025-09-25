@@ -1,0 +1,231 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-microphone"></i>
+                        Maya Conversation Test - Nova Sonic
+                    </h3>
+                    <p class="mb-0">Test speech-to-speech conversations with Maya, your IELTS examiner</p>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Speaking Part Selection -->
+                    <div class="mb-4">
+                        <label for="speakingPart" class="form-label">IELTS Speaking Part:</label>
+                        <select class="form-select" id="speakingPart">
+                            <option value="1">Part 1: Introduction & Interview</option>
+                            <option value="2">Part 2: Long Turn (Cue Card)</option>
+                            <option value="3">Part 3: Discussion</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Context Input for Parts 2 & 3 -->
+                    <div class="mb-4" id="contextSection" style="display: none;">
+                        <label for="contextInput" class="form-label">Topic Context:</label>
+                        <textarea class="form-control" id="contextInput" rows="3" 
+                                placeholder="Enter the topic or cue card details for Parts 2 & 3"></textarea>
+                    </div>
+                    
+                    <!-- User Message Input -->
+                    <div class="mb-4">
+                        <label for="userMessage" class="form-label">Your Message to Maya:</label>
+                        <textarea class="form-control" id="userMessage" rows="4" 
+                                placeholder="Type your message to start the conversation with Maya..."></textarea>
+                    </div>
+                    
+                    <!-- Controls -->
+                    <div class="d-flex gap-2 mb-4">
+                        <button class="btn btn-primary" id="startConversation">
+                            <i class="fas fa-comments"></i> Start Conversation
+                        </button>
+                        <button class="btn btn-secondary" id="clearChat">
+                            <i class="fas fa-trash"></i> Clear Chat
+                        </button>
+                    </div>
+                    
+                    <!-- Nova Sonic Status -->
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-robot"></i>
+                        <strong>Nova Sonic Status:</strong> <span id="novaStatus">Ready for speech-to-speech conversations</span>
+                    </div>
+                    
+                    <!-- Conversation History -->
+                    <div class="conversation-history" id="conversationHistory">
+                        <h5>Conversation with Maya</h5>
+                        <div class="chat-container border rounded p-3" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+                            <div class="text-muted text-center">
+                                <i class="fas fa-microphone-alt"></i>
+                                <p>Start a conversation with Maya using Nova Sonic</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-message {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.user-message {
+    background-color: #e3f2fd;
+    margin-left: 20px;
+}
+
+.maya-message {
+    background-color: #f3e5f5;
+    margin-right: 20px;
+}
+
+.message-timestamp {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 5px;
+}
+
+.conversation-history h5 {
+    color: #6f42c1;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+.audio-controls {
+    margin-top: 10px;
+}
+
+.audio-controls audio {
+    width: 100%;
+    max-width: 300px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const speakingPart = document.getElementById('speakingPart');
+    const contextSection = document.getElementById('contextSection');
+    const contextInput = document.getElementById('contextInput');
+    const userMessage = document.getElementById('userMessage');
+    const startConversation = document.getElementById('startConversation');
+    const clearChat = document.getElementById('clearChat');
+    const conversationHistory = document.querySelector('.chat-container');
+    const novaStatus = document.getElementById('novaStatus');
+    
+    // Show/hide context section based on speaking part
+    speakingPart.addEventListener('change', function() {
+        if (this.value === '2' || this.value === '3') {
+            contextSection.style.display = 'block';
+            contextInput.required = true;
+        } else {
+            contextSection.style.display = 'none';
+            contextInput.required = false;
+            contextInput.value = '';
+        }
+    });
+    
+    // Start conversation with Maya
+    startConversation.addEventListener('click', async function() {
+        const message = userMessage.value.trim();
+        const part = speakingPart.value;
+        const context = contextInput.value.trim();
+        
+        if (!message) {
+            alert('Please enter a message to start the conversation.');
+            return;
+        }
+        
+        if ((part === '2' || part === '3') && !context) {
+            alert('Please provide topic context for Part ' + part);
+            return;
+        }
+        
+        // Add user message to chat
+        addMessageToChat('You', message, 'user-message');
+        userMessage.value = '';
+        
+        // Show loading
+        startConversation.disabled = true;
+        startConversation.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Maya is responding...';
+        novaStatus.textContent = 'Nova Sonic processing speech-to-speech conversation...';
+        
+        try {
+            const response = await fetch('/maya-conversation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    part_number: parseInt(part),
+                    context: context
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Add Maya's response to chat
+                addMessageToChat('Maya', result.maya_response, 'maya-message', result.audio_available);
+                novaStatus.textContent = 'Nova Sonic conversation completed successfully';
+            } else {
+                addMessageToChat('System', 'Error: ' + result.error, 'system-message');
+                novaStatus.textContent = 'Nova Sonic conversation failed: ' + result.error;
+            }
+            
+        } catch (error) {
+            console.error('Conversation error:', error);
+            addMessageToChat('System', 'Connection error. Please try again.', 'system-message');
+            novaStatus.textContent = 'Connection error with Nova Sonic';
+        }
+        
+        // Reset button
+        startConversation.disabled = false;
+        startConversation.innerHTML = '<i class="fas fa-comments"></i> Continue Conversation';
+    });
+    
+    // Clear chat
+    clearChat.addEventListener('click', function() {
+        conversationHistory.innerHTML = `
+            <div class="text-muted text-center">
+                <i class="fas fa-microphone-alt"></i>
+                <p>Start a conversation with Maya using Nova Sonic</p>
+            </div>
+        `;
+        novaStatus.textContent = 'Ready for speech-to-speech conversations';
+    });
+    
+    function addMessageToChat(sender, message, messageClass, hasAudio = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${messageClass}`;
+        
+        let audioSection = '';
+        if (hasAudio && sender === 'Maya') {
+            audioSection = `
+                <div class="audio-controls">
+                    <small class="text-muted"><i class="fas fa-volume-up"></i> Audio response available</small>
+                </div>
+            `;
+        }
+        
+        messageDiv.innerHTML = `
+            <strong>${sender}:</strong> ${message}
+            ${audioSection}
+            <div class="message-timestamp">${new Date().toLocaleTimeString()}</div>
+        `;
+        
+        conversationHistory.appendChild(messageDiv);
+        conversationHistory.scrollTop = conversationHistory.scrollHeight;
+    }
+});
+</script>
+{% endblock %}
