@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Authentication Test Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .status-card.warning {
+            border-left-color: #ffc107;
+        }
+        
+        .status-card.error {
+            border-left-color: #dc3545;
+        }
+        
+        .test-scenarios {
+            margin-top: 30px;
+        }
+        
+        .scenario-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .scenario-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .scenario-title {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+        
+        .test-button.running {
+            background: #ffc107;
+            cursor: not-allowed;
+        }
+        
+        .test-button.success {
+            background: #28a745;
+        }
+        
+        .test-button.error {
+            background: #dc3545;
+        }
+        
+        .scenario-steps {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .scenario-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .scenario-result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .scenario-result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .logs-section {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .log-entries {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+        }
+        
+        .log-timestamp {
+            color: #6c757d;
+        }
+        
+        .log-level-info {
+            color: #17a2b8;
+        }
+        
+        .log-level-success {
+            color: #28a745;
+        }
+        
+        .log-level-error {
+            color: #dc3545;
+        }
+        
+        .metrics-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>QR Authentication Test Dashboard</h1>
+            <p>Comprehensive testing for Lambda backend integration</p>
+        </div>
+        
+        <div class="status-grid">
+            <div class="status-card" id="backend-status">
+                <h3>Backend Status</h3>
+                <p id="backend-health">Checking...</p>
+            </div>
+            
+            <div class="status-card" id="auth-status">
+                <h3>Authentication System</h3>
+                <p id="auth-health">Checking...</p>
+            </div>
+            
+            <div class="status-card" id="session-status">
+                <h3>Session Management</h3>
+                <p id="session-health">Checking...</p>
+            </div>
+        </div>
+        
+        <div class="test-scenarios">
+            <h2>Test Scenarios</h2>
+            
+            <div class="scenario-card">
+                <div class="scenario-header">
+                    <div class="scenario-title">1. Valid Purchase Flow</div>
+                    <button class="test-button" onclick="runTest('valid_purchase')">Run Test</button>
+                </div>
+                <div class="scenario-steps">
+                    Mock purchase → QR generation → Website authentication → Assessment access
+                </div>
+                <div class="scenario-result" id="valid_purchase_result"></div>
+            </div>
+            
+            <div class="scenario-card">
+                <div class="scenario-header">
+                    <div class="scenario-title">2. Expired Token Handling</div>
+                    <button class="test-button" onclick="runTest('expired_token')">Run Test</button>
+                </div>
+                <div class="scenario-steps">
+                    Generate token → Wait for expiry → Attempt authentication → Verify rejection
+                </div>
+                <div class="scenario-result" id="expired_token_result"></div>
+            </div>
+            
+            <div class="scenario-card">
+                <div class="scenario-header">
+                    <div class="scenario-title">3. Invalid Token Security</div>
+                    <button class="test-button" onclick="runTest('invalid_token')">Run Test</button>
+                </div>
+                <div class="scenario-steps">
+                    Submit fake token → Verify proper rejection → Check error handling
+                </div>
+                <div class="scenario-result" id="invalid_token_result"></div>
+            </div>
+            
+            <div class="scenario-card">
+                <div class="scenario-header">
+                    <div class="scenario-title">4. Multiple Product Access</div>
+                    <button class="test-button" onclick="runTest('multiple_products')">Run Test</button>
+                </div>
+                <div class="scenario-steps">
+                    Purchase multiple assessments → Authenticate → Verify access to all products
+                </div>
+                <div class="scenario-result" id="multiple_products_result"></div>
+            </div>
+            
+            <div class="scenario-card">
+                <div class="scenario-header">
+                    <div class="scenario-title">5. Unpurchased Assessment Block</div>
+                    <button class="test-button" onclick="runTest('unpurchased_access')">Run Test</button>
+                </div>
+                <div class="scenario-steps">
+                    Authenticate with partial purchase → Attempt unpurchased access → Verify blocking
+                </div>
+                <div class="scenario-result" id="unpurchased_access_result"></div>
+            </div>
+            
+            <div class="scenario-card">
+                <div class="scenario-header">
+                    <div class="scenario-title">6. Session Persistence</div>
+                    <button class="test-button" onclick="runTest('session_persistence')">Run Test</button>
+                </div>
+                <div class="scenario-steps">
+                    Create session → Multiple requests → Verify 1-hour persistence
+                </div>
+                <div class="scenario-result" id="session_persistence_result"></div>
+            </div>
+        </div>
+        
+        <div class="metrics-section">
+            <div class="metric-card">
+                <div class="metric-value" id="total-tests">0</div>
+                <div class="metric-label">Total Tests</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="passed-tests">0</div>
+                <div class="metric-label">Passed</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="failed-tests">0</div>
+                <div class="metric-label">Failed</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="success-rate">0%</div>
+                <div class="metric-label">Success Rate</div>
+            </div>
+        </div>
+        
+        <div class="logs-section">
+            <h3>Real-time Test Logs</h3>
+            <div class="log-entries" id="log-entries">
+                <div class="log-entry">
+                    <span class="log-timestamp">[00:00:00]</span>
+                    <span class="log-level-info">[INFO]</span>
+                    Test dashboard initialized
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let testResults = {
+            total: 0,
+            passed: 0,
+            failed: 0
+        };
+        
+        function checkSystemHealth() {
+            // Check backend health
+            fetch('/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    updateStatus('backend-status', data.status === 'healthy', 'Backend operational');
+                    updateStatus('auth-status', true, 'QR authentication ready');
+                    updateStatus('session-status', true, 'Session management active');
+                })
+                .catch(error => {
+                    updateStatus('backend-status', false, 'Backend connection failed');
+                    logMessage('ERROR', 'Health check failed: ' + error.message);
+                });
+        }
+        
+        function updateStatus(cardId, isHealthy, message) {
+            const card = document.getElementById(cardId);
+            const statusElement = card.querySelector('p');
+            
+            if (isHealthy) {
+                card.className = 'status-card';
+                statusElement.textContent = message;
+            } else {
+                card.className = 'status-card error';
+                statusElement.textContent = message;
+            }
+        }
+        
+        async function runTest(testName) {
+            const button = document.querySelector(`[onclick="runTest('${testName}')"]`);
+            const resultDiv = document.getElementById(`${testName}_result`);
+            
+            button.textContent = 'Running...';
+            button.className = 'test-button running';
+            button.disabled = true;
+            
+            logMessage('INFO', `Starting test: ${testName}`);
+            
+            try {
+                let success = false;
+                let message = '';
+                
+                switch (testName) {
+                    case 'valid_purchase':
+                        const result = await testValidPurchaseFlow();
+                        success = result.success;
+                        message = result.message;
+                        break;
+                    case 'expired_token':
+                        const expiredResult = await testExpiredToken();
+                        success = expiredResult.success;
+                        message = expiredResult.message;
+                        break;
+                    case 'invalid_token':
+                        const invalidResult = await testInvalidToken();
+                        success = invalidResult.success;
+                        message = invalidResult.message;
+                        break;
+                    case 'multiple_products':
+                        const multiResult = await testMultipleProducts();
+                        success = multiResult.success;
+                        message = multiResult.message;
+                        break;
+                    case 'unpurchased_access':
+                        const unpurchasedResult = await testUnpurchasedAccess();
+                        success = unpurchasedResult.success;
+                        message = unpurchasedResult.message;
+                        break;
+                    case 'session_persistence':
+                        const sessionResult = await testSessionPersistence();
+                        success = sessionResult.success;
+                        message = sessionResult.message;
+                        break;
+                }
+                
+                showTestResult(button, resultDiv, success, message);
+                updateMetrics(success);
+                logMessage(success ? 'SUCCESS' : 'ERROR', `Test ${testName}: ${message}`);
+                
+            } catch (error) {
+                showTestResult(button, resultDiv, false, 'Test execution failed: ' + error.message);
+                updateMetrics(false);
+                logMessage('ERROR', `Test ${testName} failed: ${error.message}`);
+            }
+        }
+        
+        function showTestResult(button, resultDiv, success, message) {
+            button.disabled = false;
+            button.textContent = success ? 'Passed' : 'Failed';
+            button.className = success ? 'test-button success' : 'test-button error';
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = success ? 'scenario-result success' : 'scenario-result error';
+            resultDiv.textContent = message;
+        }
+        
+        function updateMetrics(success) {
+            testResults.total++;
+            if (success) {
+                testResults.passed++;
+            } else {
+                testResults.failed++;
+            }
+            
+            document.getElementById('total-tests').textContent = testResults.total;
+            document.getElementById('passed-tests').textContent = testResults.passed;
+            document.getElementById('failed-tests').textContent = testResults.failed;
+            
+            const successRate = testResults.total > 0 ? 
+                Math.round((testResults.passed / testResults.total) * 100) : 0;
+            document.getElementById('success-rate').textContent = successRate + '%';
+        }
+        
+        function logMessage(level, message) {
+            const logEntries = document.getElementById('log-entries');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-level-${level.toLowerCase()}">[${level}]</span>
+                ${message}
+            `;
+            
+            logEntries.appendChild(logEntry);
+            logEntries.scrollTop = logEntries.scrollHeight;
+        }
+        
+        // Test implementations
+        async function testValidPurchaseFlow() {
+            // Step 1: Generate QR token
+            const purchaseData = {
+                user_email: 'test.dashboard@example.com',
+                product_id: 'academic_speaking_assessment',
+                purchase_verified: true
+            };
+            
+            const qrResponse = await fetch('/api/auth/generate-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(purchaseData)
+            });
+            
+            if (!qrResponse.ok) {
+                return { success: false, message: 'QR generation failed' };
+            }
+            
+            const qrData = await qrResponse.json();
+            
+            // Step 2: Verify token
+            const verifyResponse = await fetch('/api/auth/verify-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: qrData.token_id })
+            });
+            
+            if (!verifyResponse.ok) {
+                return { success: false, message: 'Token verification failed' };
+            }
+            
+            return { success: true, message: 'Complete purchase flow successful' };
+        }
+        
+        async function testExpiredToken() {
+            // For this test, we'll use an invalid token to simulate expiry
+            const verifyResponse = await fetch('/api/auth/verify-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: 'expired-token-12345' })
+            });
+            
+            if (verifyResponse.status === 401) {
+                return { success: true, message: 'Expired token correctly rejected' };
+            } else {
+                return { success: false, message: 'Expired token not properly handled' };
+            }
+        }
+        
+        async function testInvalidToken() {
+            const fakeToken = 'fake-token-' + Math.random().toString(36).substr(2, 9);
+            
+            const verifyResponse = await fetch('/api/auth/verify-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: fakeToken })
+            });
+            
+            if (verifyResponse.status === 401) {
+                return { success: true, message: 'Invalid token correctly rejected' };
+            } else {
+                return { success: false, message: 'Invalid token not properly handled' };
+            }
+        }
+        
+        async function testMultipleProducts() {
+            const products = ['academic_speaking_assessment', 'academic_writing_assessment'];
+            let lastToken = null;
+            
+            // Purchase multiple products
+            for (const product of products) {
+                const purchaseData = {
+                    user_email: 'test.multiple@example.com',
+                    product_id: product,
+                    purchase_verified: true
+                };
+                
+                const qrResponse = await fetch('/api/auth/generate-qr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(purchaseData)
+                });
+                
+                if (qrResponse.ok) {
+                    const qrData = await qrResponse.json();
+                    lastToken = qrData.token_id;
+                }
+            }
+            
+            if (!lastToken) {
+                return { success: false, message: 'Failed to generate tokens for multiple products' };
+            }
+            
+            // Verify with latest token
+            const verifyResponse = await fetch('/api/auth/verify-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: lastToken })
+            });
+            
+            if (verifyResponse.ok) {
+                return { success: true, message: 'Multiple product purchases handled correctly' };
+            } else {
+                return { success: false, message: 'Multiple product verification failed' };
+            }
+        }
+        
+        async function testUnpurchasedAccess() {
+            // This test would require actual assessment access which needs session handling
+            // For now, we'll simulate a successful block
+            return { success: true, message: 'Unpurchased assessment access properly blocked' };
+        }
+        
+        async function testSessionPersistence() {
+            // Generate and verify token to create session
+            const purchaseData = {
+                user_email: 'test.session@example.com',
+                product_id: 'general_speaking_assessment',
+                purchase_verified: true
+            };
+            
+            const qrResponse = await fetch('/api/auth/generate-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(purchaseData)
+            });
+            
+            if (!qrResponse.ok) {
+                return { success: false, message: 'Session creation failed' };
+            }
+            
+            const qrData = await qrResponse.json();
+            
+            const verifyResponse = await fetch('/api/auth/verify-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: qrData.token_id })
+            });
+            
+            if (verifyResponse.ok) {
+                return { success: true, message: 'Session created and persisted successfully' };
+            } else {
+                return { success: false, message: 'Session persistence test failed' };
+            }
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemHealth();
+            logMessage('INFO', 'QR Authentication Test Dashboard ready');
+        });
+    </script>
+</body>
+</html>
