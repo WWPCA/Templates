@@ -1,0 +1,286 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- IELTS Header -->
+    <div class="bg-light border-bottom p-2 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="/static/images/ielts-logo.png" alt="IELTS" height="30" class="me-2">
+            <span class="fw-bold">Test taker ID</span>
+        </div>
+        <div id="test-timer" class="timer badge bg-primary" data-test-type="listening">40:00</div>
+        <div>
+            <i class="fas fa-wifi me-3"></i>
+            <i class="fas fa-bell me-3"></i>
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+    
+    <!-- Audio Player Section -->
+    <div class="bg-light border-bottom p-3">
+        <div class="container-fluid">
+            <div class="audio-player-container">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <h6 class="mb-0"><i class="fas fa-headphones me-2"></i> Listening Test</h6>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="d-flex align-items-center">
+                            <button id="play-audio" class="btn btn-primary btn-sm me-3">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            
+                            <div class="progress flex-grow-1" style="height: 8px;">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            
+                            <div class="ms-3">
+                                <span id="current-time">00:00</span> / <span id="duration">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <a href="{{ test.audio_url }}" download class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                </div>
+                
+                <audio id="listening-audio" class="d-none" data-src="{{ test.audio_url }}">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row g-0">
+        <!-- Left Column - Section Information -->
+        <div class="col-md-6 border-end">
+            <div class="section-info p-3" style="height: calc(100vh - 160px); overflow-y: auto;">
+                <div class="alert alert-info mb-3">
+                    <h5 class="mb-2"><i class="fas fa-info-circle me-2"></i> Section 1</h5>
+                    <p class="mb-0">Listen to a conversation between a student and a housing advisor, then answer Questions 1-5.</p>
+                </div>
+                
+                <div class="instructions mb-4">
+                    <h6>Instructions:</h6>
+                    <ul>
+                        <li>You will hear the recording ONCE only.</li>
+                        <li>Answer the questions as you listen.</li>
+                        <li>For Questions 1-5, complete the form below with NO MORE THAN THREE WORDS AND/OR A NUMBER.</li>
+                        <li>At the end of the test, you will have 10 minutes to transfer your answers to the answer sheet.</li>
+                    </ul>
+                </div>
+                
+                <div class="tips">
+                    <h6>Tips for this section:</h6>
+                    <ul class="small text-muted">
+                        <li>Look at the questions before listening so you know what information to listen for.</li>
+                        <li>Pay attention to keywords and details like numbers, dates, and names.</li>
+                        <li>Answers will come in the same order as the questions.</li>
+                        <li>Be careful with spelling - incorrect spelling will be marked wrong.</li>
+                        <li>If you miss an answer, move on to the next question and don't panic.</li>
+                    </ul>
+                </div>
+                
+                <div class="listening-transcript mt-4 p-3 bg-light rounded d-none">
+                    <h6 class="border-bottom pb-2 mb-3">Transcript (for review after test)</h6>
+                    <p class="small">Transcript will be available after completing the test.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Questions -->
+        <div class="col-md-6">
+            <div class="questions-container p-3" style="height: calc(100vh - 160px); overflow-y: auto;">
+                <form id="practice-test-form" data-test-id="{{ test.id }}" data-test-type="listening">
+                    <h6 class="mb-3">Questions 1-5</h6>
+                    <p class="mb-3">Complete the form below.</p>
+                    <p class="mb-3">Write <strong>NO MORE THAN THREE WORDS AND/OR A NUMBER</strong> for each answer.</p>
+                    
+                    <div class="form-completion p-3 bg-light rounded mb-4">
+                        <h6 class="text-center border-bottom pb-2 mb-3">STUDENT HOUSING APPLICATION</h6>
+                        
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">Name:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control form-control-sm answer-input" value="Sarah Williams" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">Student ID:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control form-control-sm answer-input" data-question-id="q1" placeholder="(1)">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">Current Address:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control form-control-sm answer-input" value="45 Oak Street" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">Phone Number:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control form-control-sm answer-input" data-question-id="q2" placeholder="(2)">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">Preferred Building:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control form-control-sm answer-input" data-question-id="q3" placeholder="(3)">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">Maximum Budget:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control form-control-sm answer-input" data-question-id="q4" placeholder="(4)">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">Special Requirement:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control form-control-sm answer-input" data-question-id="q5" placeholder="(5)">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mb-3">Questions 6-10</h6>
+                    <p class="mb-3">Complete the notes below.</p>
+                    <p class="mb-3">Write <strong>ONE WORD ONLY</strong> for each answer.</p>
+                    
+                    <div class="notes-completion p-3 bg-light rounded mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">CAMPUS LIBRARY SERVICES</h6>
+                        <ul>
+                            <li>Opening hours: 8 AM to 10 PM (Monday to <input type="text" class="form-control form-control-sm d-inline-block answer-input" style="width: 120px;" data-question-id="q6" placeholder="(6)">)</li>
+                            <li>Weekend hours: 10 AM to 6 PM</li>
+                            <li>Study rooms must be <input type="text" class="form-control form-control-sm d-inline-block answer-input" style="width: 120px;" data-question-id="q7" placeholder="(7)"> at least 24 hours in advance</li>
+                            <li>New <input type="text" class="form-control form-control-sm d-inline-block answer-input" style="width: 120px;" data-question-id="q8" placeholder="(8)"> center located on the second floor</li>
+                            <li>Printing costs: 10 cents per <input type="text" class="form-control form-control-sm d-inline-block answer-input" style="width: 120px;" data-question-id="q9" placeholder="(9)"></li>
+                            <li>Student ID card needed to <input type="text" class="form-control form-control-sm d-inline-block answer-input" style="width: 120px;" data-question-id="q10" placeholder="(10)"> books</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Footer -->
+    <div class="bg-light border-top p-2 d-flex justify-content-between align-items-center">
+        <div class="part-navigation">
+            <span class="badge bg-secondary mx-1">Section 1</span>
+            <span class="badge bg-light text-dark mx-1">Section 2</span>
+            <span class="badge bg-light text-dark mx-1">Section 3</span>
+            <span class="badge bg-light text-dark mx-1">Section 4</span>
+        </div>
+        <div class="test-navigation d-flex align-items-center">
+            <span class="badge bg-light text-dark me-3">0 of 10</span>
+            <button type="submit" form="practice-test-form" class="btn btn-primary">
+                <i class="fas fa-check"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize audio player
+        const audioElement = document.getElementById('listening-audio');
+        const playButton = document.getElementById('play-audio');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const durationDisplay = document.getElementById('duration');
+        const progressBar = document.querySelector('.progress-bar');
+        
+        if (audioElement && playButton) {
+            // Set up audio source
+            if (audioElement.hasAttribute('data-src')) {
+                const audioSrc = audioElement.getAttribute('data-src');
+                
+                // Set up play/pause functionality
+                playButton.addEventListener('click', function() {
+                    // If audio source not loaded yet, load it first
+                    if (!audioElement.hasAttribute('src')) {
+                        console.log('Loading audio from:', audioSrc);
+                        audioElement.setAttribute('src', audioSrc);
+                        
+                        // Wait for it to be ready before playing
+                        audioElement.addEventListener('canplay', function onCanPlay() {
+                            audioElement.play();
+                            playButton.innerHTML = '<i class="fas fa-pause"></i>';
+                            audioElement.removeEventListener('canplay', onCanPlay);
+                        });
+                        
+                        // Load the audio
+                        audioElement.load();
+                        return;
+                    }
+                    
+                    // Normal play/pause behavior
+                    if (audioElement.paused) {
+                        audioElement.play();
+                        playButton.innerHTML = '<i class="fas fa-pause"></i>';
+                    } else {
+                        audioElement.pause();
+                        playButton.innerHTML = '<i class="fas fa-play"></i>';
+                    }
+                });
+            }
+            
+            // Update progress bar as audio plays
+            audioElement.addEventListener('timeupdate', function() {
+                const progress = (audioElement.currentTime / audioElement.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Update time display
+                currentTimeDisplay.textContent = formatTime(Math.floor(audioElement.currentTime));
+            });
+            
+            // Display duration when metadata is loaded
+            audioElement.addEventListener('loadedmetadata', function() {
+                durationDisplay.textContent = formatTime(Math.floor(audioElement.duration));
+            });
+            
+            // Reset button when audio ends
+            audioElement.addEventListener('ended', function() {
+                playButton.innerHTML = '<i class="fas fa-play"></i>';
+                progressBar.style.width = '0%';
+            });
+        }
+        
+        // Format time as mm:ss
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Track question answers for progress
+        const answerInputs = document.querySelectorAll('.answer-input:not([readonly])');
+        const progressBadge = document.querySelector('.test-navigation .badge');
+        
+        function updateProgress() {
+            let answered = 0;
+            answerInputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    answered++;
+                }
+            });
+            
+            progressBadge.textContent = `${answered} of ${answerInputs.length}`;
+        }
+        
+        answerInputs.forEach(input => {
+            input.addEventListener('input', updateProgress);
+        });
+    });
+</script>
+{% endblock %}
