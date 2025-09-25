@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maya AI Voice Test - IELTS GenAI Prep</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .test-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        #audioPlayer {
+            width: 100%;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎤 Maya AI Voice Test</h1>
+        <p>Test Nova Sonic en-GB-feminine voice synthesis for Maya IELTS examiner</p>
+        
+        <div>
+            <button onclick="testMayaVoice()">🔊 Test Maya's British Voice</button>
+            <button onclick="startConversation()">💬 Start Maya Conversation</button>
+            <button onclick="clearStatus()">🗑️ Clear</button>
+        </div>
+        
+        <div id="status" class="status">
+            Ready to test Maya's voice system...
+        </div>
+        
+        <audio id="audioPlayer" controls style="display:none;">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+    <script>
+        let conversationId = 'test_' + Date.now();
+        
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = message;
+        }
+        
+        function clearStatus() {
+            document.getElementById('status').innerHTML = 'Ready to test Maya\'s voice system...';
+            document.getElementById('audioPlayer').style.display = 'none';
+        }
+        
+        async function testMayaVoice() {
+            updateStatus('🔄 Testing Nova Sonic en-GB-feminine connection...');
+            
+            try {
+                const response = await fetch('/api/nova-sonic-connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        test_text: 'Hello, I am Maya, your British IELTS examiner. Welcome to your speaking assessment.'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateStatus(`
+                        ✅ <strong>Nova Sonic Working!</strong><br>
+                        Voice: ${data.voice}<br>
+                        Provider: ${data.provider}<br>
+                        Audio Data: ${data.audio_data ? 'Available' : 'None'}<br>
+                        <small>Maya's British voice is ready for frontend integration</small>
+                    `);
+                    
+                    if (data.audio_data) {
+                        playAudio(data.audio_data);
+                    }
+                } else {
+                    updateStatus(`❌ <strong>Connection Failed:</strong> ${data.message}`);
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ <strong>Error:</strong> ${error.message}`);
+            }
+        }
+        
+        async function startConversation() {
+            updateStatus('🔄 Starting Maya conversation...');
+            
+            try {
+                const response = await fetch('/api/nova-sonic-stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_text: 'Hello Maya, my name is Alex and I am ready for my IELTS speaking assessment.',
+                        conversation_id: conversationId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateStatus(`
+                        ✅ <strong>Maya Responding!</strong><br>
+                        Maya says: "${data.maya_text}"<br>
+                        Voice: ${data.voice}<br>
+                        Conversation ID: ${data.conversation_id}<br>
+                        <small>🔊 Audio should be playing Maya's British voice</small>
+                    `);
+                    
+                    if (data.maya_audio) {
+                        playAudio(data.maya_audio);
+                    }
+                } else {
+                    updateStatus(`❌ <strong>Conversation Failed:</strong> ${data.message}`);
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ <strong>Error:</strong> ${error.message}`);
+            }
+        }
+        
+        function playAudio(base64AudioData) {
+            try {
+                // Convert base64 to audio blob
+                const binaryString = atob(base64AudioData);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                
+                const audioBlob = new Blob([bytes], { type: 'audio/mpeg' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = audioUrl;
+                audioPlayer.style.display = 'block';
+                audioPlayer.play();
+                
+                updateStatus(document.getElementById('status').innerHTML + '<br>🎵 <strong>Playing Maya\'s voice...</strong>');
+                
+            } catch (error) {
+                updateStatus(document.getElementById('status').innerHTML + '<br>❌ <strong>Audio playback error:</strong> ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
