@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}Customer Address Usage Policy{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="card-title mb-4">Customer Address Usage Policy</h1>
+                    
+                    <div class="alert alert-info">
+                        This policy explains how IELTS AI Prep collects and uses customer address information for tax compliance purposes.
+                    </div>
+                    
+                    <h2 class="h4 mt-4">Why We Collect Address Information</h2>
+                    <p>IELTS AI Prep collects customer billing and shipping address information during the payment process for the following purposes:</p>
+                    <ul>
+                        <li>To comply with tax laws and regulations in various jurisdictions</li>
+                        <li>To determine the correct tax rate for your purchase based on your location</li>
+                        <li>To provide required information to tax authorities when necessary</li>
+                        <li>To verify eligibility for our services based on your country of residence</li>
+                    </ul>
+                    
+                    <h2 class="h4 mt-4">How Address Information is Collected</h2>
+                    <p>We collect address information through our secure payment provider, Stripe. When you make a purchase:</p>
+                    <ul>
+                        <li>You will be asked to provide your billing address</li>
+                        <li>Address information is transmitted securely via encrypted connections</li>
+                        <li>Stripe securely processes this information for payment verification</li>
+                        <li>We receive this information securely through Stripe's webhook system</li>
+                    </ul>
+                    
+                    <h2 class="h4 mt-4">How We Store Address Information</h2>
+                    <p>Your address information is:</p>
+                    <ul>
+                        <li>Stored securely in our database with encryption</li>
+                        <li>Associated with your payment records</li>
+                        <li>Retained for the duration required by applicable tax laws (typically 7 years)</li>
+                        <li>Accessible only to authorized personnel for tax compliance purposes</li>
+                    </ul>
+                    
+                    <h2 class="h4 mt-4">Your Rights Regarding Address Information</h2>
+                    <p>As part of your personal data, you have the following rights regarding your address information:</p>
+                    <ul>
+                        <li>The right to access your address information through our data export feature</li>
+                        <li>The right to correct inaccurate address information</li>
+                        <li>The right to request deletion of your address information (subject to tax retention requirements)</li>
+                    </ul>
+                    <p class="small text-muted">Please note that we may be legally required to retain address information for completed transactions even after account deletion, to comply with tax requirements.</p>
+                    
+                    <h2 class="h4 mt-4">Security Measures</h2>
+                    <p>We implement appropriate technical and organizational measures to protect your address information, including:</p>
+                    <ul>
+                        <li>Database encryption for sensitive data</li>
+                        <li>Secure transmission using TLS/SSL encryption</li>
+                        <li>Strict access controls limiting who can view address information</li>
+                        <li>Regular security audits and assessments</li>
+                    </ul>
+                    
+                    <h2 class="h4 mt-4">Changes to This Policy</h2>
+                    <p>We may update this policy periodically to reflect changes in our practices or legal requirements. We will notify you of any significant changes.</p>
+                    
+                    <hr class="my-4">
+                    
+                    <p class="text-center">
+                        <a href="{{ url_for('gdpr.privacy_dashboard') }}" class="btn btn-outline-primary me-2">My Data Dashboard</a>
+                        <a href="{{ url_for('privacy_policy') }}" class="btn btn-outline-secondary">Privacy Policy</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
