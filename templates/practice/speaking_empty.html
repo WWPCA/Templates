@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('practice_index') }}">Practice Tests</a></li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('practice_test_list', test_type='speaking') }}">Speaking</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ test.title }}</li>
+                </ol>
+            </nav>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">{{ test.title }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h4 class="alert-heading">Test Temporarily Unavailable</h4>
+                        <p>This test content is currently being updated to provide you with the best learning experience.</p>
+                        <hr>
+                        <p class="mb-0">Please check back soon or try one of our other practice tests.</p>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('practice_index') }}" class="btn btn-primary">Return to Practice Tests</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
