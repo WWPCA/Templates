@@ -1,0 +1,184 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/speaking.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container practice-container my-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('practice_index') }}">Practice Tests</a></li>
+                    {% if complete_test_id %}
+                    <li class="breadcrumb-item"><a href="{{ url_for('continue_complete_test', test_id=complete_test_id) }}">Complete Test</a></li>
+                    {% endif %}
+                    <li class="breadcrumb-item active" aria-current="page">Speaking Test</li>
+                </ol>
+            </nav>
+            
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">IELTS Speaking Test</h2>
+                    
+                    {% if not complete_test_id %}
+                    <div class="timer-container">
+                        <div id="timer" class="timer">11:00</div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body">
+                    <!-- Test description and instructions -->
+                    <div class="test-instructions mb-4">
+                        <h3>Instructions</h3>
+                        <p>The IELTS Speaking test takes between 11 and 14 minutes and consists of an interview with an examiner. In this digital practice version, you will respond to prompts as you would in the real exam.</p>
+                        <p>The test has three parts:</p>
+                        <ul>
+                            <li><strong>Part 1:</strong> Introduction and interview (4-5 minutes) - You answer general questions about yourself, your home/family, your job/studies, your interests, and other familiar topics.</li>
+                            <li><strong>Part 2:</strong> Individual long turn (3-4 minutes) - You are given a task card with prompts and have one minute to prepare, then speak for 1-2 minutes on the topic. The examiner then asks one or two questions on the same topic.</li>
+                            <li><strong>Part 3:</strong> Two-way discussion (4-5 minutes) - The examiner asks further questions connected to the topic in Part 2, giving you an opportunity to discuss more abstract issues and ideas.</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Speaking Prompt -->
+                    <div class="speaking-prompt-container mb-4">
+                        <h3>Speaking Prompt</h3>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="speaking-part-badge mb-2">
+                                    <span class="badge bg-primary">Part {{ test.questions.part }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <p class="prompt-text mb-0">{{ test.questions.prompt_text }}</p>
+                                    <button id="listenToPrompt" class="btn btn-sm btn-outline-primary ms-2" data-prompt-id="{{ test.id }}">
+                                        <i class="fas fa-volume-up"></i> Listen to Prompt
+                                    </button>
+                                </div>
+                                <div id="promptAudioPlayer" class="d-none mt-2">
+                                    <audio id="promptAudio" controls class="w-100"></audio>
+                                </div>
+                                
+                                {% if test.questions.part == 2 %}
+                                <div class="cue-card mt-3 p-3 border">
+                                    <div class="cue-card-title mb-3">Describe {{ test.questions.cue_card_topic }}</div>
+                                    <div class="cue-card-points">
+                                        <ul>
+                                            {% for point in test.questions.cue_card_points %}
+                                            <li>{{ point }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="cue-card-reminder mt-3 small">
+                                        <em>You will have 1 minute to think about what you are going to say before you begin talking. You can make notes if you wish. You should then speak for 1-2 minutes on the topic.</em>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recording Interface -->
+                    <div class="recording-interface">
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h4>Record Your Response</h4>
+                                
+                                <!-- Microphone Test -->
+                                <div class="mic-test mb-3">
+                                    <button id="testMicrophone" class="btn btn-outline-secondary">
+                                        <i class="fas fa-microphone"></i> Test Your Microphone
+                                    </button>
+                                    <div id="micStatusContainer" class="d-none mt-2">
+                                        <div class="alert alert-info" id="micStatus">Checking microphone...</div>
+                                        <div class="audio-level-container">
+                                            <div class="audio-level-meter">
+                                                <div class="audio-level-bar" id="audioLevelBar"></div>
+                                            </div>
+                                            <span class="audio-level-label" id="audioLevelLabel">Audio Level: 0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Part 2 Preparation Timer (only for Part 2) -->
+                                {% if test.questions.part == 2 %}
+                                <div id="preparationTimerContainer" class="mb-3">
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-clock"></i> Preparation Time: <span id="preparationTimer">60</span> seconds
+                                    </div>
+                                    <button id="startPreparation" class="btn btn-outline-primary">
+                                        Start Preparation Time
+                                    </button>
+                                    <div id="preparationNotes" class="d-none mt-2">
+                                        <label for="notepad">You can make notes here:</label>
+                                        <textarea id="notepad" rows="4" class="form-control" placeholder="Your notes here..."></textarea>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Recording Controls -->
+                                <div class="recording-controls mb-3">
+                                    <button id="startRecording" class="btn btn-primary me-2">
+                                        <i class="fas fa-microphone"></i> Start Recording
+                                    </button>
+                                    <button id="stopRecording" class="btn btn-danger me-2 d-none">
+                                        <i class="fas fa-stop"></i> Stop Recording
+                                    </button>
+                                    <span id="recordingTime" class="badge bg-light text-dark d-none">00:00</span>
+                                </div>
+                                
+                                <!-- Recording Status -->
+                                <div id="recordingStatus" class="alert alert-info d-none">
+                                    Recording in progress...
+                                </div>
+                                
+                                <!-- Audio Playback -->
+                                <div id="audioPlayback" class="d-none mb-3">
+                                    <h5>Review Your Response</h5>
+                                    <audio id="recordedAudio" controls class="w-100"></audio>
+                                </div>
+                                
+                                <!-- Submit Response -->
+                                <div id="submitResponseContainer" class="d-none">
+                                    <form id="responseForm" action="{{ url_for('submit_speaking_response', test_id=test.id) }}" method="post" enctype="multipart/form-data">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="prompt_id" value="{{ test.id }}">
+                                        {% if complete_test_id %}
+                                        <input type="hidden" name="complete_test_id" value="{{ complete_test_id }}">
+                                        {% endif %}
+                                        <input type="hidden" name="audio_blob" id="audioBlob">
+                                        
+                                        <div class="text-center mt-3">
+                                            <button type="submit" class="btn btn-success btn-lg">
+                                                <i class="fas fa-paper-plane"></i> Submit Response for Assessment
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading and Error States -->
+                    <div id="loadingState" class="text-center p-4 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Processing your response...</p>
+                    </div>
+                    
+                    <div id="errorState" class="alert alert-danger d-none">
+                        An error occurred. Please try again.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/speaking.js') }}"></script>
+{% endblock %}
