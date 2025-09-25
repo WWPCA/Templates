@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .assessment-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border: 2px solid #e9ecef;
+        height: 100%;
+    }
+    
+    .assessment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,123,255,0.15);
+        border-color: #007bff;
+    }
+    
+    .clearscore-badge {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        font-weight: bold;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .assessment-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+    
+    .test-parts {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .part-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .part-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .part-number {
+        background-color: #007bff;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .start-button {
+        width: 100%;
+        padding: 0.8rem;
+        font-weight: bold;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('profile') }}">My Assessments</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+                </ol>
+            </nav>
+            
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="text-center text-lg-start">
+                        <h1 class="display-4 mb-3">{{ title }}</h1>
+                        <div class="elaris-badge">
+                            <i class="fas fa-robot me-2"></i>Powered by ClearScore® GenAI Technology
+                        </div>
+                        <p class="lead mt-3">Choose from 4 identical speaking assessments. Each assessment follows the same format with different questions.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Important Notes</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0 small">
+                                <li><strong>Test your microphone and speakers</strong> before starting</li>
+                                <li>Each assessment contains <strong>unique questions</strong></li>
+                                <li>Assessments are <strong>available until used</strong></li>
+                                <li>You can <strong>restart if connection drops</strong></li>
+                                <li><strong>ClearScore® GenAI feedback</strong> provided after completion</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                {% for assessment_num in range(1, 5) %}
+                <div class="col-lg-6">
+                    <div class="card assessment-card">
+                        <div class="card-body text-center">
+                            <div class="assessment-number">Assessment {{ assessment_num }}</div>
+                            
+                            <div class="test-parts">
+                                <h5 class="mb-3">Test Structure</h5>
+                                <div class="part-item">
+                                    <div class="part-number">1</div>
+                                    <div class="text-start">
+                                        <strong>Introduction & Interview</strong><br>
+                                        <small class="text-muted">4-5 minutes</small>
+                                    </div>
+                                </div>
+                                <div class="part-item">
+                                    <div class="part-number">2</div>
+                                    <div class="text-start">
+                                        <strong>Long Turn Speaking</strong><br>
+                                        <small class="text-muted">3-4 minutes</small>
+                                    </div>
+                                </div>
+                                <div class="part-item">
+                                    <div class="part-number">3</div>
+                                    <div class="text-start">
+                                        <strong>Two-Way Discussion</strong><br>
+                                        <small class="text-muted">4-5 minutes</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>ClearScore® AI Assessment</strong><br>
+                                Real-time GenAI evaluation with detailed feedback
+                            </div>
+                            
+                            <a href="{{ url_for('assessment_start', assessment_type=assessment_type, assessment_number=assessment_num) }}" 
+                               class="btn btn-primary start-button">
+                                <i class="fas fa-play me-2"></i>Start Assessment {{ assessment_num }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+
+        </div>
+    </div>
+</div>
+{% endblock %}
