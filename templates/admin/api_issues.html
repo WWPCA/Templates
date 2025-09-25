@@ -1,0 +1,482 @@
+{% extends "layout.html" %}
+
+{% block title %}API Issues Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    .filter-section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .issue-card {
+        border-left: 5px solid #ccc;
+        transition: all 0.2s ease;
+    }
+    
+    .issue-card.error {
+        border-left-color: #dc3545;
+    }
+    
+    .issue-card.timeout {
+        border-left-color: #ffc107;
+    }
+    
+    .issue-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .metrics-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .metrics-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    
+    .metrics-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .metrics-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    
+    .issue-detail-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .detail-table th {
+        width: 140px;
+    }
+    
+    .error-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .error-badge.error-4xx {
+        background-color: #ffe5e5;
+        color: #cc0000;
+    }
+    
+    .error-badge.error-5xx {
+        background-color: #e5e5ff;
+        color: #0000cc;
+    }
+    
+    .error-badge.error-timeout {
+        background-color: #ffffcc;
+        color: #999900;
+    }
+    
+    .error-badge.error-other {
+        background-color: #e5e5e5;
+        color: #666666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>API Issues Dashboard</h1>
+            <p class="text-muted">Monitor and resolve issues with external API services</p>
+        </div>
+    </div>
+    
+    <!-- Metrics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card metrics-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="metrics-value text-danger">{{ metrics.total_issues }}</div>
+                    <div class="metrics-label">Total API Issues</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metrics-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="metrics-value text-success">{{ metrics.resolved_issues }}</div>
+                    <div class="metrics-label">Resolved Issues</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metrics-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="metrics-value text-warning">{{ metrics.avg_duration|round(2) }}</div>
+                    <div class="metrics-label">Avg. Request Duration (s)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metrics-card mb-3">
+                <div class="card-body text-center p-4">
+                    <div class="metrics-value text-primary">{{ "%.1f"|format(metrics.resolution_rate) }}%</div>
+                    <div class="metrics-label">Resolution Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="filter-section">
+                <form method="GET" action="{{ url_for('admin.api_issues') }}">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="date_from">Date From</label>
+                                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ filters.date_from }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="date_to">Date To</label>
+                                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ filters.date_to }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="api_name">API Service</label>
+                                <select class="form-control" id="api_name" name="api_name">
+                                    <option value="" {% if not filters.api_name %}selected{% endif %}>All Services</option>
+                                    <option value="aws_bedrock" {% if filters.api_name == 'aws_bedrock' %}selected{% endif %}>AWS Bedrock</option>
+                                    <option value="openai" {% if filters.api_name == 'openai' %}selected{% endif %}>OpenAI</option>
+                                    <option value="polly" {% if filters.api_name == 'polly' %}selected{% endif %}>AWS Polly</option>
+                                    <option value="transcribe" {% if filters.api_name == 'transcribe' %}selected{% endif %}>AWS Transcribe</option>
+                                    <option value="assemblyai" {% if filters.api_name == 'assemblyai' %}selected{% endif %}>AssemblyAI</option>
+                                    <option value="stripe" {% if filters.api_name == 'stripe' %}selected{% endif %}>Stripe</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="error_code">Error Code</label>
+                                <input type="text" class="form-control" id="error_code" name="error_code" 
+                                       value="{{ filters.error_code }}" placeholder="e.g. 403, 500, timeout">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="resolved">Status</label>
+                                <select class="form-control" id="resolved" name="resolved">
+                                    <option value="" {% if filters.resolved == '' %}selected{% endif %}>All Issues</option>
+                                    <option value="false" {% if filters.resolved == 'false' %}selected{% endif %}>Open Issues</option>
+                                    <option value="true" {% if filters.resolved == 'true' %}selected{% endif %}>Resolved Issues</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="user_id">User ID</label>
+                                <input type="text" class="form-control" id="user_id" name="user_id" 
+                                       value="{{ filters.user_id }}" placeholder="Filter by user ID">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="endpoint">Endpoint</label>
+                                <input type="text" class="form-control" id="endpoint" name="endpoint" 
+                                       value="{{ filters.endpoint }}" placeholder="Filter by endpoint">
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Issues List -->
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">API Issues</h5>
+                        </div>
+                        <div class="col text-right">
+                            <span class="badge badge-primary">{{ issues|length }} Results</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if issues %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>API Service</th>
+                                    <th>Endpoint</th>
+                                    <th>Time (UTC)</th>
+                                    <th>Error Code</th>
+                                    <th>User</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for issue in issues %}
+                                <tr class="issue-row" data-issue-id="{{ issue.id }}">
+                                    <td>#{{ issue.id }}</td>
+                                    <td>
+                                        {% if issue.api_name == 'aws_bedrock' %}
+                                        <span class="badge badge-secondary">AWS Bedrock</span>
+                                        {% elif issue.api_name == 'openai' %}
+                                        <span class="badge badge-info">OpenAI</span>
+                                        {% elif issue.api_name == 'polly' %}
+                                        <span class="badge badge-primary">AWS Polly</span>
+                                        {% elif issue.api_name == 'transcribe' %}
+                                        <span class="badge badge-dark">AWS Transcribe</span>
+                                        {% elif issue.api_name == 'assemblyai' %}
+                                        <span class="badge badge-success">AssemblyAI</span>
+                                        {% elif issue.api_name == 'stripe' %}
+                                        <span class="badge badge-warning">Stripe</span>
+                                        {% else %}
+                                        <span class="badge badge-secondary">{{ issue.api_name }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ issue.endpoint }}">
+                                            {{ issue.endpoint }}
+                                        </span>
+                                    </td>
+                                    <td>{{ issue.occurred_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>
+                                        {% if issue.error_code %}
+                                            {% if issue.error_code|string|truncate(1, True, '') == '4' %}
+                                            <span class="error-badge error-4xx">{{ issue.error_code }}</span>
+                                            {% elif issue.error_code|string|truncate(1, True, '') == '5' %}
+                                            <span class="error-badge error-5xx">{{ issue.error_code }}</span>
+                                            {% elif issue.error_code == 'timeout' %}
+                                            <span class="error-badge error-timeout">Timeout</span>
+                                            {% else %}
+                                            <span class="error-badge error-other">{{ issue.error_code }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if issue.user_id %}
+                                        <a href="{{ url_for('admin.user_profile', user_id=issue.user_id) }}">
+                                            {{ issue.user.username if issue.user else 'User #' + issue.user_id|string }}
+                                        </a>
+                                        {% else %}
+                                        Anonymous
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if issue.request_duration %}
+                                        {{ "%.2f"|format(issue.request_duration) }}s
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if issue.resolved %}
+                                        <span class="badge badge-success status-badge">Resolved</span>
+                                        {% else %}
+                                        <span class="badge badge-warning status-badge">Open</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-primary view-details-btn" data-issue-id="{{ issue.id }}">
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr id="details-row-{{ issue.id }}" class="details-row" style="display: none;">
+                                    <td colspan="9">
+                                        <div class="issue-detail-section">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6>Error Details</h6>
+                                                    <div class="mb-3">
+                                                        <h6 class="small text-muted">Error Message</h6>
+                                                        <div class="bg-light p-2 rounded small">{{ issue.error_message or 'No error message recorded' }}</div>
+                                                    </div>
+                                                    
+                                                    {% if issue.ip_address or issue.city or issue.country %}
+                                                    <div class="mb-3">
+                                                        <h6 class="small text-muted">Request Origin</h6>
+                                                        <table class="table table-sm">
+                                                            <tbody>
+                                                                {% if issue.ip_address %}
+                                                                <tr>
+                                                                    <th>IP Address:</th>
+                                                                    <td>{{ issue.ip_address }}</td>
+                                                                </tr>
+                                                                {% endif %}
+                                                                {% if issue.city or issue.country %}
+                                                                <tr>
+                                                                    <th>Location:</th>
+                                                                    <td>
+                                                                        {% if issue.city and issue.country %}
+                                                                        {{ issue.city }}, {{ issue.country }}
+                                                                        {% elif issue.country %}
+                                                                        {{ issue.country }}
+                                                                        {% elif issue.city %}
+                                                                        {{ issue.city }}
+                                                                        {% endif %}
+                                                                    </td>
+                                                                </tr>
+                                                                {% endif %}
+                                                                {% if issue.user_agent %}
+                                                                <tr>
+                                                                    <th>User Agent:</th>
+                                                                    <td>{{ issue.user_agent }}</td>
+                                                                </tr>
+                                                                {% endif %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    {% endif %}
+                                                    
+                                                    {% if issue.resolved %}
+                                                    <div class="mb-3">
+                                                        <h6 class="small text-muted">Resolution</h6>
+                                                        <table class="table table-sm">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>Resolved At:</th>
+                                                                    <td>{{ issue.resolved_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                                                </tr>
+                                                                {% if issue.resolution_notes %}
+                                                                <tr>
+                                                                    <th>Notes:</th>
+                                                                    <td>{{ issue.resolution_notes }}</td>
+                                                                </tr>
+                                                                {% endif %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-6">
+                                                    {% if issue.request_data %}
+                                                    <div class="mb-3">
+                                                        <h6 class="small text-muted">Request Data</h6>
+                                                        <pre class="small bg-light p-2 rounded" style="max-height: 150px; overflow-y: auto;">{{ issue.request_data }}</pre>
+                                                    </div>
+                                                    {% endif %}
+                                                    
+                                                    {% if issue.response_data %}
+                                                    <div>
+                                                        <h6 class="small text-muted">Response Data</h6>
+                                                        <pre class="small bg-light p-2 rounded" style="max-height: 150px; overflow-y: auto;">{{ issue.response_data }}</pre>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            
+                                            {% if not issue.resolved %}
+                                            <div class="row mt-3">
+                                                <div class="col">
+                                                    <form method="POST" action="{{ url_for('admin.mark_api_issue_resolved', issue_id=issue.id) }}">
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" name="resolution_notes" placeholder="Resolution notes (optional)">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-success" type="submit">Mark as Resolved</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-5 text-center">
+                        <div class="py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4>No API issues found</h4>
+                            <p class="text-muted">Try adjusting your filters to see more results</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle issue details
+    const detailButtons = document.querySelectorAll('.view-details-btn');
+    detailButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const issueId = this.dataset.issueId;
+            const detailsRow = document.getElementById(`details-row-${issueId}`);
+            
+            if (detailsRow.style.display === 'none') {
+                // Hide all other open details first
+                document.querySelectorAll('.details-row').forEach(row => {
+                    row.style.display = 'none';
+                });
+                
+                // Show this detail row
+                detailsRow.style.display = 'table-row';
+                this.textContent = 'Hide Details';
+            } else {
+                detailsRow.style.display = 'none';
+                this.textContent = 'View Details';
+            }
+        });
+    });
+    
+    // Format JSON in pre sections
+    document.querySelectorAll('pre').forEach(pre => {
+        try {
+            const content = pre.textContent;
+            const json = JSON.parse(content);
+            pre.textContent = JSON.stringify(json, null, 2);
+        } catch (e) {
+            // Not valid JSON, leave as is
+        }
+    });
+});
+</script>
+{% endblock %}
