@@ -1,0 +1,742 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .microphone-test {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid #dee2e6;
+    }
+    
+    .test-button {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        font-size: 2rem;
+        margin: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .test-button:hover {
+        transform: scale(1.1);
+    }
+    
+    .audio-level {
+        height: 20px;
+        background-color: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+    
+    .audio-level-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+        width: 0%;
+        transition: width 0.1s ease;
+    }
+    
+    .clearscore-header {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    /* Mobile responsiveness and scrolling fixes for all touch devices */
+    @media (max-width: 768px) {
+        html {
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y pinch-zoom;
+            position: relative;
+        }
+        
+        .container, .container-fluid {
+            overflow: visible;
+            min-height: auto;
+            position: relative;
+        }
+        
+        .microphone-test {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            touch-action: manipulation;
+        }
+        
+        .test-button {
+            width: 100px;
+            height: 100px;
+            font-size: 1.5rem;
+            margin: 0.5rem;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+            user-select: none;
+        }
+        
+        .test-button:active {
+            transform: scale(0.95);
+        }
+        
+        .clearscore-header {
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert {
+            margin-bottom: 1rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        /* Ensure proper height and scrolling */
+        .main-content {
+            min-height: auto;
+            overflow: visible;
+            position: relative;
+        }
+        
+        /* Remove fixed positioning that can interfere with scrolling */
+        .navbar-fixed-top, .navbar-fixed-bottom {
+            position: relative;
+        }
+        
+        /* Android-specific touch improvements */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        button, .btn {
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* Improve scroll performance on Android */
+        .container-fluid {
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+        }
+        
+        /* Fix viewport height issues on mobile browsers */
+        .py-5 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+    }
+    
+    /* Additional touch support for tablets */
+    @media (max-width: 1024px) and (orientation: portrait) {
+        body {
+            -webkit-overflow-scrolling: touch;
+            overflow-y: auto;
+        }
+    }
+    
+    .question-preview {
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+    }
+    
+    .start-assessment-btn {
+        font-size: 1.2rem;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-weight: bold;
+    }
+    
+    .ready-indicator {
+        display: none;
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .status-icon {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('profile') }}">My Assessments</a></li>
+                    <li class="breadcrumb-item">
+                        {% if 'academic' in assessment_type %}
+                            <a href="{{ url_for('academic_speaking_selection') }}">Academic Speaking</a>
+                        {% else %}
+                            <a href="{{ url_for('general_speaking_selection') }}">General Training Speaking</a>
+                        {% endif %}
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Assessment {{ assessment_number }}</li>
+                </ol>
+            </nav>
+            
+            <!-- Persistent Warning Message -->
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Important:</strong> You cannot begin the test without completing both microphone and speaker tests.
+            </div>
+
+            <div class="clearscore-header">
+                <h1 class="h2 mb-3">
+                    <i class="fas fa-robot me-2"></i>
+                    {{ title }}
+                </h1>
+                <p class="mb-0">Powered by ClearScore® GenAI Technology - The world's only AI IELTS speaking examiner</p>
+            </div>
+            
+            <!-- Microphone and Speaker Test Section -->
+            <div class="microphone-test">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-microphone status-icon"></i>
+                    Test Your Microphone and Speakers
+                </h3>
+                
+                <div class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Before you begin:</strong> Your browser will show a permission popup asking to use your microphone. This popup shows a long website address - that's normal. Just click "Allow" to continue.
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Important:</strong> Please test your microphone and speakers before starting the assessment to ensure proper recording and playback.
+                </div>
+                
+                <div class="row text-center">
+                    <div class="col-md-6">
+                        <h5>Microphone Test</h5>
+                        <button class="btn btn-primary test-button" id="micTestBtn">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <div class="audio-level">
+                            <div class="audio-level-bar" id="audioLevelBar"></div>
+                        </div>
+                        <div id="micStatus" class="mt-2">Click to test microphone</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5>Speaker Test</h5>
+                        <button class="btn btn-success test-button" id="speakerTestBtn">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <div id="speakerStatus" class="mt-2">Click to test speakers</div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <div class="ready-indicator" id="readyIndicator">
+                        <i class="fas fa-check-circle status-icon"></i>
+                        Ready to start assessment!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Assessment Overview -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0">Assessment Overview</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <div class="h2 text-primary">1</div>
+                                <strong>Introduction & Interview</strong>
+                                <div class="small text-muted">4-5 minutes</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <div class="h2 text-primary">2</div>
+                                <strong>Long Turn Speaking</strong>
+                                <div class="small text-muted">3-4 minutes</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <div class="h2 text-primary">3</div>
+                                <strong>Two-Way Discussion</strong>
+                                <div class="small text-muted">4-5 minutes</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="question-preview">
+                        <h5><i class="fas fa-eye me-2"></i>First Question Preview</h5>
+                        <p class="mb-0">
+                            {% if 'academic' in assessment_type %}
+                                "Hello, my name is Maya, and I'll be your AI examiner today. Let's start with some questions about yourself. Can you tell me your name and where you're from?"
+                            {% else %}
+                                "Hello, my name is Maya, and I'll be your AI examiner today. Let's begin with some general questions. Could you tell me your name and something about your hometown?"
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Assessment Features:</h6>
+                        <ul class="mb-0">
+                            <li>AI examiner speaks with British accent</li>
+                            <li>Real-time conversation with Maya</li>
+                            <li>Written transcript provided after completion</li>
+                            <li>Detailed band scoring and feedback</li>
+                            <li>Can restart if connection drops</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <div class="alert alert-warning mb-3" id="audioTestWarning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Both microphone and speaker tests must be completed before starting the assessment.</strong>
+                            <br><small>This ensures optimal audio quality for your conversation with Maya.</small>
+                        </div>
+                        <button class="btn btn-success start-assessment-btn" id="startAssessmentBtn" disabled>
+                            <i class="fas fa-comments me-2"></i>
+                            Start Conversation with Maya
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let micTested = false;
+    let speakerTested = false;
+    let mediaRecorder = null;
+    let audioStream = null;
+    
+    const micTestBtn = document.getElementById('micTestBtn');
+    const speakerTestBtn = document.getElementById('speakerTestBtn');
+    const startAssessmentBtn = document.getElementById('startAssessmentBtn');
+    const readyIndicator = document.getElementById('readyIndicator');
+    const audioLevelBar = document.getElementById('audioLevelBar');
+    const micStatus = document.getElementById('micStatus');
+    const speakerStatus = document.getElementById('speakerStatus');
+    
+    // Microphone test with playback
+    let recordedChunks = [];
+    let recordedBlob = null;
+    
+    micTestBtn.addEventListener('click', async function() {
+        try {
+            if (audioStream) {
+                // Stop current stream and recorder
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                audioStream.getTracks().forEach(track => track.stop());
+                audioStream = null;
+                micTestBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                micStatus.textContent = 'Click to test microphone';
+                audioLevelBar.style.width = '0%';
+                return;
+            }
+            
+            // Show user-friendly message before browser popup
+            micStatus.innerHTML = 'Your browser will ask for microphone permission - please click "Allow"';
+            micStatus.style.color = '#007bff';
+            
+            recordedChunks = [];
+            audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            micTestBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            micStatus.textContent = 'Recording... Speak now to test your microphone';
+            micStatus.style.color = '#dc3545';
+            
+            // Set up MediaRecorder for playback
+            mediaRecorder = new MediaRecorder(audioStream);
+            mediaRecorder.ondataavailable = function(event) {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+            
+            mediaRecorder.onstop = function() {
+                recordedBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const audioUrl = URL.createObjectURL(recordedBlob);
+                
+                micStatus.innerHTML = `
+                    Microphone test completed! 
+                    <button class="btn btn-sm btn-outline-primary ms-2" id="playRecordingBtn">
+                        <i class="fas fa-play"></i> Hear Your Recording
+                    </button>
+                `;
+                micStatus.style.color = '#28a745';
+                micTested = true;
+                checkReady();
+                
+                // Store the audio URL globally for playback
+                window.recordedAudioUrl = audioUrl;
+                
+                // Add event listener to the new button
+                setTimeout(() => {
+                    const playBtn = document.getElementById('playRecordingBtn');
+                    if (playBtn) {
+                        playBtn.addEventListener('click', function() {
+                            playRecording();
+                        });
+                    }
+                }, 100);
+                
+                // Auto-delete recording after 30 seconds for privacy
+                setTimeout(() => {
+                    if (window.recordedAudioUrl) {
+                        URL.revokeObjectURL(window.recordedAudioUrl);
+                        window.recordedAudioUrl = null;
+                        console.log('Recording automatically deleted after 30 seconds');
+                    }
+                }, 30000);
+            };
+            
+            mediaRecorder.start();
+            
+            // Create audio context for level monitoring
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const microphone = audioContext.createMediaStreamSource(audioStream);
+            
+            analyser.smoothingTimeConstant = 0.8;
+            analyser.fftSize = 1024;
+            microphone.connect(analyser);
+            
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            
+            function updateAudioLevel() {
+                if (!audioStream) return;
+                
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / dataArray.length;
+                const percentage = (average / 255) * 100;
+                audioLevelBar.style.width = percentage + '%';
+                
+                requestAnimationFrame(updateAudioLevel);
+            }
+            
+            updateAudioLevel();
+            
+            setTimeout(() => {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                if (audioStream) {
+                    audioStream.getTracks().forEach(track => track.stop());
+                    audioStream = null;
+                    micTestBtn.innerHTML = '<i class="fas fa-check"></i>';
+                }
+            }, 5000);
+            
+        } catch (err) {
+            console.error('Microphone access denied:', err);
+            showAudioTroubleshootingPopup('microphone');
+            micStatus.textContent = 'Microphone access denied. Click for help.';
+            micStatus.style.color = '#dc3545';
+        }
+    });
+    
+    // Function to play back the recorded audio
+    function playRecording() {
+        if (window.recordedAudioUrl) {
+            const audio = new Audio(window.recordedAudioUrl);
+            audio.play().then(() => {
+                console.log('Recording playback started');
+                // Auto-delete after playback for privacy
+                audio.addEventListener('ended', () => {
+                    setTimeout(() => {
+                        if (window.recordedAudioUrl) {
+                            URL.revokeObjectURL(window.recordedAudioUrl);
+                            window.recordedAudioUrl = null;
+                            console.log('Recording deleted after playback');
+                        }
+                    }, 1000);
+                });
+            }).catch(err => {
+                console.error('Playback failed:', err);
+            });
+        } else {
+            console.log('No recording available to play');
+        }
+    }
+    
+    // Speaker test with better browser compatibility
+    speakerTestBtn.addEventListener('click', async function() {
+        if (!speakerTested) {
+            try {
+                speakerTestBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                speakerStatus.textContent = 'Testing speakers...';
+                speakerStatus.style.color = '#007bff';
+                
+                // Create a simple beep using Web Audio API for better compatibility
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Resume audio context if suspended (required by some browsers)
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // 800Hz beep
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                // Wait for the beep to finish
+                setTimeout(() => {
+                    speakerTestBtn.innerHTML = '<i class="fas fa-check"></i>';
+                    speakerStatus.textContent = 'Speaker test completed successfully! Did you hear the beep?';
+                    speakerStatus.style.color = '#28a745';
+                    speakerTested = true;
+                    checkReady();
+                    
+                    // Add a confirmation button for user to verify they heard the sound
+                    speakerStatus.innerHTML += '<br><small class="text-muted">If you didn\'t hear anything, <a href="#" onclick="showAudioTroubleshootingPopup(\'speaker\'); return false;">click here for help</a></small>';
+                }, 600);
+                
+            } catch (error) {
+                console.error('Speaker test failed:', error);
+                
+                // Fallback to HTML5 Audio if Web Audio API fails
+                try {
+                    const audio = new Audio();
+                    audio.src = 'data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4AAAA='; // Minimal valid WAV
+                    
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        await playPromise;
+                        speakerTestBtn.innerHTML = '<i class="fas fa-check"></i>';
+                        speakerStatus.textContent = 'Speaker test completed! Did you hear the sound?';
+                        speakerStatus.style.color = '#28a745';
+                        speakerTested = true;
+                        checkReady();
+                    }
+                } catch (fallbackError) {
+                    console.error('Both audio methods failed:', fallbackError);
+                    showAudioTroubleshootingPopup('speaker');
+                    speakerTestBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    speakerStatus.textContent = 'Speaker test failed. Click for help.';
+                    speakerStatus.style.color = '#dc3545';
+                }
+            }
+        } else {
+            // Reset speaker test
+            speakerTestBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            speakerStatus.textContent = 'Click to test speakers';
+            speakerStatus.style.color = '#6c757d';
+            speakerTested = false;
+            checkReady();
+        }
+    });
+    
+    function checkReady() {
+        const audioTestWarning = document.getElementById('audioTestWarning');
+        if (micTested && speakerTested) {
+            readyIndicator.style.display = 'block';
+            startAssessmentBtn.disabled = false;
+            if (audioTestWarning) {
+                audioTestWarning.style.display = 'none';
+            }
+        } else {
+            if (audioTestWarning) {
+                audioTestWarning.style.display = 'block';
+            }
+        }
+    }
+    
+    // Audio troubleshooting popup
+    function showAudioTroubleshootingPopup(deviceType) {
+        const modalHtml = `
+        <div class="modal fade" id="audioTroubleshootingModal" tabindex="-1" aria-labelledby="audioTroubleshootingModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title" id="audioTroubleshootingModalLabel">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${deviceType === 'microphone' ? 'Microphone' : 'Speaker'} Setup Help
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${deviceType === 'microphone' ? getMicrophoneTroubleshooting() : getSpeakerTroubleshooting()}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="retryAudioTest('${deviceType}')" data-bs-dismiss="modal">
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        
+        // Remove existing modal if present
+        const existingModal = document.getElementById('audioTroubleshootingModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add modal to page
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('audioTroubleshootingModal'));
+        modal.show();
+    }
+    
+    function getMicrophoneTroubleshooting() {
+        return `
+        <div class="alert alert-info">
+            <strong>Common microphone issues and solutions:</strong>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-shield-alt text-primary"></i> Browser Permissions</h6>
+                <ul class="small">
+                    <li>Click the microphone icon in your browser's address bar</li>
+                    <li>Select "Allow" for microphone access</li>
+                    <li>Refresh the page if needed</li>
+                </ul>
+                
+                <h6><i class="fas fa-volume-up text-primary"></i> Device Settings</h6>
+                <ul class="small">
+                    <li>Check if your microphone is plugged in properly</li>
+                    <li>Ensure your microphone is not muted</li>
+                    <li>Try adjusting microphone volume in system settings</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-cog text-primary"></i> System Settings</h6>
+                <ul class="small">
+                    <li><strong>Windows:</strong> Settings → Privacy → Microphone</li>
+                    <li><strong>Mac:</strong> System Preferences → Security & Privacy → Microphone</li>
+                    <li><strong>Chrome:</strong> Settings → Privacy → Site Settings → Microphone</li>
+                </ul>
+                
+                <h6><i class="fas fa-tools text-primary"></i> Quick Fixes</h6>
+                <ul class="small">
+                    <li>Try using a different browser (Chrome/Firefox)</li>
+                    <li>Restart your browser</li>
+                    <li>Check if other apps are using the microphone</li>
+                </ul>
+            </div>
+        </div>`;
+    }
+    
+    function getSpeakerTroubleshooting() {
+        return `
+        <div class="alert alert-info">
+            <strong>Common speaker issues and solutions:</strong>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-volume-up text-primary"></i> Audio Output</h6>
+                <ul class="small">
+                    <li>Check if your speakers/headphones are connected</li>
+                    <li>Ensure volume is not muted or too low</li>
+                    <li>Try different speakers or headphones</li>
+                </ul>
+                
+                <h6><i class="fas fa-shield-alt text-primary"></i> Browser Settings</h6>
+                <ul class="small">
+                    <li>Some browsers block autoplay audio</li>
+                    <li>Click anywhere on the page first, then test</li>
+                    <li>Check browser sound settings</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-cog text-primary"></i> System Audio</h6>
+                <ul class="small">
+                    <li><strong>Windows:</strong> Right-click speaker icon → Open Sound settings</li>
+                    <li><strong>Mac:</strong> System Preferences → Sound → Output</li>
+                    <li>Make sure correct audio device is selected</li>
+                </ul>
+                
+                <h6><i class="fas fa-tools text-primary"></i> Quick Fixes</h6>
+                <ul class="small">
+                    <li>Try a different browser</li>
+                    <li>Restart your browser</li>
+                    <li>Test audio in other applications</li>
+                </ul>
+            </div>
+        </div>`;
+    }
+    
+    function retryAudioTest(deviceType) {
+        if (deviceType === 'microphone') {
+            micTestBtn.click();
+        } else {
+            speakerTestBtn.click();
+        }
+    }
+    
+    // Play back the recorded audio
+    function playRecording() {
+        if (window.recordedAudioUrl) {
+            const audio = new Audio(window.recordedAudioUrl);
+            audio.play().then(() => {
+                console.log('Playing back recorded audio');
+                
+                // Delete recording immediately after playback for privacy
+                audio.addEventListener('ended', () => {
+                    URL.revokeObjectURL(window.recordedAudioUrl);
+                    window.recordedAudioUrl = null;
+                    console.log('Recording deleted after playback');
+                    
+                    // Update the UI to show recording was deleted
+                    const micStatus = document.getElementById('micStatus');
+                    micStatus.innerHTML = 'Microphone test completed! <small class="text-muted">(Recording deleted for privacy)</small>';
+                });
+                
+            }).catch((error) => {
+                console.error('Error playing recording:', error);
+                alert('Unable to play back the recording. Your microphone is working, but playback failed.');
+            });
+        }
+    }
+    
+    // Start assessment
+    startAssessmentBtn.addEventListener('click', function() {
+        if (micTested && speakerTested) {
+            // Navigate to speaking assessment interface
+            window.location.href = '/assessments/{{ assessment_type }}/conversational/{{ assessment_number }}';
+        } else {
+            alert('Please complete both microphone and speaker tests before starting the assessment.');
+        }
+    });
+});
+</script>
+{% endblock %}
