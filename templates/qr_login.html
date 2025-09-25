@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS GenAI Prep - Authenticate</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .auth-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .auth-header {
+            margin-bottom: 30px;
+        }
+        .auth-header h1 {
+            color: #2563eb;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .auth-header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+        .qr-display-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 2px dashed #cbd5e1;
+        }
+        .qr-code-display {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e5e7eb;
+        }
+        .qr-placeholder-content {
+            text-align: center;
+            color: #6b7280;
+        }
+        .qr-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #9ca3af;
+        }
+        .qr-code-image {
+            max-width: 280px;
+            max-height: 280px;
+            border-radius: 8px;
+        }
+        .scanner-info {
+            margin-top: 15px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        .instructions {
+            margin: 30px 0;
+            text-align: left;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .instructions h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        .instructions ol {
+            color: #475569;
+            line-height: 1.6;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .message.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        .message.success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        .message.info {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .manual-token {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+        .manual-token input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .manual-token button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .manual-token button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>Welcome to IELTS GenAI Prep</h1>
+            <p>Authenticate with your mobile app to access your assessments</p>
+        </div>
+
+        {% if message %}
+        <div class="message info">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <!-- QR Code Display Area -->
+        <div class="qr-display-container">
+            <div id="qr-code-area" class="qr-code-display">
+                <div class="qr-placeholder-content">
+                    <i class="fas fa-qrcode qr-icon"></i>
+                    <p>Generating QR Code...</p>
+                </div>
+            </div>
+            <div class="scanner-info">
+                <p>Scan this QR code with your IELTS GenAI Prep mobile app</p>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <span>Verifying authentication...</span>
+        </div>
+
+        <div class="instructions">
+            <h3>How to authenticate:</h3>
+            <ol>
+                <li>Open the IELTS GenAI Prep mobile app</li>
+                <li>Complete a purchase verification for any assessment module ($49.99)</li>
+                <li>Use your mobile app to scan the QR code displayed above</li>
+                <li>You'll be automatically logged in to access your assessments</li>
+            </ol>
+            <p><strong>Note:</strong> QR codes expire after 10 minutes for security.</p>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe;">
+                <p style="color: #1e40af; font-weight: 600; margin-bottom: 10px;">For Testing in .replit Environment:</p>
+                <p style="color: #475569; margin-bottom: 15px;">
+                    Use the mobile purchase simulator to generate test QR tokens:
+                </p>
+                <a href="/test-mobile" style="background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 500;">
+                    Open Mobile Simulator
+                </a>
+            </div>
+        </div>
+
+        <div class="manual-token">
+            <h4>Manual Token Entry (for testing)</h4>
+            <input type="text" id="manual-token" placeholder="Enter QR token manually">
+            <button onclick="verifyManualToken()">Verify Token</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQRToken = null;
+        let qrRefreshInterval = null;
+        
+        // Generate and display QR code on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            generateWebsiteQR();
+            
+            // Refresh QR code every 9 minutes (before 10-minute expiration)
+            qrRefreshInterval = setInterval(generateWebsiteQR, 9 * 60 * 1000);
+        });
+        
+        async function generateWebsiteQR() {
+            try {
+                const response = await fetch('/api/generate-website-qr');
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentQRToken = data.token_id;
+                    
+                    // Display the QR code image
+                    const qrArea = document.getElementById('qr-code-area');
+                    qrArea.innerHTML = `<img src="${data.qr_code_image}" alt="QR Code" class="qr-code-image">`;
+                    
+                    // Start polling for authentication
+                    startAuthenticationPolling();
+                    
+                    showMessage(`QR code generated. Expires in ${data.expires_in_minutes} minutes.`, 'info');
+                } else {
+                    showMessage('Failed to generate QR code: ' + data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+                showMessage('Failed to generate QR code', 'error');
+            }
+        }
+        
+        let authPollingInterval = null;
+        
+        function startAuthenticationPolling() {
+            // Clear any existing polling
+            if (authPollingInterval) {
+                clearInterval(authPollingInterval);
+            }
+            
+            // Poll every 2 seconds to check if mobile app has authenticated
+            authPollingInterval = setInterval(async () => {
+                if (currentQRToken) {
+                    try {
+                        const response = await fetch('/auth/verify-qr', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                token: currentQRToken
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            clearInterval(authPollingInterval);
+                            
+                            // Set authentication cookie
+                            document.cookie = `qr_session_id=${data.session_id}; path=/; max-age=3600`;
+                            
+                            showMessage('Authentication successful! Redirecting...', 'success');
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url || '/profile';
+                            }, 1500);
+                        }
+                    } catch (error) {
+                        // Ignore polling errors, continue polling
+                    }
+                }
+            }, 2000);
+        }
+        
+        function verifyQRToken(token) {
+            showLoading(true);
+            
+            // Use local test endpoint for .replit environment
+            fetch('/api/auth/verify-qr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: token })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                
+                if (data.success) {
+                    // Store session data in localStorage for the frontend
+                    localStorage.setItem('qr_session_id', data.session_id);
+                    localStorage.setItem('qr_user_email', data.user_email);
+                    
+                    showMessage('Authentication successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '/profile';
+                    }, 1500);
+                } else {
+                    showMessage(data.error || 'Authentication failed', 'error');
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                console.error('Verification error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            });
+        }
+        
+        function verifyManualToken() {
+            const token = document.getElementById('manual-token').value.trim();
+            if (token) {
+                verifyQRToken(token);
+            } else {
+                showMessage('Please enter a token', 'error');
+            }
+        }
+        
+        function showMessage(text, type) {
+            // Remove existing messages
+            const existingMessages = document.querySelectorAll('.message');
+            existingMessages.forEach(msg => {
+                if (!msg.classList.contains('info')) {
+                    msg.remove();
+                }
+            });
+            
+            // Create new message
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = text;
+            
+            // Insert after auth header
+            const authHeader = document.querySelector('.auth-header');
+            authHeader.insertAdjacentElement('afterend', message);
+            
+            // Auto-remove error messages after 5 seconds
+            if (type === 'error') {
+                setTimeout(() => {
+                    message.remove();
+                }, 5000);
+            }
+        }
+        
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            loading.style.display = show ? 'block' : 'none';
+        }
+        
+        // QR code display is handled by generateWebsiteQR() function above
+        
+        // Handle manual token input on Enter key
+        document.getElementById('manual-token').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyManualToken();
+            }
+        });
+    </script>
+</body>
+</html>
