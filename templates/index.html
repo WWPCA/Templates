@@ -1,0 +1,401 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+<style>
+.pricing-card {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+.pricing-card:hover {
+    transform: translateY(-5px);
+}
+.genai-brand-section {
+    margin-bottom: 60px;
+}
+.brand-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+.brand-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.brand-tagline {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Assessment Access Notice for Logged-in Users -->
+{% if current_user.is_authenticated %}
+<div class="container mt-4">
+    <div class="alert alert-success mb-4">
+        <div class="d-flex align-items-center">
+            <div class="me-3">
+                <i class="fas fa-check-circle fa-2x text-success"></i>
+            </div>
+            <div>
+                <h4 class="alert-heading mb-2"><i class="fas fa-user-check me-2"></i>You have active assessment packages!</h4>
+                <p class="mb-2">Access your purchased GenAI assessments from your <strong><a href="{{ url_for('profile') }}" class="alert-link">Profile Page</a></strong>.</p>
+                <hr class="my-2">
+                <p class="mb-0">
+                    <a href="{{ url_for('profile') }}" class="btn btn-success btn-sm me-2">
+                        <i class="fas fa-arrow-right me-1"></i>Go to My Assessments
+                    </a>
+                    <small class="text-muted">Start your TrueScore® and ClearScore® assessments now!</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1 class="display-4 fw-bold mb-3">Master IELTS with the World's ONLY GenAI Assessment Platform</h1>
+            <div class="p-2 mb-4" style="background-color: #3498db; color: white; border-radius: 4px; display: inline-block; width: 100%; max-width: 100%; white-space: normal; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; text-align: center; padding: 8px; font-size: 1rem; line-height: 1.4;">
+                Powered by TrueScore® & ClearScore® - Industry-Leading Standardized Assessment Technology
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-lg-10 mx-auto">
+                <p class="lead">IELTS GenAI Prep delivers precise, examiner-aligned feedback through our exclusive TrueScore® writing analysis and ClearScore® speaking assessment systems. Our proprietary technology applies the official IELTS marking criteria to provide consistent, accurate band scores and actionable feedback for both Academic and General Training.</p>
+            </div>
+        </div>
+
+        <div class="text-center mb-5">
+            <div class="d-md-flex d-block justify-content-center gap-3">
+                <div class="d-flex align-items-center justify-content-center mb-2 mb-md-0">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>Standardized Assessment</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-center mb-2 mb-md-0">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>IELTS Criteria Aligned</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>Personalized Feedback</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-buttons text-center">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-2">Start Your IELTS Preparation</a>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary btn-lg">Sign In</a>
+        </div>
+    </div>
+</section>
+
+<!-- GenAI Technology Overview Section - Enhanced with exclusivity messaging -->
+<section class="assessment-sections py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">The World's ONLY Standardized IELTS GenAI Assessment System</h2>
+            <p class="text-muted">Our proprietary technologies deliver consistent, examiner-aligned evaluations</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-success">
+                    <div class="card-header bg-success text-white text-center py-3">
+                        <h3 class="m-0">TrueScore® Writing Assessment</h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-pencil-alt fa-3x text-success mb-3"></i>
+                        <div class="badge bg-light text-dark mb-3">EXCLUSIVE TECHNOLOGY</div>
+                        <p>Our proprietary TrueScore® system is the only GenAI technology that standardizes writing assessment within the official IELTS marking criteria rubric. Receive detailed feedback on Task Achievement, Coherence and Cohesion, Lexical Resource, and Grammatical Range and Accuracy for both Academic and General Training tasks.</p>
+
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-primary">
+                    <div class="card-header bg-primary text-white text-center py-3">
+                        <h3 class="m-0">ClearScore® Speaking Assessment</h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-microphone-alt fa-3x text-primary mb-3" data-v="3"></i>
+                        <div class="badge bg-light text-dark mb-3">EXCLUSIVE TECHNOLOGY</div>
+                        <p>ClearScore® is the world's first GenAI system to precisely assess IELTS speaking performance across all official criteria. Its sophisticated speech analysis delivers comprehensive feedback on Fluency and Coherence, Lexical Resource, Grammatical Range and Accuracy, and Pronunciation for all three speaking assessment sections.</p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ad Container - Removed -->
+
+<!-- GenAI Technology Overview Section removed (duplicate content) -->
+
+<!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose IELTS GenAI Prep for Your Assessment Preparation?</h2>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3 text-center">
+                    <img src="{{ url_for('static', filename='images/checklist_icon.svg') }}?v={{ cache_buster }}" alt="Comprehensive IELTS Assessment Preparation" 
+                        class="mx-auto d-block mb-3" width="80" height="80">
+                    <h3 class="h4">Comprehensive IELTS Assessment Preparation</h3>
+                    <p>Master the IELTS Writing and Speaking modules with the world's only GenAI-driven assessments aligned with the official IELTS band descriptors for accurate feedback for both IELTS Academic and General Training. Boost your skills and achieve your target score with confidence.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3 text-center">
+                    <img src="{{ url_for('static', filename='images/graduate_icon.svg') }}?v={{ cache_buster }}" alt="Personal GenAI IELTS Coach" 
+                        class="mx-auto d-block mb-3" width="80" height="80">
+                    <h3 class="h4">Your Personal GenAI IELTS Coach</h3>
+                    <p>Get detailed feedback aligned with the official IELTS assessment criteria on both speaking and writing tasks with TrueScore® and ClearScore®.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3 text-center">
+                    <img src="{{ url_for('static', filename='images/globe_icon.svg') }}?v={{ cache_buster }}" alt="Global Assessment Preparation: At Your Own Pace, from Anywhere" 
+                        class="mx-auto d-block mb-3" width="80" height="80">
+                    <h3 class="h4">Global Assessment Preparation: At Your Own Pace, from Anywhere</h3>
+                    <p>Whether you're a student striving for academic success or an individual chasing new horizons through study or career opportunities abroad, our inclusive platform empowers your goals, delivering world-class assessment preparation tailored to your journey, wherever you are.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Product Plans Section -->
+{% if not current_user.is_authenticated %}
+<section class="pricing py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">GenAI Assessed IELTS Modules</h2>
+        <p class="text-center mb-5">Our specialized GenAI technologies provide accurate assessment for IELTS preparation</p>
+        
+        <!-- TrueScore® Section -->
+        <div class="genai-brand-section mb-5">
+            <div class="text-center mb-4">
+                <div class="brand-icon text-success">
+                    <i class="fas fa-pencil-alt"></i>
+                </div>
+                <h3 class="brand-title">TrueScore® Writing Assessment</h3>
+                <p class="brand-tagline">Professional GenAI assessment of IELTS writing tasks aligned with the official IELTS band descriptors on Task Achievement, Coherence and Cohesion, Lexical Resource, and Grammatical Range and Accuracy</p>
+            </div>
+            
+            <div class="row equal-height-cards">
+                <!-- Academic Writing Assessment -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card pricing-card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h3 class="my-0 font-weight-bold">Academic Writing</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="pricing-features mt-3 mb-4">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 4 complete assessment sets of:</li>
+                                    <li class="mb-2 ms-4">Task 1: Chart & Graph analysis</li>
+                                    <li class="mb-2 ms-4">Task 2: Academic essay writing</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> TrueScore® GenAI detailed feedback</li>
+                                </ul>
+                            </div>
+                            <div class="mt-auto d-grid">
+                                <a href="{{ url_for('register') }}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-rocket"></i> Get Started
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- General Training Writing Assessment -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card pricing-card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h3 class="my-0 font-weight-bold">General Writing</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="pricing-features mt-3 mb-4">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 4 complete assessment sets of:</li>
+                                    <li class="mb-2 ms-4">Task 1: Formal & informal letters</li>
+                                    <li class="mb-2 ms-4">Task 2: General essay writing</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> TrueScore® GenAI detailed feedback</li>
+                                </ul>
+                            </div>
+                            <div class="mt-auto d-grid">
+                                <a href="{{ url_for('register') }}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-rocket"></i> Get Started
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ClearScore® Section -->
+        <div class="genai-brand-section">
+            <div class="text-center mb-4">
+                <div class="brand-icon text-primary">
+                    <i class="fas fa-microphone-alt"></i>
+                </div>
+                <h3 class="brand-title">ClearScore® Speaking Assessment</h3>
+                <p class="brand-tagline">Advanced GenAI speech analysis and feedback aligned with the official IELTS band assessment criteria on Fluency and Coherence, Lexical Resource, Grammatical Range and Accuracy, and Pronunciation</p>
+            </div>
+            
+            <div class="row equal-height-cards">
+                <!-- Academic Speaking Assessment -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card pricing-card">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h3 class="my-0 font-weight-bold">Academic Speaking</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="pricing-features mt-3 mb-4">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 4 complete assessment sets of:</li>
+                                    <li class="mb-2 ms-4">Part 1: Introduction & interview</li>
+                                    <li class="mb-2 ms-4">Part 2: Speaking on a topic</li>
+                                    <li class="mb-2 ms-4">Part 3: Two-way discussion</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> ClearScore® GenAI speech analysis</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Audio recording & playback</li>
+                                </ul>
+                            </div>
+                            <div class="mt-auto d-grid">
+                                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-rocket"></i> Get Started
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- General Training Speaking Assessment -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card pricing-card">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h3 class="my-0 font-weight-bold">General Speaking</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="pricing-features mt-3 mb-4">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 4 complete assessment sets of:</li>
+                                    <li class="mb-2 ms-4">Part 1: Introduction & interview</li>
+                                    <li class="mb-2 ms-4">Part 2: Speaking on a topic</li>
+                                    <li class="mb-2 ms-4">Part 3: Two-way discussion</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> ClearScore® GenAI speech analysis</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Audio recording & playback</li>
+                                </ul>
+                            </div>
+                            <div class="mt-auto d-grid">
+                                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-rocket"></i> Get Started
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+
+
+<!-- Testimonials Section -->
+<section class="testimonials py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">IELTS Success Stories: Users Who Achieved Their Target Band Scores</h2>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card testimonial-card">
+                    <div class="card-body">
+                        <div class="testimonial-rating mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="testimonial-text">"TrueScore® and ClearScore® completely transformed my IELTS preparation. As the only standardized GenAI assessment tools for IELTS, they gave me precise feedback aligned with official marking criteria. Thanks to their accurate assessments, I improved from Band 6 to 7.5 and secured admission to my dream university!"</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-name">Rahul S.</div>
+                            <div class="testimonial-location">New Delhi, India</div>
+                            <div class="testimonial-score">Overall Band Score: 7.5</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card testimonial-card">
+                    <div class="card-body">
+                        <div class="testimonial-rating mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="testimonial-text">"TrueScore® is truly revolutionary for IELTS writing preparation. Being the only standardized GenAI writing assessment that perfectly aligns with official IELTS criteria, it gave me exactly the guidance I needed. The detailed feedback on Task Achievement and Coherence helped me achieve my target band score on the first attempt!"</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-name">Fatima A.</div>
+                            <div class="testimonial-location">Cebu, Philippines</div>
+                            <div class="testimonial-score">Overall Band Score: 8.0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card testimonial-card">
+                    <div class="card-body">
+                        <div class="testimonial-rating mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star-half-alt text-warning"></i>
+                        </div>
+                        <p class="testimonial-text">"ClearScore® is absolutely unique in the IELTS preparation world. As the only GenAI speaking assessment tool that accurately applies IELTS criteria, it identified my precise pronunciation issues and provided standardized feedback. Using the world's only GenAI tool calibrated to IELTS standards helped me secure the Band 7.0 I needed for my immigration application!"</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-name">Min-Jun K.</div>
+                            <div class="testimonial-location">Vancouver, Canada</div>
+                            <div class="testimonial-score">Overall Band Score: 7.0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ad Container - Removed -->
+
+<!-- CTA Section -->
+<section class="cta py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="mb-4">Experience the World's ONLY Standardized IELTS GenAI Assessment System</h2>
+        <div class="mb-4">
+            <span class="badge bg-light text-dark p-2 me-2 mb-2" style="font-size: 1.1rem;">TrueScore® Writing Assessment</span>
+            <span class="badge bg-light text-dark p-2 mb-2" style="font-size: 1.1rem;">ClearScore® Speaking Analysis</span>
+        </div>
+        <p class="lead mb-4">Join thousands of successful IELTS candidates who achieved their target band scores using our exclusive GenAI assessment technology. Our proprietary tools are the only solutions that accurately apply official IELTS marking criteria to provide standardized, examiner-aligned feedback.</p>
+
+        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg fw-bold">
+            <i class="fas fa-graduation-cap me-2"></i>Get Started with TrueScore® & ClearScore®
+        </a>
+    </div>
+</section>
+{% endblock %}
