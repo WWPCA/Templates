@@ -1,0 +1,230 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('practice_index') }}">Practice Tests</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Reading</li>
+                </ol>
+            </nav>
+            
+            {% if taking_test %}
+                <!-- Timer Display -->
+                <div id="test-timer" class="timer" data-test-type="reading">60:00</div>
+                
+                <!-- Test Content -->
+                <div class="practice-test">
+                    <h1 class="mb-4">{{ test.title }}</h1>
+                    <p class="lead">{{ test.description }}</p>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h4 mb-0">Reading Passage</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="reading-passage">
+                                <!-- This would contain the actual reading passage from the database -->
+                                <p>{{ test.description }}</p>
+                                
+                                <!-- Placeholder text for the reading passage -->
+                                <h3>{{ test.title }}</h3>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nulla id aliquam convallis, nunc nulla tincidunt nunc, nec aliquam dui nisl ac nisl. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam.</p>
+                                
+                                <p>Maecenas vitae eros eget nunc aliquam aliquam. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam.</p>
+                                
+                                <p>Praesent euismod, mauris nec aliquam aliquam, nunc nulla tincidunt nunc, nec aliquam dui nisl ac nisl. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam.</p>
+                                
+                                <h4>Section A</h4>
+                                <p>Suspendisse potenti. Nullam auctor, nulla id aliquam convallis, nunc nulla tincidunt nunc, nec aliquam dui nisl ac nisl. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam.</p>
+                                
+                                <p>Maecenas vitae eros eget nunc aliquam aliquam. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam.</p>
+                                
+                                <h4>Section B</h4>
+                                <p>Praesent euismod, mauris nec aliquam aliquam, nunc nulla tincidunt nunc, nec aliquam dui nisl ac nisl. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam.</p>
+                                
+                                <p>Suspendisse potenti. Nullam auctor, nulla id aliquam convallis, nunc nulla tincidunt nunc, nec aliquam dui nisl ac nisl. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam.</p>
+                                
+                                <h4>Section C</h4>
+                                <p>Maecenas vitae eros eget nunc aliquam aliquam. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam.</p>
+                                
+                                <p>Praesent euismod, mauris nec aliquam aliquam, nunc nulla tincidunt nunc, nec aliquam dui nisl ac nisl. Sed sit amet enim ac nisl tincidunt aliquam. Sed sit amet enim ac nisl tincidunt aliquam.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form id="practice-test-form" data-test-id="{{ test.id }}" data-test-type="reading">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h2 class="h4 mb-0">Questions</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="questions">
+                                    {% for q_id, question in test.questions.items() %}
+                                        <div class="question mb-4">
+                                            <p class="question-text">{{ question }}</p>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control answer-input" 
+                                                      placeholder="Your answer" data-question-id="{{ q_id }}">
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Answers</button>
+                        </div>
+                    </form>
+                    
+                    <div id="test-results" class="mt-5"></div>
+                </div>
+                
+            {% else %}
+                <!-- Reading Test List -->
+                <h1 class="mb-4">IELTS Reading Practice Tests</h1>
+                
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-book-open fa-2x"></i>
+                        </div>
+                        <div>
+                            <h4>About IELTS Reading</h4>
+                            <p class="mb-0">The IELTS Reading test takes 60 minutes and consists of 40 questions. Academic Reading contains three long texts, which range from descriptive and factual to discursive and analytical. General Training Reading contains extracts from books, magazines, newspapers, and advertisements.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if not current_user.is_subscribed() %}
+                    <div class="alert alert-warning mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-crown fa-2x"></i>
+                            </div>
+                            <div>
+                                <h4>Premium Access Required</h4>
+                                <p>Subscribe to unlock all 12 practice tests for each test type.</p>
+                                <a href="{{ url_for('subscribe') }}" class="btn btn-primary">Subscribe Now</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h4 mb-0">Tips for IELTS Reading</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h3 class="h5"><i class="fas fa-check me-2 text-success"></i> Skim and scan</h3>
+                                    <p>Quickly skim the texts first, then scan for specific information when answering questions.</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h3 class="h5"><i class="fas fa-check me-2 text-success"></i> Manage your time</h3>
+                                    <p>Spend around 20 minutes on each passage. Don't spend too long on any single question.</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h3 class="h5"><i class="fas fa-check me-2 text-success"></i> Read the instructions carefully</h3>
+                                    <p>Pay attention to word limits and follow instructions precisely.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h3 class="h5"><i class="fas fa-check me-2 text-success"></i> Identify keywords</h3>
+                                    <p>Recognize key terms in questions to help locate relevant information in the text.</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h3 class="h5"><i class="fas fa-check me-2 text-success"></i> Understand question types</h3>
+                                    <p>Different question types (multiple choice, matching, True/False/Not Given) require different approaches.</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h3 class="h5"><i class="fas fa-check me-2 text-success"></i> Watch for synonyms</h3>
+                                    <p>The text rarely uses exactly the same words as the questions.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="mb-3">Available Reading Tests</h3>
+                
+                <div class="row">
+                    {% for test in tests %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h3 class="h5 mb-0">{{ test.title }}</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ test.description }}</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-book-open me-2 text-primary"></i> Section {{ test.section }}</li>
+                                        <li><i class="fas fa-question-circle me-2 text-primary"></i> {{ test.questions|length }} questions</li>
+                                        <li><i class="fas fa-clock me-2 text-primary"></i> 60 minutes</li>
+                                    </ul>
+                                    {% if current_user.is_authenticated and test.id in completed_test_ids %}
+                                        <div class="mt-2 text-success">
+                                            <i class="fas fa-check-circle"></i> Completed
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-white text-center">
+                                    {% if current_user.is_authenticated and test.id in completed_test_ids %}
+                                        <button class="btn btn-secondary" disabled>
+                                            <i class="fas fa-check-circle me-1"></i> Completed
+                                        </button>
+                                    {% else %}
+                                        <a href="{{ url_for('test_details', test_type='reading', test_id=test.id) }}" class="btn btn-primary">
+                                            Test Details
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    {% if tests|length == 0 %}
+                        <div class="col-12">
+                            <div class="alert alert-info text-center">
+                                <p class="mb-0">No reading tests available at the moment. Please check back later.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if not current_user.is_subscribed() and tests|length > 0 %}
+                        {% for i in range(3) %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h3 class="h5 mb-0">Premium Reading Test {{ i+1 }}</h3>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-lock fa-4x text-secondary mb-3"></i>
+                                        <p>This test is available to premium subscribers only.</p>
+                                    </div>
+                                    <div class="card-footer bg-white text-center">
+                                        <a href="{{ url_for('subscribe') }}" class="btn btn-primary">
+                                            Subscribe to Access
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
