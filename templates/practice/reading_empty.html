@@ -1,0 +1,247 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- IELTS Header -->
+    <div class="bg-light border-bottom p-2 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="/static/images/ielts-logo.svg" alt="IELTS" height="30" class="me-2">
+            <span class="fw-bold">Test taker ID</span>
+        </div>
+        <div id="test-timer" class="timer badge bg-primary" data-test-type="reading">60:00</div>
+        <div>
+            <i class="fas fa-wifi me-3"></i>
+            <i class="fas fa-bell me-3"></i>
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+    
+    <!-- Part Indicator -->
+    <div class="bg-light border-bottom p-2">
+        <div class="container-fluid">
+            <h6 class="mb-1">Part 1</h6>
+            <p class="mb-0 small">Read the text and answer questions 1-13</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row g-0">
+        <!-- Left Column - Reading Passage -->
+        <div class="col-md-6 border-end">
+            <div class="reading-passage p-3" style="height: calc(100vh - 110px); overflow-y: auto;">
+                <h5 class="mb-3">The life and work of Marie Curie</h5>
+                
+                <p>Marie Curie is perhaps the most famous woman scientist who has ever lived. Born Maria Sklodowska in Poland in 1867, she is famous for her work on radioactivity, and was twice a winner of the Nobel Prize. With her husband, Pierre Curie, and Henri Becquerel, she was awarded the 1903 Nobel Prize for Physics, and was then sole winner of the 1911 Nobel Prize for Chemistry. She was the first woman to win a Nobel Prize.</p>
+                
+                <p>From childhood, Marie was remarkable for her prodigious memory, and at the age of 16 won a gold medal on completion of her secondary education. Because her father lost his savings through bad investment, she then had to take work as a teacher. From her earnings she was able to finance her sister Bronia's medical studies in Paris, on the understanding that Bronia would in turn later help her to get an education.</p>
+                
+                <p>In 1891 this promise was fulfilled and Marie went to Paris and began to study at the Sorbonne (the University of Paris). She often worked far into the night and lived on little more than bread and butter and tea. She came first in the examination in the physical sciences in 1893, and in 1894 was placed second in the examination in mathematical sciences. It was not until the spring of that year that she was introduced to Pierre Curie.</p>
+                
+                <p>Their marriage in 1895 marked the start of a partnership that was soon to achieve results of world significance. Following Henri Becquerel's discovery in 1896 of a new phenomenon, which Marie later called 'radioactivity', Marie Curie decided to find out if the radioactivity discovered in uranium was to be found in other elements. She discovered that this was true for thorium.</p>
+                
+                <p>Turning her attention to minerals, she found that pitchblende, a mineral whose radioactivity, superior to that of pure uranium, could be explained only by the presence in the ore of small quantities of an unknown substance of very high activity. Pierre Curie joined her in the work that she had undertaken to resolve this problem, and that led to the discovery of the new elements, polonium and radium. While Pierre Curie devoted himself chiefly to the physical study of the new radiations, Marie Curie struggled to obtain pure radium in the metallic state. This was achieved with the help of the chemist André-Louis Debierne, one of Pierre Curie's pupils. Based on the results of this research, Marie Curie received her Doctorate of Science, and in 1903 Marie and Pierre shared with Becquerel the Nobel Prize for Physics for the discovery of radioactivity.</p>
+                
+                <p>The births of Marie's two daughters, Irène and Eve, in 1897 and 1904 failed to interrupt her scientific work. She was appointed lecturer in physics at the École Normale Supérieure for girls in Sèvres, France (1900), and introduced a method of teaching based on experimental demonstrations. In December 1904 she was appointed chief assistant in the laboratory directed by Pierre Curie.</p>
+                
+                <p>The sudden death of Pierre Curie in 1906 was a bitter blow to Marie Curie, but was also a turning point in her career: she was elected to the position he had held at the Sorbonne. She was the first woman to teach there. In addition, she took his place at the laboratory, becoming director of the Curie Laboratory in the Radium Institute of the University of Paris, founded in 1914.</p>
+                
+                <p>Throughout World War I, Marie Curie, with the help of her daughter Irène, devoted herself to the development of the use of X-radiography, including the mobile units which came to be known as 'little Curies', used for the treatment of wounded soldiers. In 1918 the Radium Institute began to operate in earnest, and became a centre for nuclear physics and chemistry. Marie Curie worked there until her death in 1934.</p>
+                
+                <p>Marie Curie's work laid the foundation for much of the nuclear research that followed. Her contributions to science earned her many awards and recognitions, and she remains an icon for women in science and a role model for generations of young scientists around the world.</p>
+            </div>
+        </div>
+
+        <!-- Right Column - Questions -->
+        <div class="col-md-6">
+            <div class="questions-container" style="height: calc(100vh - 110px); overflow-y: auto;">
+                <form id="practice-test-form" data-test-id="{{ test.id }}" data-test-type="reading">
+                    <div class="p-3">
+                        <h6 class="mb-3">Questions 1-6</h6>
+                        <p class="mb-3">Choose <strong>TRUE</strong> if the statement agrees with the information given in the text, choose <strong>FALSE</strong> if the statement contradicts the information, or choose <strong>NOT GIVEN</strong> if there is no information on this.</p>
+                        
+                        <div class="question-item mb-4" id="question-1">
+                            <p class="mb-2"><strong>1</strong> Marie Curie's husband was a joint winner of both Marie's Nobel Prizes.</p>
+                            <div class="ms-4">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q1" id="q1-true" value="TRUE" data-question-id="q1">
+                                    <label class="form-check-label" for="q1-true">TRUE</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q1" id="q1-false" value="FALSE" data-question-id="q1">
+                                    <label class="form-check-label" for="q1-false">FALSE</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input answer-input" type="radio" name="q1" id="q1-ng" value="NOT GIVEN" data-question-id="q1">
+                                    <label class="form-check-label" for="q1-ng">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question-item mb-4" id="question-2">
+                            <p class="mb-2"><strong>2</strong> Marie became interested in science when she was a child.</p>
+                            <div class="ms-4">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q2" id="q2-true" value="TRUE" data-question-id="q2">
+                                    <label class="form-check-label" for="q2-true">TRUE</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q2" id="q2-false" value="FALSE" data-question-id="q2">
+                                    <label class="form-check-label" for="q2-false">FALSE</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input answer-input" type="radio" name="q2" id="q2-ng" value="NOT GIVEN" data-question-id="q2">
+                                    <label class="form-check-label" for="q2-ng">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question-item mb-4" id="question-3">
+                            <p class="mb-2"><strong>3</strong> Marie was able to attend the Sorbonne because of her sister's financial contribution.</p>
+                            <div class="ms-4">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q3" id="q3-true" value="TRUE" data-question-id="q3">
+                                    <label class="form-check-label" for="q3-true">TRUE</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q3" id="q3-false" value="FALSE" data-question-id="q3">
+                                    <label class="form-check-label" for="q3-false">FALSE</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input answer-input" type="radio" name="q3" id="q3-ng" value="NOT GIVEN" data-question-id="q3">
+                                    <label class="form-check-label" for="q3-ng">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question-item mb-4" id="question-4">
+                            <p class="mb-2"><strong>4</strong> Marie stopped doing research for several years when her children were born.</p>
+                            <div class="ms-4">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q4" id="q4-true" value="TRUE" data-question-id="q4">
+                                    <label class="form-check-label" for="q4-true">TRUE</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q4" id="q4-false" value="FALSE" data-question-id="q4">
+                                    <label class="form-check-label" for="q4-false">FALSE</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input answer-input" type="radio" name="q4" id="q4-ng" value="NOT GIVEN" data-question-id="q4">
+                                    <label class="form-check-label" for="q4-ng">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question-item mb-4" id="question-5">
+                            <p class="mb-2"><strong>5</strong> Marie took over Pierre's teaching position after his death.</p>
+                            <div class="ms-4">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q5" id="q5-true" value="TRUE" data-question-id="q5">
+                                    <label class="form-check-label" for="q5-true">TRUE</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q5" id="q5-false" value="FALSE" data-question-id="q5">
+                                    <label class="form-check-label" for="q5-false">FALSE</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input answer-input" type="radio" name="q5" id="q5-ng" value="NOT GIVEN" data-question-id="q5">
+                                    <label class="form-check-label" for="q5-ng">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question-item mb-4" id="question-6">
+                            <p class="mb-2"><strong>6</strong> Marie's daughter Irène won a Nobel Prize with her husband.</p>
+                            <div class="ms-4">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q6" id="q6-true" value="TRUE" data-question-id="q6">
+                                    <label class="form-check-label" for="q6-true">TRUE</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input answer-input" type="radio" name="q6" id="q6-false" value="FALSE" data-question-id="q6">
+                                    <label class="form-check-label" for="q6-false">FALSE</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input answer-input" type="radio" name="q6" id="q6-ng" value="NOT GIVEN" data-question-id="q6">
+                                    <label class="form-check-label" for="q6-ng">NOT GIVEN</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Question Navigation -->
+    <div class="bg-light border-top p-2 d-flex justify-content-between align-items-center">
+        <div class="part-navigation">
+            <span class="badge bg-secondary mx-1">Part 1</span>
+            <button class="btn btn-sm btn-outline-secondary mx-1">1</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1 active">2</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">3</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">4</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">5</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">6</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">7</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">8</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">9</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">10</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">11</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">12</button>
+            <button class="btn btn-sm btn-outline-secondary mx-1">13</button>
+        </div>
+        <div class="test-navigation d-flex align-items-center">
+            <span class="me-2">Part 2</span>
+            <span class="badge bg-light text-dark me-3">0 of 13</span>
+            <button type="button" class="btn btn-primary">
+                <i class="fas fa-check"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Question navigation
+        const questionButtons = document.querySelectorAll('.part-navigation button');
+        const questionItems = document.querySelectorAll('.question-item');
+        
+        // Set up question navigation
+        questionButtons.forEach((button, index) => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                questionButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                // Scroll to the corresponding question
+                if (questionItems[index]) {
+                    questionItems[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // Track radio button selections and update completed count
+        const radioButtons = document.querySelectorAll('.answer-input[type="radio"]');
+        const completedCountElement = document.querySelector('.test-navigation .badge');
+        
+        function updateCompletedCount() {
+            // Count the number of questions that have at least one radio button selected
+            const answeredQuestions = new Set();
+            radioButtons.forEach(radio => {
+                if (radio.checked) {
+                    answeredQuestions.add(radio.name);
+                }
+            });
+            
+            completedCountElement.textContent = `${answeredQuestions.size} of 13`;
+        }
+        
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', updateCompletedCount);
+        });
+    });
+</script>
+{% endblock %}
