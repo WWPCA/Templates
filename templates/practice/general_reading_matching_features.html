@@ -1,0 +1,245 @@
+{% extends 'layout.html' %}
+
+{% block title %}IELTS General Training Reading: Matching Features{% endblock %}
+
+{% block styles %}
+<style>
+  .test-container {
+    display: flex;
+    margin-top: 20px;
+  }
+  
+  .passage-column {
+    flex: 1;
+    padding-right: 20px;
+    overflow-y: auto;
+    max-height: 70vh;
+  }
+  
+  .questions-column {
+    flex: 1;
+    padding-left: 20px;
+    border-left: 1px solid #ccc;
+  }
+  
+  .question-container {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+  }
+  
+  .question-text {
+    margin-bottom: 15px;
+    font-weight: normal;
+  }
+  
+  .options-container {
+    margin-top: 15px;
+  }
+  
+  .option-row {
+    margin-bottom: 8px;
+  }
+  
+  .option-label {
+    margin-right: 10px;
+    font-weight: bold;
+    min-width: 25px;
+    display: inline-block;
+  }
+  
+  .feature-list {
+    margin-top: 25px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .feature-item {
+    margin-bottom: 8px;
+  }
+  
+  .timer-container {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 5px;
+  }
+  
+  .nav-button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .nav-button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  
+  .submit-button-container {
+    text-align: center;
+    margin-top: 25px;
+    margin-bottom: 40px;
+  }
+  
+  /* Feature selection table */
+  .features-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  
+  .features-table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .heading-row td {
+    font-weight: bold;
+    background-color: #f5f5f5;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-3">General Training Reading: Matching Features</h1>
+  
+  <div class="alert alert-info">
+    <strong>Instructions:</strong> Read the passage and then choose the correct features (A-C) for each statement.
+    You may choose the features more than once.
+    <br>
+    <strong>Time allowed:</strong> 1 hour
+  </div>
+  
+  <div class="timer-container">
+    <div>Time remaining: <span id="timer">60:00</span></div>
+  </div>
+  
+  <form method="post" id="reading-test-form">
+    <div class="test-container">
+      <div class="passage-column">
+        <h2 class="h4 mb-3">{{ test.title }}</h2>
+        <div class="passage-content">
+          {{ test.content|safe }}
+        </div>
+      </div>
+      
+      <div class="questions-column">
+        <h3 class="h5 mb-3">Questions 1-4</h3>
+        <p>Choose the correct feature, A-C, for each statement. You may choose any feature more than once.</p>
+        
+        {% for i in range(1, 5) %}
+        <div class="question-container">
+          <div class="d-flex">
+            <div class="mr-2"><strong>{{ i }}</strong></div>
+            <div class="question-text">{{ test.questions[i-1][11:] }}</div>
+          </div>
+          
+          <table class="features-table">
+            <tr class="heading-row">
+              <td>A</td>
+              <td>B</td>
+              <td>C</td>
+            </tr>
+            <tr>
+              <td>
+                <input type="radio" id="q{{ i }}_A" name="q{{ i }}" value="A" required>
+              </td>
+              <td>
+                <input type="radio" id="q{{ i }}_B" name="q{{ i }}" value="B" required>
+              </td>
+              <td>
+                <input type="radio" id="q{{ i }}_C" name="q{{ i }}" value="C" required>
+              </td>
+            </tr>
+          </table>
+        </div>
+        {% endfor %}
+        
+        <div class="feature-list">
+          <h4 class="h6 mb-3">List of Features</h4>
+          {% for i, feature in enumerate(test.features) %}
+          <div class="feature-item">
+            <strong>{{ ['A', 'B', 'C'][i] }}</strong>: {{ feature }}
+          </div>
+          {% endfor %}
+        </div>
+        
+        <div class="submit-button-container">
+          <button type="submit" class="btn btn-primary btn-lg">Submit Answers</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="navigation">
+      {% for i in range(1, 5) %}
+      <div class="nav-button {% if i == 1 %}active{% endif %}" onclick="scrollToQuestion({{ i }})">{{ i }}</div>
+      {% endfor %}
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Timer functionality
+    function startTimer(duration, display) {
+      let timer = duration, minutes, seconds;
+      let interval = setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+          clearInterval(interval);
+          alert("Time's up! Your answers will be submitted.");
+          document.getElementById('reading-test-form').submit();
+        }
+      }, 1000);
+    }
+    
+    // Navigation functionality
+    window.scrollToQuestion = function(num) {
+      const questions = document.querySelectorAll('.question-container');
+      if (questions[num-1]) {
+        questions[num-1].scrollIntoView({ behavior: 'smooth' });
+        
+        // Update active button
+        document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.nav-button')[num-1].classList.add('active');
+      }
+    };
+    
+    // Start the timer (60 minutes)
+    const sixtyMinutes = 60 * 60;
+    const display = document.getElementById('timer');
+    startTimer(sixtyMinutes, display);
+  });
+</script>
+{% endblock %}
