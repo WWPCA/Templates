@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+
+{% block title %}Age Verification - IELTS GenAI Prep{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">Age Verification</h1>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h4>Age Requirement</h4>
+                                <p class="mb-0">
+                                    You must be at least 16 years old to use IELTS GenAI Prep.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-4">
+                        To comply with data protection regulations and ensure appropriate safeguards, 
+                        we need to verify that you meet the minimum age requirement of 16 years.
+                    </p>
+                    
+                    <form action="{{ url_for('gdpr.verify_age') }}" method="post" class="mt-4">
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="age_verification" name="age_verification" required>
+                            <label class="form-check-label" for="age_verification">
+                                <strong>I confirm that I am at least 16 years old.</strong>
+                            </label>
+                        </div>
+                        
+                        <input type="hidden" name="next" value="{{ request.args.get('next', url_for('index')) }}">
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="continue-btn">Continue</button>
+                        </div>
+                    </form>
+                    
+                    <div class="alert alert-info mt-4">
+                        <p class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            If you are under 16 years old, you must have your parent or guardian's permission to use IELTS GenAI Prep.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Store age verification in session on form submission
+        document.querySelector('form').addEventListener('submit', function() {
+            if (document.getElementById('age_verification').checked) {
+                sessionStorage.setItem('age_verified', 'true');
+            }
+        });
+    });
+</script>
+{% endblock %}
