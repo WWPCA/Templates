@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Assessments - IELTS GenAI Prep</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .user-details h2 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 28px;
+        }
+        .user-details p {
+            margin: 0;
+            color: #666;
+            font-size: 16px;
+        }
+        .session-info {
+            background: #e3f2fd;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1976d2;
+        }
+        .assessments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        .assessment-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .assessment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        }
+        .assessment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .assessment-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 16px;
+            color: white;
+        }
+        .writing-icon {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        .speaking-icon {
+            background: linear-gradient(135deg, #007bff, #6610f2);
+        }
+        .assessment-title {
+            flex: 1;
+        }
+        .assessment-title h3 {
+            margin: 0 0 4px 0;
+            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .assessment-title p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .assessment-features {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0;
+        }
+        .assessment-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+            font-size: 14px;
+        }
+        .assessment-features li:last-child {
+            border-bottom: none;
+        }
+        .assessment-features li i {
+            color: #28a745;
+            margin-right: 8px;
+            width: 16px;
+        }
+        .access-button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .access-button.available {
+            background: #28a745;
+            color: white;
+        }
+        .access-button.available:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+        .access-button.locked {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+            cursor: not-allowed;
+        }
+        .mobile-notice {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            border-left: 4px solid #17a2b8;
+        }
+        .mobile-notice h4 {
+            color: #17a2b8;
+            margin: 0 0 12px 0;
+            font-size: 18px;
+        }
+        .mobile-notice p {
+            margin: 0;
+            color: #555;
+            line-height: 1.6;
+        }
+        .logout-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .logout-btn {
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 15px;
+            }
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            .assessments-grid {
+                grid-template-columns: 1fr;
+            }
+            .header-card, .assessment-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header with User Info -->
+        <div class="header-card">
+            <div class="user-info">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div class="user-avatar" id="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <h2 id="user-name">Loading...</h2>
+                        <p id="user-email">Retrieving user information...</p>
+                    </div>
+                </div>
+                <div class="session-info">
+                    <i class="fas fa-mobile-alt"></i>
+                    Authenticated via Mobile App
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile App Notice -->
+        <div class="mobile-notice">
+            <h4><i class="fas fa-info-circle"></i> Seamless Mobile-Web Experience</h4>
+            <p>
+                You've successfully authenticated from your mobile app! Your purchased assessments are now available on this web platform. 
+                Return to your mobile app anytime to scan new QR codes or make additional purchases.
+            </p>
+        </div>
+
+        <!-- Assessments Grid -->
+        <div class="assessments-grid" id="assessments-container">
+            <!-- Assessment cards will be loaded here -->
+        </div>
+
+        <!-- Logout Section -->
+        <div class="logout-section">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> End Session
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Assessment product definitions
+        const assessmentProducts = {
+            'academic-writing': {
+                title: 'TrueScore® GenAI Writing Assessment',
+                subtitle: 'Academic Training',
+                icon: 'fas fa-pen-fancy',
+                iconClass: 'writing-icon',
+                features: [
+                    'AI-powered essay evaluation',
+                    'Detailed feedback on Task Achievement',
+                    'Coherence and Cohesion analysis',
+                    'Lexical Resource assessment',
+                    'Grammatical Range scoring',
+                    'Instant band score prediction'
+                ]
+            },
+            'academic-speaking': {
+                title: 'ClearScore® GenAI Speaking Assessment',
+                subtitle: 'Academic Training',
+                icon: 'fas fa-microphone',
+                iconClass: 'speaking-icon',
+                features: [
+                    'Bi-directional conversation with AI Maya',
+                    'Real-time pronunciation feedback',
+                    'Fluency and Coherence evaluation',
+                    'Vocabulary usage analysis',
+                    'Grammar accuracy scoring',
+                    'Complete speaking test simulation'
+                ]
+            },
+            'general-writing': {
+                title: 'TrueScore® GenAI Writing Assessment',
+                subtitle: 'General Training',
+                icon: 'fas fa-pen-fancy',
+                iconClass: 'writing-icon',
+                features: [
+                    'Letter writing (Task 1) evaluation',
+                    'Essay assessment (Task 2)',
+                    'Task-specific feedback',
+                    'Writing style analysis',
+                    'Grammar and vocabulary scoring',
+                    'Practical writing skills development'
+                ]
+            },
+            'general-speaking': {
+                title: 'ClearScore® GenAI Speaking Assessment',
+                subtitle: 'General Training',
+                icon: 'fas fa-microphone',
+                iconClass: 'speaking-icon',
+                features: [
+                    'Natural conversation practice',
+                    'Real-world topic discussions',
+                    'Pronunciation improvement',
+                    'Confidence building exercises',
+                    'Interactive speaking scenarios',
+                    'Personalized feedback system'
+                ]
+            }
+        };
+
+        // Load user session and products
+        async function loadUserProfile() {
+            try {
+                // Check if user has valid session
+                const sessionCookie = getCookie('web_session_id');
+                if (!sessionCookie) {
+                    window.location.href = '/qr-auth';
+                    return;
+                }
+
+                // Get user info from session storage or make API call
+                const userInfo = sessionStorage.getItem('user_info');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    displayUserProfile(user);
+                    displayUserAssessments(user.products || []);
+                } else {
+                    // Redirect to QR auth if no user info
+                    window.location.href = '/qr-auth';
+                }
+            } catch (error) {
+                console.error('Failed to load user profile:', error);
+                window.location.href = '/qr-auth';
+            }
+        }
+
+        function displayUserProfile(user) {
+            const userNameEl = document.getElementById('user-name');
+            const userEmailEl = document.getElementById('user-email');
+            const userAvatarEl = document.getElementById('user-avatar');
+
+            const firstName = user.email.split('@')[0];
+            const initials = firstName.charAt(0).toUpperCase();
+
+            userNameEl.textContent = `Welcome, ${firstName}`;
+            userEmailEl.textContent = user.email;
+            userAvatarEl.textContent = initials;
+        }
+
+        function displayUserAssessments(userProducts) {
+            const container = document.getElementById('assessments-container');
+            container.innerHTML = '';
+
+            // Create cards for all assessment types
+            Object.keys(assessmentProducts).forEach(productId => {
+                const product = assessmentProducts[productId];
+                const hasAccess = userProducts.includes(productId);
+                
+                const card = document.createElement('div');
+                card.className = 'assessment-card';
+                card.innerHTML = `
+                    <div class="assessment-header">
+                        <div class="assessment-icon ${product.iconClass}">
+                            <i class="${product.icon}"></i>
+                        </div>
+                        <div class="assessment-title">
+                            <h3>${product.title}</h3>
+                            <p>${product.subtitle}</p>
+                        </div>
+                    </div>
+                    
+                    <ul class="assessment-features">
+                        ${product.features.map(feature => `
+                            <li><i class="fas fa-check"></i> ${feature}</li>
+                        `).join('')}
+                    </ul>
+                    
+                    ${hasAccess ? `
+                        <a href="/assessment/${productId}" class="access-button available">
+                            <i class="fas fa-play"></i> Start Assessment
+                        </a>
+                    ` : `
+                        <div class="access-button locked">
+                            <i class="fas fa-lock"></i> Purchase in Mobile App
+                        </div>
+                    `}
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function logout() {
+            // Clear session
+            sessionStorage.clear();
+            document.cookie = 'web_session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            
+            // Redirect to QR auth
+            window.location.href = '/qr-auth';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', loadUserProfile);
+
+        // Store user info from QR authentication
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('authenticated') === 'true') {
+            const userEmail = urlParams.get('email');
+            const userProducts = urlParams.get('products') ? urlParams.get('products').split(',') : [];
+            
+            if (userEmail) {
+                sessionStorage.setItem('user_info', JSON.stringify({
+                    email: userEmail,
+                    products: userProducts
+                }));
+            }
+            
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    </script>
+</body>
+</html>
