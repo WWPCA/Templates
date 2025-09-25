@@ -1,0 +1,237 @@
+{% extends "layout.html" %}
+{% set title = "Cookie Policy" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h1 class="h2 text-center mb-4 text-primary">🍪 Cookie Policy</h1>
+                    <p class="text-muted text-center mb-4">
+                        Last updated: {{ current_date or 'June 2025' }}
+                    </p>
+                    
+                    <div class="content-section">
+                        <h2 class="h4 text-primary mb-3">What Are Cookies?</h2>
+                        <p>
+                            Cookies are small text files that are stored on your device when you visit our website. 
+                            They help us provide you with a better experience by remembering your preferences and 
+                            improving our services.
+                        </p>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h2 class="h4 text-primary mb-3">How We Use Cookies</h2>
+                        <p>
+                            IELTS GenAI Prep uses cookies for the following purposes:
+                        </p>
+                        
+                        <div class="cookie-category-details">
+                            <div class="cookie-type">
+                                <h5 class="text-success">
+                                    <i class="fas fa-shield-alt me-2"></i>Essential Cookies (Always Active)
+                                </h5>
+                                <p>
+                                    These cookies are necessary for our website to function properly. They enable core 
+                                    functionality such as security, authentication, and accessibility features.
+                                </p>
+                                <ul class="list-unstyled">
+                                    <li><strong>Session Management:</strong> Keep you logged in during your visit</li>
+                                    <li><strong>Security:</strong> Protect against CSRF attacks and maintain secure connections</li>
+                                    <li><strong>Accessibility:</strong> Remember your accessibility preferences</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="cookie-type">
+                                <h5 class="text-info">
+                                    <i class="fas fa-cog me-2"></i>Preference Cookies
+                                </h5>
+                                <p>
+                                    These cookies remember your settings and preferences to provide a personalized experience.
+                                </p>
+                                <ul class="list-unstyled">
+                                    <li><strong>Language Preferences:</strong> Remember your chosen language</li>
+                                    <li><strong>Theme Settings:</strong> Save your display preferences</li>
+                                    <li><strong>Cookie Consent:</strong> Remember your cookie preferences</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="cookie-type">
+                                <h5 class="text-warning">
+                                    <i class="fas fa-chart-bar me-2"></i>Analytics Cookies
+                                </h5>
+                                <p>
+                                    These cookies help us understand how visitors interact with our website by collecting 
+                                    and reporting information anonymously.
+                                </p>
+                                <ul class="list-unstyled">
+                                    <li><strong>Usage Analytics:</strong> Track which pages are most popular</li>
+                                    <li><strong>Performance Monitoring:</strong> Identify areas for improvement</li>
+                                    <li><strong>Error Tracking:</strong> Help us fix technical issues</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="cookie-type">
+                                <h5 class="text-danger">
+                                    <i class="fas fa-bullhorn me-2"></i>Marketing Cookies
+                                </h5>
+                                <p>
+                                    These cookies are used to deliver relevant advertisements and track the effectiveness 
+                                    of our marketing campaigns.
+                                </p>
+                                <ul class="list-unstyled">
+                                    <li><strong>Targeted Advertising:</strong> Show relevant ads based on your interests</li>
+                                    <li><strong>Campaign Tracking:</strong> Measure advertising effectiveness</li>
+                                    <li><strong>Social Media Integration:</strong> Enable sharing features</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h2 class="h4 text-primary mb-3">Third-Party Cookies</h2>
+                        <p>
+                            Some cookies on our site are set by third-party services we use to enhance your experience:
+                        </p>
+                        <ul>
+                            <li><strong>Google reCAPTCHA:</strong> Protects against spam and abuse</li>
+                            <li><strong>Payment Processors:</strong> Secure mobile app purchase verification</li>
+                            <li><strong>Content Delivery Networks:</strong> Improve website loading speed</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h2 class="h4 text-primary mb-3">Managing Your Cookie Preferences</h2>
+                        <p>
+                            You have full control over your cookie preferences. You can:
+                        </p>
+                        <ul>
+                            <li>Accept or reject specific types of cookies</li>
+                            <li>Change your preferences at any time</li>
+                            <li>Withdraw your consent completely</li>
+                        </ul>
+                        
+                        <div class="text-center mt-4">
+                            <button class="btn btn-primary" onclick="cookieConsent.showSettings()">
+                                <i class="fas fa-cog me-2"></i>Manage Cookie Preferences
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h2 class="h4 text-primary mb-3">Browser Controls</h2>
+                        <p>
+                            You can also control cookies through your browser settings:
+                        </p>
+                        <div class="browser-controls">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><strong>Chrome:</strong></h6>
+                                    <p class="small">Settings → Privacy and security → Cookies and other site data</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><strong>Firefox:</strong></h6>
+                                    <p class="small">Options → Privacy & Security → Cookies and Site Data</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><strong>Safari:</strong></h6>
+                                    <p class="small">Preferences → Privacy → Manage Website Data</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><strong>Edge:</strong></h6>
+                                    <p class="small">Settings → Cookies and site permissions → Cookies and site data</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h2 class="h4 text-primary mb-3">Cookie Retention</h2>
+                        <p>
+                            Different cookies have different lifespans:
+                        </p>
+                        <ul>
+                            <li><strong>Session Cookies:</strong> Deleted when you close your browser</li>
+                            <li><strong>Preference Cookies:</strong> Stored for up to 1 year</li>
+                            <li><strong>Analytics Cookies:</strong> Stored for up to 2 years</li>
+                            <li><strong>Marketing Cookies:</strong> Stored for up to 1 year</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h2 class="h4 text-primary mb-3">Contact Us</h2>
+                        <p>
+                            If you have any questions about our use of cookies, please contact us at:
+                        </p>
+                        <div class="contact-info">
+                            <p><strong>Email:</strong> privacy@ieltsgenaiprep.com</p>
+                            <p><strong>Address:</strong> IELTS GenAI Prep Privacy Team</p>
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h2 class="h4 text-primary mb-3">Changes to This Policy</h2>
+                        <p>
+                            We may update this Cookie Policy from time to time. When we do, we will post the 
+                            updated policy on this page and update the "Last updated" date above.
+                        </p>
+                    </div>
+                    
+                    <div class="text-center mt-5">
+                        <a href="{{ url_for('privacy_policy') }}" class="btn btn-outline-primary me-3">
+                            <i class="fas fa-shield-alt me-2"></i>Privacy Policy
+                        </a>
+                        <a href="{{ url_for('terms_and_payment') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-contract me-2"></i>Terms of Service
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.content-section {
+    margin-bottom: 2rem;
+}
+
+.cookie-type {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #007bff;
+}
+
+.cookie-type h5 {
+    margin-bottom: 0.75rem;
+}
+
+.cookie-type ul li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.cookie-type ul li::before {
+    content: "•";
+    color: #6c757d;
+    position: absolute;
+    left: 0;
+}
+
+.browser-controls .small {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.contact-info {
+    background: #e3f2fd;
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 4px solid #2196f3;
+}
+</style>
+{% endblock %}
