@@ -1,0 +1,237 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('assessment_structure') }}">Assessment Structure</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">IELTS General Training</li>
+                </ol>
+            </nav>
+            
+            <div class="assessment-structure-content">
+                <h1 class="mb-4">IELTS General Training Test</h1>
+                
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h4>About the IELTS Test</h4>
+                            <p class="mb-0">The IELTS General Training test is designed for those migrating to Australia, Canada, New Zealand and the UK, or applying for secondary education, training programmes and work experience in an English-speaking environment.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-primary mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-briefcase fa-2x"></i>
+                        </div>
+                        <div>
+                            <h4>Purpose</h4>
+                            <p class="mb-0">The IELTS General Training test is designed for those planning to migrate to English-speaking countries, seeking secondary education, or engaging in work experience or training programs in English-speaking environments.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 class="mb-3">Test Format</h2>
+                <p>The IELTS General Training test has four sections: Listening, Reading, Writing, and Speaking. Our platform focuses specifically on providing AI assessment for the Writing and Speaking components, which are the most challenging parts for many test-takers.</p>
+                
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>IELTS AI Assessment Focus</h5>
+                            <p class="mb-0">Our platform specializes in providing detailed AI-powered assessment for the Writing and Speaking modules, which require personalized feedback that is difficult to get through traditional practice materials.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-primary mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-lightbulb fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>Why We Focus on Writing and Speaking</h5>
+                            <p class="mb-0">
+                                While the complete IELTS exam includes Listening and Reading sections, our platform specializes in Writing and Speaking assessments because:
+                                <ul class="mb-0 mt-2">
+                                    <li>These are the most challenging components for many test-takers</li>
+                                    <li>They require personalized feedback that is difficult to find elsewhere</li>
+                                    <li>Our AI technology can provide detailed analysis that mimics official IELTS examiners</li>
+                                </ul>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-structure-section">
+                    <h3><i class="fas fa-pencil-alt me-2 text-primary"></i> Writing (60 minutes)</h3>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <p>The Writing section consists of two tasks:</p>
+                            
+                            <div class="mb-3">
+                                <h4 class="h5">Task 1 (20 minutes)</h4>
+                                <p>You'll be presented with a situation and asked to write a letter requesting information or explaining the situation. The letter may need to be personal, semi-formal or formal in tone.</p>
+                                <p class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i> <strong>Word count:</strong> Minimum 150 words
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="h5">Task 2 (40 minutes)</h4>
+                                <p>You'll be asked to write an essay in response to a point of view, argument or problem. The essay should be a formal style but written in a more personal way than the Academic Writing Task 2.</p>
+                                <p class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i> <strong>Word count:</strong> Minimum 250 words
+                                </p>
+                                <p>Task 2 contributes twice as much as Task 1 to your Writing score.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-structure-section">
+                    <h3><i class="fas fa-comment me-2 text-primary"></i> Speaking (11-14 minutes)</h3>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <p>The Speaking section is a face-to-face interview with a certified IELTS examiner. It consists of three parts:</p>
+                            
+                            <div class="mb-3">
+                                <h4 class="h5">Part 1: Introduction and Interview (4-5 minutes)</h4>
+                                <p>The examiner will introduce themselves and ask you to introduce yourself and confirm your identity. They will then ask general questions on familiar topics such as home, family, work, studies, and interests.</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h4 class="h5">Part 2: Long Turn (3-4 minutes)</h4>
+                                <p>The examiner will give you a task card which asks you to talk about a particular topic, including points to include in your talk. You'll be given 1 minute to prepare and make notes, then you'll talk for 1-2 minutes. The examiner will then ask one or two questions on the same topic.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="h5">Part 3: Discussion (4-5 minutes)</h4>
+                                <p>The examiner will ask further questions connected to the topic in Part 2. These questions will allow you to discuss more abstract issues and ideas.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 class="mb-3 mt-5">How IELTS General Training Differs from IELTS Academic</h2>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Section</th>
+                                    <th>General Training</th>
+                                    <th>Academic</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Listening</strong></td>
+                                    <td colspan="2" class="text-center">Identical for both versions</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Reading</strong></td>
+                                    <td>Focuses on everyday English used in social and workplace contexts. Includes notices, advertisements, and general texts.</td>
+                                    <td>Includes more complex texts from books, journals, newspapers, and magazines on academic topics.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Writing Task 1</strong></td>
+                                    <td>Write a letter (personal, semi-formal, or formal) in response to a given situation.</td>
+                                    <td>Describe, summarize, or explain visual information (graph, table, chart, or diagram).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Writing Task 2</strong></td>
+                                    <td colspan="2" class="text-center">Similar format, but Academic may expect more formal language and structure</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Speaking</strong></td>
+                                    <td colspan="2" class="text-center">Identical for both versions</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <h2 class="mb-3 mt-5">IELTS General Training Assessment Criteria</h2>
+                
+                <p class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Our AI assessment system uses the official IELTS marking criteria to evaluate your Writing and Speaking responses, providing detailed feedback and scoring to help you prepare effectively for the actual test.
+                </p>
+                
+                <div class="accordion" id="accordionCriteria">
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingWriting">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWriting" aria-expanded="false" aria-controls="collapseWriting">
+                                Writing Assessment
+                            </button>
+                        </h2>
+                        <div id="collapseWriting" class="accordion-collapse collapse" aria-labelledby="headingWriting" data-bs-parent="#accordionCriteria">
+                            <div class="accordion-body">
+                                <p>Writing responses are assessed by certificated IELTS examiners based on the following criteria:</p>
+                                <ul>
+                                    <li><strong>Task Achievement (Task 1)</strong> - How fully you address all parts of the task with relevant, fully extended and supported ideas.</li>
+                                    <li><strong>Task Response (Task 2)</strong> - How you develop a position or argument clearly with relevant examples and supporting ideas.</li>
+                                    <li><strong>Coherence and Cohesion</strong> - How you organize information and ideas logically, with clear progression using cohesive devices effectively.</li>
+                                    <li><strong>Lexical Resource</strong> - The range and precision of your vocabulary, your ability to use less common vocabulary, and your awareness of collocation.</li>
+                                    <li><strong>Grammatical Range and Accuracy</strong> - Your ability to use a variety of complex structures with limited grammatical errors.</li>
+                                </ul>
+                                <p>Task 2 contributes twice as much as Task 1 to your Writing score.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingSpeaking">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpeaking" aria-expanded="false" aria-controls="collapseSpeaking">
+                                Speaking Assessment
+                            </button>
+                        </h2>
+                        <div id="collapseSpeaking" class="accordion-collapse collapse" aria-labelledby="headingSpeaking" data-bs-parent="#accordionCriteria">
+                            <div class="accordion-body">
+                                <p>Speaking performance is assessed by certificated IELTS examiners based on the following criteria:</p>
+                                <ul>
+                                    <li><strong>Fluency and Coherence</strong> - How well you can speak at a normal rate without too much hesitation, organize your ideas coherently, and use cohesive devices effectively.</li>
+                                    <li><strong>Lexical Resource</strong> - The range and precision of the vocabulary you use, and your ability to paraphrase effectively.</li>
+                                    <li><strong>Grammatical Range and Accuracy</strong> - Your ability to use a variety of complex structures with limited grammatical errors.</li>
+                                    <li><strong>Pronunciation</strong> - Your ability to use appropriate pronunciation features to convey meaning effectively.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 class="mb-3 mt-5">How to Book IELTS General Training Test</h2>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <ol>
+                            <li>Visit the official IELTS website at <a href="https://ielts.org/take-a-test/booking-your-test" target="_blank">ielts.org/take-a-test/booking-your-test</a> to find available test slots in your area.</li>
+                            <li>Select "IELTS General Training" as your test type.</li>
+                            <li>Choose your preferred date and time.</li>
+                            <li>Complete the registration process and make payment.</li>
+                            <li>Receive confirmation email with instructions for the test day.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="{{ url_for('assessment_products_page') }}" class="btn btn-primary">Explore AI Assessed IELTS Modules</a>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('assessment_structure_detail', assessment_type='academic') }}" class="btn btn-outline-secondary me-2"><i class="fas fa-arrow-left"></i> Previous: Academic IELTS</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
