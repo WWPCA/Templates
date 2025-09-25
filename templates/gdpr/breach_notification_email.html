@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Important Security Notice - IELTS GenAI Prep</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            border-bottom: 3px solid #dc3545;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+        }
+        .alert-box {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background-color: #e2f0fd;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #dc3545;
+            font-size: 24px;
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 18px;
+            margin-top: 25px;
+            color: #444;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .contact {
+            margin-top: 25px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Important Security Notice</h1>
+    </div>
+    
+    <div class="alert-box">
+        <p><strong>Notice of Data Breach</strong></p>
+        <p>We're contacting you regarding a data security incident that may have affected your personal information. We take this matter very seriously and want to provide you with information about what happened and steps you can take to protect yourself.</p>
+    </div>
+    
+    <h2>What Happened</h2>
+    <p>On {{ breach_date }}, we detected a security incident involving {{ breach.breach_type }}. We discovered this incident on {{ discovery_date }} and immediately launched an investigation and took steps to address the situation.</p>
+    
+    <h2>What Information Was Involved</h2>
+    <p>Based on our investigation, the incident may have affected the following types of information:</p>
+    <ul>
+        {% for data_type in breach.affected_data.split('\n') %}
+            <li>{{ data_type }}</li>
+        {% endfor %}
+    </ul>
+    
+    <div class="info-box">
+        <h2>What We Are Doing</h2>
+        <p>We have taken the following steps to address this incident:</p>
+        <ul>
+            {% if breach.containment_measures %}
+                {% for measure in breach.containment_measures.split('\n') %}
+                    <li>{{ measure }}</li>
+                {% endfor %}
+            {% endif %}
+            {% if breach.recovery_actions %}
+                {% for action in breach.recovery_actions.split('\n') %}
+                    <li>{{ action }}</li>
+                {% endfor %}
+            {% endif %}
+        </ul>
+        <p>We have also notified relevant data protection authorities as required by applicable laws.</p>
+    </div>
+    
+    <h2>What You Can Do</h2>
+    <p>We recommend that you take the following steps to protect your information:</p>
+    <ul>
+        <li>Be vigilant for suspicious activity in your accounts</li>
+        <li>Consider changing your password for your IELTS GenAI Prep account</li>
+        <li>Consider changing passwords for other accounts where you may use the same or similar password</li>
+        <li>Monitor your accounts for any unusual activity</li>
+        <li>Be cautious of any unsolicited communications that ask for your personal information or refer to this incident</li>
+    </ul>
+    
+    <a href="{{ privacy_url }}" class="button">Review Your Privacy Settings</a>
+    
+    <div class="contact">
+        <h2>For More Information</h2>
+        <p>If you have questions or concerns, please visit our <a href="{{ help_url }}">Help Center</a> or use our Contact Us form on the website.</p>
+    </div>
+    
+    <div class="footer">
+        <p>IELTS GenAI Prep takes the protection of your personal information very seriously. We sincerely apologize for any concern or inconvenience this incident may cause.</p>
+        <p>© {{ breach.discovery_date.year }} IELTS GenAI Prep. All rights reserved.</p>
+        <p>This is a mandatory security notification. Please do not reply to this email.</p>
+    </div>
+</body>
+</html>
