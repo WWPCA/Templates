@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-12 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('practice_index') }}">Practice Tests</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Writing Test</li>
+                </ol>
+            </nav>
+
+            <!-- Test Header -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0">IELTS Writing Task</h3>
+                <div id="test-timer" class="timer" data-test-type="writing">60:00</div>
+            </div>
+
+            <!-- Test Content -->
+            <div class="card mb-4">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <!-- Left Column - Question -->
+                        <div class="col-md-6 border-end">
+                            <div class="p-4">
+                                <!-- Task Header -->
+                                <div class="alert alert-light mb-3">
+                                    <h5 class="mb-1">Part 1</h5>
+                                    <p class="mb-0">You should spend about 20 minutes on this task. Write at least 150 words.</p>
+                                </div>
+
+                                <!-- Task Prompt -->
+                                <p class="mb-4">The chart below shows the number of adults participating in different major sports in one area, in 1997 and 2017.</p>
+                                <p class="mb-4">Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</p>
+
+                                <!-- Visual Information (chart, graph, etc.) -->
+                                <div class="text-center mb-4">
+                                    <img src="/static/images/chart_example.png" alt="Chart showing number of adults participating in sports" class="img-fluid border rounded" style="max-width: 100%;">
+                                    <!-- Placeholder for actual chart -->
+                                </div>
+
+                                <!-- Additional Instructions -->
+                                <div class="mt-4">
+                                    <small class="text-muted">
+                                        Remember to:
+                                        <ul>
+                                            <li>Identify key trends and patterns</li>
+                                            <li>Compare the most significant changes</li>
+                                            <li>Group related information logically</li>
+                                            <li>Use appropriate linking words</li>
+                                        </ul>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column - Answer Area -->
+                        <div class="col-md-6">
+                            <div class="p-4">
+                                <form id="practice-test-form" data-test-id="{{ test.id }}" data-test-type="writing">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <label for="response" class="form-label">Your Response</label>
+                                            <span id="word-count" class="text-muted">Words: 0</span>
+                                        </div>
+                                        <textarea class="form-control writing-textarea" id="response" 
+                                                rows="20" placeholder="Type your answer here..."
+                                                data-min-words="150" data-question-id="response"></textarea>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <button type="button" class="btn btn-outline-secondary">
+                                            <i class="fas fa-arrow-left"></i> Previous
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Submit <i class="fas fa-check"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test Results (shown after submission) -->
+            <div id="test-results" class="mt-5"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize word counter
+        const textarea = document.querySelector('.writing-textarea');
+        const wordCountDisplay = document.getElementById('word-count');
+        
+        if (textarea && wordCountDisplay) {
+            textarea.addEventListener('input', function() {
+                const text = textarea.value.trim();
+                const wordCount = text ? text.split(/\s+/).length : 0;
+                wordCountDisplay.textContent = `Words: ${wordCount}`;
+                
+                // Add visual indicator if minimum word count is reached
+                const minWords = parseInt(textarea.dataset.minWords || 0);
+                if (wordCount >= minWords) {
+                    wordCountDisplay.classList.remove('text-danger');
+                    wordCountDisplay.classList.add('text-success');
+                } else {
+                    wordCountDisplay.classList.remove('text-success');
+                    wordCountDisplay.classList.add('text-danger');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
