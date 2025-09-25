@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - IELTS GenAI Prep</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+        .back-button {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .content-card {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .section-title {
+            color: #667eea;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .pricing-highlight {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .last-updated {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .brand-highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+            <h1>Terms of Service</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="section-title">Assessment Products and Pricing</div>
+            <div class="pricing-highlight">
+                <h5><i class="fas fa-tag me-2"></i>Assessment Packages</h5>
+                <p>Each assessment package costs <strong>$36.49 USD</strong> and includes:</p>
+                <ul>
+                    <li>4 complete AI-graded assessments</li>
+                    <li>Detailed feedback using official IELTS criteria</li>
+                    <li>Access on both mobile app and website</li>
+                    <li>Progress tracking and performance analytics</li>
+                </ul>
+            </div>
+
+            <div class="section-title">Payment and Refund Policy</div>
+            <div class="warning-box">
+                <h5><i class="fas fa-exclamation-triangle me-2"></i>No Refund Policy</h5>
+                <p><strong>All purchases are final and non-refundable.</strong> Due to the instant delivery nature of our AI assessment services, refunds cannot be provided once you have accessed your purchased assessments.</p>
+            </div>
+            
+            <p>Payments are processed through:</p>
+            <ul>
+                <li>Apple App Store (iOS mobile app)</li>
+                <li>Google Play Store (Android mobile app)</li>
+                <li>Secure payment processing for web purchases</li>
+            </ul>
+
+            <div class="section-title">AI Content Policy</div>
+            <p>Our platform uses advanced AI technology to provide assessment services:</p>
+            <ul>
+                <li><span class="brand-highlight">TrueScore®</span> AI provides writing assessment with official IELTS rubric alignment</li>
+                <li><span class="brand-highlight">ClearScore®</span> AI provides speaking assessment with Maya AI examiner</li>
+                <li>AI-generated feedback is designed for educational purposes only</li>
+                <li>Results are indicative and may not reflect actual IELTS test performance</li>
+            </ul>
+
+            <div class="section-title">Data Protection</div>
+            <p>By using our service, you agree to:</p>
+            <ul>
+                <li>Provide accurate information for account creation</li>
+                <li>Use the service for legitimate IELTS preparation purposes</li>
+                <li>Not attempt to reverse-engineer or manipulate our AI systems</li>
+                <li>Respect the intellectual property of our assessment content</li>
+            </ul>
+
+            <div class="section-title">Account Management</div>
+            <p>You are responsible for:</p>
+            <ul>
+                <li>Maintaining the security of your account credentials</li>
+                <li>All activities that occur under your account</li>
+                <li>Notifying us of any unauthorized use of your account</li>
+            </ul>
+
+            <div class="section-title">Service Availability</div>
+            <p>We strive to provide continuous service availability, but cannot guarantee:</p>
+            <ul>
+                <li>Uninterrupted access to all features</li>
+                <li>Compatibility with all devices and browsers</li>
+                <li>Immediate resolution of technical issues</li>
+            </ul>
+
+            <div class="section-title">Mobile App Integration</div>
+            <p>Our mobile app provides the same assessment services with additional features:</p>
+            <ul>
+                <li>Cross-platform synchronization with website</li>
+                <li>In-app purchase integration</li>
+                <li>Offline access to completed assessments</li>
+            </ul>
+
+            <div class="last-updated">
+                Last Updated: July 16, 2025
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
