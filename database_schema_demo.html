@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS GenAI Prep - DynamoDB Schema & Nova AI Access</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .table-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .table-name { color: #2c5aa0; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+        .table-desc { color: #666; margin-bottom: 15px; }
+        .field-list { background: #f8f9fa; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .sample-data { background: #e8f4f8; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+        .nova-access { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .status-box { background: #d4edda; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { text-align: center; padding: 20px; }
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IELTS GenAI Prep - AWS Database Architecture</h1>
+        
+        <div class="status-box" id="connectionStatus">
+            <div class="loading">Loading database schema and Nova AI access patterns...</div>
+        </div>
+
+        <div id="schemaContent" style="display: none;">
+            <h2>DynamoDB Tables Structure</h2>
+            
+            <div class="table-section">
+                <div class="table-name">ielts-genai-prep-assessment-rubrics</div>
+                <div class="table-desc">IELTS assessment criteria and Nova AI prompts</div>
+                <div class="field-list">
+                    <strong>Primary Key:</strong> rubric_id<br>
+                    <strong>Fields:</strong> assessment_type, criteria, nova_sonic_prompts, nova_micro_prompts
+                </div>
+                <div class="sample-data" id="rubricsData">Loading rubrics...</div>
+            </div>
+
+            <div class="table-section">
+                <div class="table-name">ielts-genai-prep-assessment-results</div>
+                <div class="table-desc">User assessment results and AI feedback</div>
+                <div class="field-list">
+                    <strong>Primary Key:</strong> result_id<br>
+                    <strong>Fields:</strong> user_email, assessment_type, scores, feedback, transcript, created_at
+                </div>
+            </div>
+
+            <div class="table-section">
+                <div class="table-name">ielts-genai-prep-users</div>
+                <div class="table-desc">User authentication and profile data</div>
+                <div class="field-list">
+                    <strong>Primary Key:</strong> user_email<br>
+                    <strong>Fields:</strong> name, password_hash, created_at, last_login
+                </div>
+            </div>
+
+            <div class="nova-access">
+                <h3>Nova AI Access Patterns</h3>
+                <div id="novaAccess">Loading Nova AI access patterns...</div>
+            </div>
+
+            <div class="status-box" id="healthStatus">
+                <div id="healthData">Loading database health status...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDatabaseInfo() {
+            try {
+                // Get health status
+                const healthResponse = await fetch('/health');
+                const healthData = await healthResponse.json();
+                
+                document.getElementById('healthData').innerHTML = `
+                    <h4>Database Status</h4>
+                    <pre>${JSON.stringify(healthData, null, 2)}</pre>
+                `;
+
+                // Show schema content
+                document.getElementById('connectionStatus').style.display = 'none';
+                document.getElementById('schemaContent').style.display = 'block';
+
+                // Load rubrics data (mock for demonstration)
+                const rubricsHTML = `
+<h4>Sample Academic Speaking Rubric</h4>
+<pre>{
+  "rubric_id": "ielts_academic_speaking_v2024",
+  "assessment_type": "speaking",
+  "criteria": {
+    "fluency_and_coherence": {
+      "band_9": "Speaks fluently with only rare repetition or self-correction...",
+      "band_8": "Speaks fluently with only occasional repetition...",
+      "descriptors": ["flow", "pace", "coherence", "topic_development"]
+    },
+    "lexical_resource": {
+      "band_9": "Uses vocabulary with full flexibility and precise usage...",
+      "descriptors": ["range", "accuracy", "flexibility", "appropriacy"]
+    }
+  },
+  "nova_sonic_prompts": {
+    "system_prompt": "You are Maya, an experienced IELTS examiner...",
+    "part_1_topics": ["work", "studies", "hometown", "family"],
+    "part_2_structure": "Give candidate cue card with topic...",
+    "part_3_approach": "Ask abstract questions related to Part 2 topic..."
+  }
+}</pre>`;
+
+                document.getElementById('rubricsData').innerHTML = rubricsHTML;
+
+                // Nova access patterns
+                const novaHTML = `
+<h4>Nova Sonic (Speaking Assessments)</h4>
+<ol>
+  <li><strong>Retrieve Rubric:</strong> Query assessment_rubrics table by assessment_type</li>
+  <li><strong>Extract Prompts:</strong> Get nova_sonic_prompts.system_prompt</li>
+  <li><strong>Bi-directional Stream:</strong> WebSocket audio conversation with user</li>
+  <li><strong>Real-time Evaluation:</strong> Score against IELTS band descriptors</li>
+  <li><strong>Store Results:</strong> Save to assessment_results table (text only, no audio)</li>
+</ol>
+
+<h4>Nova Micro (Writing Assessments)</h4>
+<ol>
+  <li><strong>Retrieve Rubric:</strong> Query assessment_rubrics table for writing criteria</li>
+  <li><strong>Extract Requirements:</strong> Get nova_micro_prompts for task specifications</li>
+  <li><strong>Text Analysis:</strong> Evaluate Task Achievement, Coherence, Lexical Resource, Grammar</li>
+  <li><strong>Band Scoring:</strong> Generate scores 1-9 with detailed feedback</li>
+  <li><strong>Store Results:</strong> Save assessment to assessment_results table</li>
+</ol>
+
+<h4>No RAG Architecture</h4>
+<p><strong>Direct Database Access:</strong> Nova models access rubrics directly from DynamoDB tables. 
+No vector embeddings or retrieval-augmented generation needed - all IELTS criteria are structured 
+data in the assessment_rubrics table.</p>`;
+
+                document.getElementById('novaAccess').innerHTML = novaHTML;
+
+            } catch (error) {
+                document.getElementById('connectionStatus').innerHTML = `
+                    <div class="error">Error connecting to database: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Load data when page loads
+        window.addEventListener('load', loadDatabaseInfo);
+    </script>
+</body>
+</html>
