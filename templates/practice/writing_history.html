@@ -1,0 +1,149 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card mb-5">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h4 mb-0">My Writing Assessment History</h1>
+                </div>
+                <div class="card-body">
+                    {% if attempts %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Test Title</th>
+                                        <th>Overall Score</th>
+                                        <th>Task Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for attempt in attempts %}
+                                    <tr>
+                                        <td>{{ attempt.attempt_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ attempt.test.title }}</td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ attempt.score }}</span>
+                                        </td>
+                                        <td>
+                                            {% if 'Academic Task 1' in attempt.test.title %}
+                                                Academic Task 1
+                                            {% elif 'General Task 1' in attempt.test.title %}
+                                                General Training Task 1
+                                            {% else %}
+                                                Task 2
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('writing_assessment.show_results', attempt_id=attempt.id) }}" class="btn btn-sm btn-outline-primary">
+                                                View Results
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="score-summary mt-4 p-3 bg-light rounded">
+                            <h3 class="h5 mb-3">Score Progress</h3>
+                            <div class="progress-chart" id="score-chart" style="height: 250px;">
+                                <!-- Chart will be rendered here with JavaScript -->
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">You haven't completed any writing assessments yet.</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('writing_assessment.writing_tests') }}" class="btn btn-primary">Practice More Tests</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if attempts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Prepare data for chart
+        const attempts = [
+            {% for attempt in attempts %}
+            {
+                date: '{{ attempt.attempt_date.strftime("%Y-%m-%d") }}',
+                score: {{ attempt.score }},
+                title: '{{ attempt.test.title }}'
+            },
+            {% endfor %}
+        ];
+        
+        // Sort attempts by date
+        attempts.sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        // Create chart
+        const ctx = document.getElementById('score-chart').getContext('2d');
+        const scoreChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: attempts.map(a => a.date),
+                datasets: [{
+                    label: 'IELTS Writing Score',
+                    data: attempts.map(a => a.score),
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    pointBackgroundColor: '#3498db',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: Math.max(0, Math.min(...attempts.map(a => a.score)) - 1),
+                        max: Math.min(9, Math.max(...attempts.map(a => a.score)) + 1),
+                        title: {
+                            display: true,
+                            text: 'Band Score'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Test Date'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const index = tooltipItems[0].dataIndex;
+                                return attempts[index].title;
+                            },
+                            label: function(context) {
+                                return `Band Score: ${context.raw}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}
