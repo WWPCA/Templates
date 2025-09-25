@@ -1,0 +1,208 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .assessment-header {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    
+    .task-card {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .task-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .task-number {
+        background-color: #28a745;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .time-badge {
+        background-color: #ffc107;
+        color: #212529;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+    
+    .start-assessment-btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('profile') }}">My Assessments</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for(assessment_type.replace('_', '_') + '_selection') }}">{{ assessment_type.replace('_', ' ').title() }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Assessment {{ assessment_number }}</li>
+                </ol>
+            </nav>
+            
+            <div class="assessment-header text-center">
+                <h1 class="display-4 mb-3">{{ title }}</h1>
+                <div class="badge bg-light text-dark fs-6 mb-3">
+                    <i class="fas fa-pen-alt me-2"></i>Powered by TrueScore® GenAI Technology
+                </div>
+                <p class="lead">Comprehensive writing assessment with detailed AI feedback</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8">
+                    {% if 'academic' in assessment_type %}
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="card task-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="task-number me-3">1</div>
+                                        <div>
+                                            <h5 class="mb-0">Task 1: Data Description</h5>
+                                            <div class="time-badge mt-2">20 minutes</div>
+                                        </div>
+                                    </div>
+                                    <ul class="mb-0">
+                                        <li>Describe visual information</li>
+                                        <li>Graphs, charts, or diagrams</li>
+                                        <li>Minimum 150 words</li>
+                                        <li>Academic language required</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card task-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="task-number me-3">2</div>
+                                        <div>
+                                            <h5 class="mb-0">Task 2: Essay Writing</h5>
+                                            <div class="time-badge mt-2">40 minutes</div>
+                                        </div>
+                                    </div>
+                                    <ul class="mb-0">
+                                        <li>Academic essay format</li>
+                                        <li>Present and justify opinions</li>
+                                        <li>Minimum 250 words</li>
+                                        <li>Clear structure required</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="card task-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="task-number me-3">1</div>
+                                        <div>
+                                            <h5 class="mb-0">Task 1: Letter Writing</h5>
+                                            <div class="time-badge mt-2">20 minutes</div>
+                                        </div>
+                                    </div>
+                                    <ul class="mb-0">
+                                        <li>Formal or informal letter</li>
+                                        <li>Specific purpose and tone</li>
+                                        <li>Minimum 150 words</li>
+                                        <li>Appropriate style required</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card task-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="task-number me-3">2</div>
+                                        <div>
+                                            <h5 class="mb-0">Task 2: Essay Writing</h5>
+                                            <div class="time-badge mt-2">40 minutes</div>
+                                        </div>
+                                    </div>
+                                    <ul class="mb-0">
+                                        <li>General essay topics</li>
+                                        <li>Express and support opinions</li>
+                                        <li>Minimum 250 words</li>
+                                        <li>Clear arguments required</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="text-center">
+                        <a href="/writing/assessment/{{ assessment_type }}/{{ assessment_number }}" 
+                           class="btn btn-success start-assessment-btn">
+                            <i class="fas fa-play me-2"></i>Begin Assessment {{ assessment_number }}
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Assessment Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Total Time:</strong> 60 minutes</p>
+                            <p><strong>Assessment Type:</strong> {{ assessment_type.replace('_', ' ').title() }}</p>
+                            <p><strong>AI Technology:</strong> TrueScore® GenAI</p>
+                            <hr>
+                            <h6>What to Expect:</h6>
+                            <ul class="small mb-0">
+                                <li>Two writing tasks to complete</li>
+                                <li>Detailed AI feedback on completion</li>
+                                <li>Band score estimation</li>
+                                <li>Improvement suggestions</li>
+                                <li>Written transcript of your work</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-warning mt-3">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Before You Start</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="small mb-0">
+                                <li>Ensure stable internet connection</li>
+                                <li>Have quiet environment for focus</li>
+                                <li>You can restart if connection drops</li>
+                                <li>Assessment saves automatically</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
