@@ -1,0 +1,128 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- IELTS Header -->
+    <div class="bg-light border-bottom p-2 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="/static/images/ielts-logo.svg" alt="IELTS" height="30" class="me-2">
+            <span class="fw-bold">Test taker ID</span>
+        </div>
+        <div id="test-timer" class="timer badge bg-primary" data-test-type="writing">60:00</div>
+        <div>
+            <i class="fas fa-wifi me-3"></i>
+            <i class="fas fa-bell me-3"></i>
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+    
+    <!-- Part Indicator -->
+    <div class="bg-light border-bottom p-2">
+        <div class="container-fluid">
+            <h6 class="mb-1">Part 1</h6>
+            <p class="mb-0 small">You should spend about 20 minutes on this task. Write at least 150 words.</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row g-0">
+        <!-- Left Column - Task and Chart -->
+        <div class="col-md-6 border-end">
+            <div class="task-container p-3" style="height: calc(100vh - 110px); overflow-y: auto;">
+                <!-- Task Description -->
+                <p class="mb-3">{{ test.questions[0].get('description', 'The chart below shows the number of adults participating in different cultural activities in one area, in 2010 and 2020.') }}</p>
+                <p class="mb-4">{{ test.questions[0].get('instructions', 'Summarise the key trends in adult participation in these cultural activities over the 10-year period and provide relevant comparisons between the two years.') }}</p>
+                
+                <!-- Chart/Image -->
+                <div class="chart-container mb-4 text-center">
+                    <img src="{{ test.questions[0].get('image_url', '/static/images/writing_graphs/cultural_activities_2010_2020.png') }}" alt="Chart showing cultural activities data" class="img-fluid border rounded" style="max-width: 100%;">
+                </div>
+                
+                <!-- Additional Instructions (Optional) -->
+                <div class="instructions mt-4">
+                    <h6>Tips:</h6>
+                    <ul class="small text-muted">
+                        <li>Begin with an introduction that clearly states what the chart shows.</li>
+                        <li>Identify 2-3 key trends or patterns in the data.</li>
+                        <li>Group similar information (increasing vs. decreasing trends).</li>
+                        <li>Use appropriate language for describing trends (increased, declined, remained stable).</li>
+                        <li>Include specific details from the chart to support your observations.</li>
+                        <li>Provide a brief overview paragraph after your introduction.</li>
+                        <li>Don't include your own opinions or information not shown in the chart.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Answer Area -->
+        <div class="col-md-6">
+            <div class="response-container" style="height: calc(100vh - 110px); display: flex; flex-direction: column;">
+                <form id="practice-test-form" action="{{ url_for('writing_assessment.submit_writing_task', test_id=test.id) }}" method="post" style="display: flex; flex-direction: column; height: 100%;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="p-3 flex-grow-1 d-flex flex-column">
+                        <!-- Text Area Container -->
+                        <div class="flex-grow-1 d-flex flex-column">
+                            <textarea class="form-control writing-textarea flex-grow-1 mb-2" 
+                                    name="essay_text"
+                                    style="resize: none; min-height: 350px;" 
+                                    placeholder="Type your answer here..."
+                                    data-min-words="150" 
+                                    data-question-id="response"></textarea>
+                            <div class="d-flex justify-content-end">
+                                <span id="word-count" class="text-muted small">Words: 0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button (visible on mobile) -->
+                    <div class="d-md-none p-3">
+                        <button type="submit" class="btn btn-primary w-100">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Footer -->
+    <div class="bg-light border-top p-2 d-flex justify-content-between align-items-center">
+        <div class="part-navigation">
+            <span class="badge bg-secondary mx-1">Part 1</span>
+        </div>
+        <div class="test-navigation d-flex align-items-center">
+            <span class="me-2">Part 2</span>
+            <span class="badge bg-light text-dark me-3">0 of 1</span>
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('practice-test-form').submit()">
+                <i class="fas fa-check"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize word counter
+        const textarea = document.querySelector('.writing-textarea');
+        const wordCountDisplay = document.getElementById('word-count');
+        
+        if (textarea && wordCountDisplay) {
+            textarea.addEventListener('input', function() {
+                const text = textarea.value.trim();
+                const wordCount = text ? text.split(/\s+/).length : 0;
+                wordCountDisplay.textContent = `Words: ${wordCount}`;
+                
+                // Add visual indicator if minimum word count is reached
+                const minWords = parseInt(textarea.dataset.minWords || 0);
+                if (wordCount >= minWords) {
+                    wordCountDisplay.classList.remove('text-danger');
+                    wordCountDisplay.classList.add('text-success');
+                } else {
+                    wordCountDisplay.classList.remove('text-success');
+                    wordCountDisplay.classList.add('text-danger');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
