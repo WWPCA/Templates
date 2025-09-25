@@ -1,0 +1,238 @@
+{% extends "layout.html" %}
+
+{% block title %}Domain Verification Status - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-shield-alt"></i> Domain Verification Status</h2>
+                <a href="/admin/dashboard" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Verification Status Card -->
+            <div class="row mb-4">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-check-circle"></i> Domain Status</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if verification_status %}
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Domain:</strong></div>
+                                    <div class="col-sm-8">{{ verification_status.domain }}</div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-sm-4"><strong>Status:</strong></div>
+                                    <div class="col-sm-8">
+                                        {% if verification_status.verified %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check"></i> Verified
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock"></i> {{ verification_status.status }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-sm-4"><strong>Email Service:</strong></div>
+                                    <div class="col-sm-8">
+                                        {% if verification_status.verified %}
+                                            <span class="text-success">
+                                                <i class="fas fa-envelope"></i> Active
+                                            </span>
+                                        {% else %}
+                                            <span class="text-warning">
+                                                <i class="fas fa-exclamation-triangle"></i> Pending Verification
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    Unable to retrieve verification status
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Test Card -->
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-paper-plane"></i> Email Testing</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="emailTestForm">
+                                <div class="mb-3">
+                                    <label for="testEmail" class="form-label">Test Email Address:</label>
+                                    <input type="email" class="form-control" id="testEmail" 
+                                           placeholder="Enter email address" required>
+                                    <div class="form-text">
+                                        Note: In sandbox mode, the recipient email must be verified in Amazon SES
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-info">
+                                    <i class="fas fa-paper-plane"></i> Send Test Email
+                                </button>
+                            </form>
+                            <div id="emailTestResult" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DNS Configuration Guide -->
+            {% if verification_status and not verification_status.verified %}
+            <div class="card mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-cog"></i> DNS Configuration Required</h5>
+                </div>
+                <div class="card-body">
+                    <p>Your domain requires DNS configuration to enable email services. Add these records to your DNS provider:</p>
+                    
+                    <h6>Domain Verification TXT Record:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>TXT</code></td>
+                                    <td><code>_amazonses.{{ verification_status.domain }}</code></td>
+                                    <td><code>Contact support for verification token</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        DNS propagation can take up to 72 hours. Amazon will automatically verify once records are detected.
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Email Service Features -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Available Email Features</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Current Features:</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <i class="fas fa-key text-primary"></i> Password Reset Emails
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-envelope text-primary"></i> Account Verification
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-bell text-primary"></i> System Notifications
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-shield-alt text-primary"></i> Security Alerts
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Email Deliverability:</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success"></i> DKIM Authentication
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success"></i> SPF Records
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success"></i> Domain Reputation
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success"></i> Bounce Handling
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('emailTestForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('testEmail').value;
+    const resultDiv = document.getElementById('emailTestResult');
+    
+    // Show loading
+    resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Sending test email...</div>';
+    
+    try {
+        const response = await fetch('/admin/test-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+            },
+            body: JSON.stringify({email: email})
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> Test email sent successfully!
+                    ${result.message_id ? '<br><small>Message ID: ' + result.message_id + '</small>' : ''}
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> Failed to send test email: ${result.error}
+                    ${result.fallback ? '<br><small>Note: Domain verification may be required</small>' : ''}
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i> Error: Unable to send test email
+            </div>
+        `;
+    }
+});
+
+// Auto-refresh verification status every 30 seconds
+setInterval(async function() {
+    try {
+        const response = await fetch('/admin/api/domain-verification-status');
+        const result = await response.json();
+        
+        if (result.success && result.data.verified) {
+            location.reload(); // Refresh page if verification status changed
+        }
+    } catch (error) {
+        console.log('Status check failed');
+    }
+}, 30000);
+</script>
+{% endblock %}
