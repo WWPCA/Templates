@@ -1,0 +1,298 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('practice_index') }}">Practice Tests</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Writing</li>
+                </ol>
+            </nav>
+            
+            {% if taking_test %}
+                <!-- Timer Display -->
+                <div id="test-timer" class="timer" data-test-type="writing">60:00</div>
+                
+                <!-- Test Content -->
+                <div class="practice-test">
+                    <h1 class="mb-4">{{ test.title }}</h1>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h4 mb-0">Task Instructions</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="task-description">
+                                <p class="lead">{{ test.description }}</p>
+                                
+                                <!-- Visual Information (for Academic Task 1) -->
+                                {% if 'Task 1' in test.title and 'Academic' in test.title %}
+                                    <div class="visual-data mb-4">
+                                        <!-- This would be a chart, graph, diagram, etc. from the database -->
+                                        <div class="alert alert-secondary text-center p-5 mb-3">
+                                            <p class="mb-0">
+                                                [Visual information would appear here - e.g., a bar chart showing internet usage in different countries from 2000-2020]
+                                            </p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Task prompt from the database -->
+                                {% for q_id, question in test.questions.items() %}
+                                    <div class="task-prompt alert alert-info">
+                                        <p>{{ question }}</p>
+                                    </div>
+                                {% endfor %}
+                                
+                                <!-- Word count requirements -->
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <span>
+                                        {% if 'Task 1' in test.title %}
+                                            You should write at least 150 words.
+                                        {% else %}
+                                            You should write at least 250 words.
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form id="practice-test-form" data-test-id="{{ test.id }}" data-test-type="writing">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h2 class="h4 mb-0">Your Response</h2>
+                                <span id="word-count" class="badge bg-light text-primary">0 words</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <textarea 
+                                        class="form-control writing-textarea" 
+                                        rows="15" 
+                                        placeholder="Write your response here..."
+                                        data-min-words="{% if 'Task 1' in test.title %}150{% else %}250{% endif %}"
+                                        data-question-id="response"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Essay</button>
+                        </div>
+                    </form>
+                    
+                    <div id="test-results" class="mt-5"></div>
+                </div>
+                
+            {% else %}
+                <!-- Writing Test List -->
+                <h1 class="mb-4">IELTS Writing Practice Tests</h1>
+                
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-pencil-alt fa-2x"></i>
+                        </div>
+                        <div>
+                            <h4>About IELTS Writing</h4>
+                            <p class="mb-0">The IELTS Writing test takes 60 minutes and consists of two tasks. In Academic Writing, Task 1 requires you to describe visual information, while in General Training, Task 1 involves writing a letter. Task 2 is an essay for both versions. Task 2 contributes twice as much to your final score as Task 1.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if not current_user.is_subscribed() %}
+                    <div class="alert alert-warning mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-crown fa-2x"></i>
+                            </div>
+                            <div>
+                                <h4>Premium Access Required</h4>
+                                <p>Subscribe to unlock all 12 practice tests for each test type.</p>
+                                <a href="{{ url_for('subscribe') }}" class="btn btn-primary">Subscribe Now</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h4 mb-0">Tips for IELTS Writing</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h3 class="h5 mb-3">Task 1 Tips</h3>
+                                
+                                <div class="mb-3">
+                                    <h4 class="h6"><i class="fas fa-check me-2 text-success"></i> Analyze the data first</h4>
+                                    <p>Identify main trends, significant features, and key comparisons before writing.</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h4 class="h6"><i class="fas fa-check me-2 text-success"></i> Use appropriate language</h4>
+                                    <p>For graphs: "increase," "decrease," "fluctuate," "remain stable," etc.</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h4 class="h6"><i class="fas fa-check me-2 text-success"></i> Structure logically</h4>
+                                    <p>Introduction → Overview of main trends → Detailed description → No conclusion needed</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h3 class="h5 mb-3">Task 2 Tips</h3>
+                                
+                                <div class="mb-3">
+                                    <h4 class="h6"><i class="fas fa-check me-2 text-success"></i> Plan your essay</h4>
+                                    <p>Spend 5 minutes planning your structure and main points.</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h4 class="h6"><i class="fas fa-check me-2 text-success"></i> Clear structure</h4>
+                                    <p>Introduction → 2-3 body paragraphs (one idea per paragraph) → Conclusion</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h4 class="h6"><i class="fas fa-check me-2 text-success"></i> Support with examples</h4>
+                                    <p>Always provide specific examples to support your arguments.</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h4 class="h6"><i class="fas fa-check me-2 text-success"></i> Use a range of vocabulary</h4>
+                                    <p>Avoid repetition and demonstrate a wide lexical resource.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="mb-3">Available Writing Tests</h3>
+                
+                <div class="row">
+                    {% for test in tests %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h3 class="h5 mb-0">{{ test.title }}</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ test.description }}</p>
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <i class="fas fa-pencil-alt me-2 text-primary"></i> 
+                                            {% if 'Task 1' in test.title %}
+                                                Writing Task 1 (20 minutes, 150 words)
+                                            {% else %}
+                                                Writing Task 2 (40 minutes, 250 words)
+                                            {% endif %}
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-graduation-cap me-2 text-primary"></i> 
+                                            {% if 'Academic' in test.title %}
+                                                Academic Writing
+                                            {% else %}
+                                                General Training Writing
+                                            {% endif %}
+                                        </li>
+                                    </ul>
+                                    {% if current_user.is_authenticated and test.id in completed_test_ids %}
+                                        <div class="mt-2 text-success">
+                                            <i class="fas fa-check-circle"></i> Completed
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-white text-center">
+                                    {% if current_user.is_authenticated and test.id in completed_test_ids %}
+                                        <button class="btn btn-secondary" disabled>
+                                            <i class="fas fa-check-circle me-1"></i> Completed
+                                        </button>
+                                    {% else %}
+                                        <a href="{{ url_for('test_details', test_type='writing', test_id=test.id) }}" class="btn btn-primary">
+                                            Test Details
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    {% if tests|length == 0 %}
+                        <div class="col-12">
+                            <div class="alert alert-info text-center">
+                                <p class="mb-0">No writing tests available at the moment. Please check back later.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if not current_user.is_subscribed() and tests|length > 0 %}
+                        {% for i in range(3) %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h3 class="h5 mb-0">Premium Writing Test {{ i+1 }}</h3>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-lock fa-4x text-secondary mb-3"></i>
+                                        <p>This test is available to premium subscribers only.</p>
+                                    </div>
+                                    <div class="card-footer bg-white text-center">
+                                        <a href="{{ url_for('subscribe') }}" class="btn btn-primary">
+                                            Subscribe to Access
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="card mt-5">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h4 mb-0">Writing Assessment Criteria</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>IELTS Writing is assessed based on these criteria:</p>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>Criterion</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Task Achievement (Task 1)</strong></td>
+                                        <td>How fully you address all parts of the task with relevant, fully extended and supported ideas.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Task Response (Task 2)</strong></td>
+                                        <td>How you develop a position or argument clearly with relevant examples and supporting ideas.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Coherence and Cohesion</strong></td>
+                                        <td>How you organize information and ideas logically, with clear progression using cohesive devices effectively.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Lexical Resource</strong></td>
+                                        <td>The range and precision of your vocabulary, your ability to use less common vocabulary, and your awareness of collocation.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Grammatical Range and Accuracy</strong></td>
+                                        <td>Your ability to use a variety of complex structures with limited grammatical errors.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
