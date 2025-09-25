@@ -1,0 +1,180 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h1 class="h4 mb-0">{{ test.title }}</h1>
+                    <div class="timer" id="test-timer">
+                        <i class="fas fa-clock"></i> <span id="timer-display">
+                            {% if 'Task 1' in test.title %}20:00{% else %}40:00{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h2 class="h5">Instructions:</h2>
+                        <ul class="mb-0">
+                            <li>{% if 'Task 1' in test.title %}Write at least 150 words{% else %}Write at least 250 words{% endif %}</li>
+                            <li>Time allowed: {% if 'Task 1' in test.title %}20 minutes{% else %}40 minutes{% endif %}</li>
+                            {% if test.ielts_test_type == 'academic' or 'Task 2' in test.title %}
+                                <li>Write in formal academic style</li>
+                            {% else %}
+                                <li>Write in appropriate letter format</li>
+                            {% endif %}
+                            <li>Do not include personal information (name, ID) in your writing</li>
+                        </ul>
+                    </div>
+
+                    <div class="row">
+                        <!-- Left column for prompt/instructions -->
+                        <div class="col-md-6">
+                            <div class="writing-prompt mb-4 p-3 border border-primary rounded">
+                                <h2 class="h5 mb-3">Writing Prompt:</h2>
+                                <div class="prompt-content">
+                                    {{ prompt|safe }}
+                                </div>
+                                
+                                {% if test.ielts_test_type == 'general' and 'Task 1' in test.title %}
+                                    <!-- Show letter starter for general training task 1 -->
+                                    <div class="mt-4 letter-format">
+                                        <p><strong>Begin your letter as follows:</strong></p>
+                                        <div class="letter-starter p-2 bg-light">
+                                            {% if '"Dear [name]"' in prompt %}
+                                                Dear [name],
+                                            {% elif '"Dear [Manager\'s Name]"' in prompt or '"Dear [Supervisor\'s Name]"' in prompt or '"Dear [Landlord\'s Name]"' in prompt %}
+                                                Dear [Name],
+                                            {% elif '"Dear Neighbor"' in prompt %}
+                                                Dear Neighbor,
+                                            {% else %}
+                                                Dear Sir or Madam,
+                                            {% endif %}
+                                        </div>
+                                        <div class="mt-3 text-muted">
+                                            <small>You do NOT need to write any addresses.</small>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Right column for response area -->
+                        <div class="col-md-6">
+                            <form id="writing-form" method="POST" action="{{ url_for('writing_assessment.submit_writing', test_id=test.id) }}">
+                                <div class="form-group mb-3">
+                                    <label for="essay_text" class="form-label">Your Answer:</label>
+                                    <textarea 
+                                        class="form-control" 
+                                        id="essay_text" 
+                                        name="essay_text" 
+                                        rows="15" 
+                                        placeholder="Start writing your response here..."
+                                        required></textarea>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="word-count">
+                                        Word count: <span id="word-counter">0</span> words
+                                        <div class="word-count-alert" id="word-count-alert"></div>
+                                    </div>
+                                    <div>
+                                        <a href="{{ url_for('writing_assessment.writing_tests') }}" class="btn btn-secondary me-2">Cancel</a>
+                                        <button type="submit" class="btn btn-primary">Submit for Assessment</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Timer functionality
+        const timerDisplay = document.getElementById('timer-display');
+        const timerText = timerDisplay.textContent.trim();
+        let minutes = parseInt(timerText.split(':')[0]);
+        let seconds = parseInt(timerText.split(':')[1]);
+        let totalSeconds = minutes * 60 + seconds;
+        
+        const timerInterval = setInterval(function() {
+            totalSeconds--;
+            
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                alert('Time is up! Your response will now be submitted for assessment.');
+                document.getElementById('writing-form').submit();
+            }
+            
+            minutes = Math.floor(totalSeconds / 60);
+            seconds = totalSeconds % 60;
+            
+            // Format the time display
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Change color when time is running out
+            if (totalSeconds < 60) {
+                timerDisplay.parentElement.classList.add('text-danger');
+            } else if (totalSeconds < 180) {
+                timerDisplay.parentElement.classList.add('text-warning');
+            }
+        }, 1000);
+        
+        // Word counter functionality
+        const essayTextarea = document.getElementById('essay_text');
+        const wordCounter = document.getElementById('word-counter');
+        const wordCountAlert = document.getElementById('word-count-alert');
+        
+        function updateWordCount() {
+            const text = essayTextarea.value.trim();
+            const wordCount = text ? text.split(/\s+/).length : 0;
+            wordCounter.textContent = wordCount;
+            
+            // Set minimum word requirements based on task type
+            const isTask1 = {{ 'true' if 'Task 1' in test.title else 'false' }};
+            const minWords = isTask1 ? 150 : 250;
+            
+            if (wordCount < minWords) {
+                wordCountAlert.textContent = `Need ${minWords - wordCount} more words to reach minimum`;
+                wordCountAlert.className = 'word-count-alert text-warning';
+            } else {
+                wordCountAlert.textContent = 'Minimum word count reached';
+                wordCountAlert.className = 'word-count-alert text-success';
+            }
+        }
+        
+        essayTextarea.addEventListener('input', updateWordCount);
+        updateWordCount(); // Initial count
+        
+        // Form submission validation
+        document.getElementById('writing-form').addEventListener('submit', function(e) {
+            const text = essayTextarea.value.trim();
+            if (!text) {
+                e.preventDefault();
+                alert('Please write your response before submitting.');
+                return false;
+            }
+            
+            const wordCount = text.split(/\s+/).length;
+            const isTask1 = {{ 'true' if 'Task 1' in test.title else 'false' }};
+            const minWords = isTask1 ? 150 : 250;
+            
+            if (wordCount < minWords) {
+                if (!confirm(`Your response is ${wordCount} words, which is below the minimum requirement of ${minWords} words. Do you still want to submit?`)) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+    });
+</script>
+{% endblock %}
