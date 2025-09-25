@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block styles %}
+<style>
+    .documentation-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        background-color: #fff;
+        border-radius: 5px;
+    }
+    
+    .documentation-container h1 {
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .documentation-container h2 {
+        margin-top: 30px;
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .documentation-container h3 {
+        margin-top: 25px;
+    }
+    
+    .documentation-container p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .documentation-container code {
+        background-color: #f8f9fa;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.9em;
+    }
+    
+    .documentation-container pre {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        overflow-x: auto;
+    }
+    
+    .documentation-container pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    
+    .documentation-container ul, .documentation-container ol {
+        margin-bottom: 20px;
+        margin-left: 20px;
+    }
+    
+    .documentation-container li {
+        margin-bottom: 8px;
+    }
+    
+    .documentation-container table {
+        width: 100%;
+        margin-bottom: 20px;
+        border-collapse: collapse;
+    }
+    
+    .documentation-container th, .documentation-container td {
+        padding: 12px 15px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .documentation-container th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    
+    .documentation-container tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    
+    .documentation-container blockquote {
+        border-left: 4px solid #007bff;
+        padding-left: 20px;
+        margin: 20px 0;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="documentation-container">
+        {{ content|safe }}
+    </div>
+</div>
+{% endblock %}
