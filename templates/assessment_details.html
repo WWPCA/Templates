@@ -1,0 +1,554 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('profile') }}">My Assessments</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('assessment_list', assessment_type=assessment_type) }}">{{ assessment_type.capitalize() }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ assessment.title }}</li>
+                </ol>
+            </nav>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">{{ assessment.title }}</h1>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <h2 class="h4 mb-3">Assessment Description</h2>
+                            <p>{{ assessment.description }}</p>
+                            
+                            {% if assessment_type == 'writing' %}
+                                <div class="card border-primary mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h3 class="h5 mb-0"><i class="fas fa-pencil-alt me-2"></i>IELTS {{ 'Academic' if 'academic' in assessment.assessment_type else 'General Training' }} Writing Assessment</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="card h-100 border-info">
+                                                    <div class="card-header bg-light">
+                                                        <h4 class="h6 mb-0">📝 Task 1</h4>
+                                                        <span class="badge bg-info">20 minutes</span>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        {% if 'academic' in assessment.assessment_type %}
+                                                            <h5 class="h6 text-primary">Academic Task 1</h5>
+                                                            <p>Describe and analyze a chart, graph, table, or diagram in at least 150 words.</p>
+                                                            <div class="small text-muted">
+                                                                <p><strong>You'll analyze:</strong> Data visualization requiring clear description and key trend identification</p>
+                                                            </div>
+                                                        {% else %}
+                                                            <h5 class="h6 text-primary">General Training Task 1</h5>
+                                                            <p>Write a letter for a specific purpose in at least 150 words.</p>
+                                                            <div class="small text-muted">
+                                                                <p><strong>Letter types:</strong> Formal, semi-formal, or informal correspondence</p>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="card h-100 border-success">
+                                                    <div class="card-header bg-light">
+                                                        <h4 class="h6 mb-0">📄 Task 2</h4>
+                                                        <span class="badge bg-success">40 minutes</span>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <h5 class="h6 text-success">Essay Writing</h5>
+                                                        <p>Write a formal essay of at least 250 words responding to a point of view, argument, or problem.</p>
+                                                        <div class="small text-muted">
+                                                            <p><strong>Essay types:</strong> Opinion, discussion, problem-solution, or advantage-disadvantage</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-warning mt-3 mb-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-clock me-2"></i>
+                                                <div>
+                                                    <strong>Total Time: 60 minutes</strong>
+                                                    <p class="mb-0 small">Task 2 is worth twice as much as Task 1 in your final score</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            {% elif assessment_type == 'speaking' %}
+                                <div class="card border-success mb-4">
+                                    <div class="card-header bg-success text-white">
+                                        <h3 class="h5 mb-0"><i class="fas fa-microphone me-2"></i>IELTS {{ 'Academic' if 'academic' in assessment.assessment_type else 'General Training' }} Speaking Assessment</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-info mb-4">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-star fa-2x text-primary me-3"></i>
+                                                <div>
+                                                    <h4 class="h6 mb-1">🎯 Choose Your Speaking Experience</h4>
+                                                    <p class="mb-0 small">Select traditional recording practice or try our revolutionary AI conversation feature</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="card h-100 border-primary">
+                                                    <div class="card-header bg-light text-center">
+                                                        <h4 class="h6 mb-1">Part 1</h4>
+                                                        <span class="badge bg-primary">4-5 minutes</span>
+                                                    </div>
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-handshake fa-2x text-primary mb-2"></i>
+                                                        <h5 class="h6 text-primary">Introduction & Interview</h5>
+                                                        <p class="small">Personal questions about familiar topics like home, family, work, studies, and interests.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-4">
+                                                <div class="card h-100 border-warning">
+                                                    <div class="card-header bg-light text-center">
+                                                        <h4 class="h6 mb-1">Part 2</h4>
+                                                        <span class="badge bg-warning text-dark">3-4 minutes</span>
+                                                    </div>
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-presentation fa-2x text-warning mb-2"></i>
+                                                        <h5 class="h6 text-warning">Individual Long Turn</h5>
+                                                        <p class="small">1 minute preparation, then speak for 1-2 minutes on a given topic with specific points to cover.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-4">
+                                                <div class="card h-100 border-info">
+                                                    <div class="card-header bg-light text-center">
+                                                        <h4 class="h6 mb-1">Part 3</h4>
+                                                        <span class="badge bg-info">4-5 minutes</span>
+                                                    </div>
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-comments fa-2x text-info mb-2"></i>
+                                                        <h5 class="h6 text-info">Two-Way Discussion</h5>
+                                                        <p class="small">Abstract questions connected to Part 2 topic, exploring ideas and concepts in depth.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-success mt-3 mb-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-microphone me-2"></i>
+                                                <div>
+                                                    <strong>Requirements:</strong> Working microphone required for recording your responses
+                                                    <p class="mb-0 small">Ensure your device has microphone access enabled</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            {% elif assessment_type == 'reading' %}
+                                <div class="card border-info mb-4">
+                                    <div class="card-header bg-info text-white">
+                                        <h3 class="h5 mb-0"><i class="fas fa-book-open me-2"></i>IELTS {{ 'Academic' if 'academic' in assessment.assessment_type else 'General Training' }} Reading Assessment</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            {% if 'academic' in assessment.assessment_type %}
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-header bg-light">
+                                                            <h4 class="h6 mb-0">Passage 1</h4>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <p class="small">Academic text with factual information and general interest topics.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-header bg-light">
+                                                            <h4 class="h6 mb-0">Passage 2</h4>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <p class="small">Academic text related to work or academic contexts.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-header bg-light">
+                                                            <h4 class="h6 mb-0">Passage 3</h4>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <p class="small">Academic text with complex arguments and academic vocabulary.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-header bg-light">
+                                                            <h4 class="h6 mb-0">Section 1</h4>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <p class="small">Everyday social situations - advertisements, notices, timetables.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-header bg-light">
+                                                            <h4 class="h6 mb-0">Section 2</h4>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <p class="small">Work-related contexts - job descriptions, company policies, training materials.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-header bg-light">
+                                                            <h4 class="h6 mb-0">Section 3</h4>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <p class="small">General academic interest - newspapers, magazines, academic texts.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="alert alert-warning mt-3 mb-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-clock me-2"></i>
+                                                <div>
+                                                    <strong>Time Limit: 60 minutes</strong>
+                                                    <p class="mb-0 small">40 questions total across all passages/sections</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            {% elif assessment_type == 'listening' %}
+                                <div class="card border-warning mb-4">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h3 class="h5 mb-0"><i class="fas fa-headphones me-2"></i>IELTS Listening Assessment</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="card h-100">
+                                                    <div class="card-header bg-light">
+                                                        <h4 class="h6 mb-0">Section 1</h4>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="small">Conversation in everyday social context between two people.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="card h-100">
+                                                    <div class="card-header bg-light">
+                                                        <h4 class="h6 mb-0">Section 2</h4>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="small">Monologue in everyday social context - speech about local facilities.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="card h-100">
+                                                    <div class="card-header bg-light">
+                                                        <h4 class="h6 mb-0">Section 3</h4>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="small">Conversation in educational context - students discussing assignment.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="card h-100">
+                                                    <div class="card-header bg-light">
+                                                        <h4 class="h6 mb-0">Section 4</h4>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="small">Monologue on academic subject - university lecture.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-warning mt-3 mb-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-volume-up me-2"></i>
+                                                <div>
+                                                    <strong>Duration: 30 minutes + 10 minutes transfer time</strong>
+                                                    <p class="mb-0 small">40 questions total, audio played only once</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Exclusive GenAI Technology Section -->
+                            <div class="card border-warning mt-4">
+                                <div class="card-header bg-warning text-dark">
+                                    <h2 class="h5 mb-0"><i class="fas fa-star me-2"></i>World's Only GenAI IELTS Assessment Technology</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-exclamation-circle fa-2x text-primary me-3"></i>
+                                            <div>
+                                                <h4 class="h6 mb-1">🌟 Exclusive Global Technology</h4>
+                                                <p class="mb-0 small">TrueScore® and ClearScore® are the ONLY GenAI assessment tools specifically designed for IELTS preparation worldwide</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if assessment_type == 'writing' %}
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="me-3">
+                                                <i class="fas fa-brain fa-3x text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="h5 mb-1">TrueScore® Writing Assessment</h4>
+                                                <p class="mb-2">Revolutionary GenAI technology that evaluates your writing with the precision of expert IELTS examiners.</p>
+                                                <div class="small text-muted">
+                                                    <span class="badge bg-primary me-1">Task Achievement</span>
+                                                    <span class="badge bg-success me-1">Coherence & Cohesion</span>
+                                                    <span class="badge bg-info me-1">Lexical Resource</span>
+                                                    <span class="badge bg-warning text-dark">Grammar Range & Accuracy</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    {% elif assessment_type == 'speaking' %}
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="me-3">
+                                                <i class="fas fa-robot fa-3x text-success"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="h5 mb-1">ClearScore® Speaking Assessment</h4>
+                                                <p class="mb-2">Advanced conversational AI that provides authentic IELTS speaking practice with real-time assessment.</p>
+                                                <div class="small text-muted">
+                                                    <span class="badge bg-primary me-1">Fluency & Coherence</span>
+                                                    <span class="badge bg-success me-1">Lexical Resource</span>
+                                                    <span class="badge bg-info me-1">Grammar Range</span>
+                                                    <span class="badge bg-warning text-dark">Pronunciation</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    {% elif assessment_type == 'reading' %}
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="me-3">
+                                                <i class="fas fa-search fa-3x text-info"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="h5 mb-1">TrueScore® Reading Assessment</h4>
+                                                <p class="mb-2">Intelligent analysis of your reading comprehension and response accuracy.</p>
+                                                <div class="small text-muted">
+                                                    <span class="badge bg-info me-1">Reading Comprehension</span>
+                                                    <span class="badge bg-primary me-1">Question Analysis</span>
+                                                    <span class="badge bg-success">Response Accuracy</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    {% elif assessment_type == 'listening' %}
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="me-3">
+                                                <i class="fas fa-ear-listen fa-3x text-warning"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="h5 mb-1">TrueScore® Listening Assessment</h4>
+                                                <p class="mb-2">Precise evaluation of your listening comprehension and response accuracy.</p>
+                                                <div class="small text-muted">
+                                                    <span class="badge bg-warning text-dark me-1">Audio Comprehension</span>
+                                                    <span class="badge bg-primary me-1">Detail Recognition</span>
+                                                    <span class="badge bg-success">Response Quality</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="row mt-4">
+                                        <div class="col-md-6">
+                                            <h5 class="h6 mb-2"><i class="fas fa-chart-line text-success me-1"></i> What You'll Receive:</h5>
+                                            <ul class="small text-muted">
+                                                <li>Precise band scores for each criterion</li>
+                                                <li>Detailed performance analysis</li>
+                                                <li>Specific improvement recommendations</li>
+                                                <li>Comparison with IELTS standards</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5 class="h6 mb-2"><i class="fas fa-clock text-primary me-1"></i> Assessment Timeline:</h5>
+                                            <ul class="small text-muted">
+                                                <li>Instant preliminary scoring</li>
+                                                <li>Complete analysis within minutes</li>
+                                                <li>Detailed feedback report</li>
+                                                <li>Personalized study recommendations</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-5">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h3 class="h5 mb-0">Start Assessment</h3>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    {% if already_completed %}
+                                        <div class="alert alert-success mb-4">
+                                            <i class="fas fa-check-circle me-2"></i> You have already completed this assessment.
+                                        </div>
+                                        
+                                        <p>You can view your results or take the assessment again.</p>
+                                        
+                                        <div class="mt-auto">
+                                            <a href="{{ url_for('assessment_list', assessment_type=assessment_type) }}" class="btn btn-outline-primary mb-2 w-100">View All Assessments</a>
+                                            
+                                            <form action="{{ url_for('start_assessment', assessment_type=assessment_type, assessment_id=assessment.id) }}" method="post">
+                                                <button type="submit" class="btn btn-primary w-100">Take Assessment Again</button>
+                                            </form>
+                                        </div>
+                                    {% elif is_speaking_only and assessment_type == 'speaking' and remaining_speaking <= 0 %}
+                                        <div class="alert alert-warning mb-4">
+                                            <i class="fas fa-exclamation-circle me-2"></i> You have used all your speaking assessments.
+                                        </div>
+                                        
+                                        <p>Your speaking assessment package allows a limited number of assessments. Please purchase a new package to continue.</p>
+                                        
+                                        <div class="mt-auto">
+                                            <a href="{{ url_for('assessment_products_page') }}" class="btn btn-primary w-100">Purchase New Package</a>
+                                        </div>
+                                    {% else %}
+                                        <div class="mb-4">
+                                            <h4 class="h6">Assessment Details:</h4>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-clock me-2"></i> 
+                                                    {% if assessment_type == 'writing' %}60 minutes
+                                                    {% elif assessment_type == 'speaking' %}15 minutes
+                                                    {% endif %}
+                                                </li>
+                                                <li><i class="fas fa-tasks me-2"></i> 
+                                                    {% if assessment_type == 'writing' %}2 tasks
+                                                    {% elif assessment_type == 'speaking' %}3 parts
+                                                    {% endif %}
+                                                </li>
+                                                {% if is_speaking_only and assessment_type == 'speaking' %}
+                                                    <li><i class="fas fa-calculator me-2"></i> {{ remaining_speaking }} assessment(s) remaining</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="alert alert-info mb-4">
+                                            <h4 class="h6 mb-1"><i class="fas fa-info-circle me-2"></i> Before You Begin</h4>
+                                            <p class="mb-0 small">Make sure you have enough time to complete the assessment. Once started, you can save your progress but should aim to complete it in one session.</p>
+                                        </div>
+                                        
+                                        <div class="mt-auto">
+                                            <form action="{{ url_for('start_assessment', assessment_type=assessment_type, assessment_id=assessment.id) }}" method="post">
+                                                <button type="submit" class="btn btn-lg btn-primary w-100">Start Assessment</button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h3 class="h5 mb-0">Assessment Structure</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if assessment_type == 'writing' %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h4 class="h6 mb-0">Task 1</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted mb-2">20 minutes | 150+ words</p>
+                                        {% if 'academic' in assessment.assessment_type %}
+                                            <p>You will be presented with a graph, table, chart, or diagram and asked to describe, summarize, or explain the information in your own words.</p>
+                                        {% else %}
+                                            <p>You will be presented with a situation and asked to write a letter requesting information or explaining a situation.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h4 class="h6 mb-0">Task 2</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted mb-2">40 minutes | 250+ words</p>
+                                        <p>You will be asked to write an essay in response to a point of view, argument, or problem. The essay should be formal in style.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% elif assessment_type == 'speaking' %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h4 class="h6 mb-0">Part 1</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted mb-2">4-5 minutes</p>
+                                        <p>Introduction and interview. The assessor asks general questions about familiar topics such as home, family, work, studies, and interests.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h4 class="h6 mb-0">Part 2</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted mb-2">3-4 minutes</p>
+                                        <p>Individual long turn. You will be given a task card with a topic and several points to include in your talk. You will have 1 minute to prepare and then speak for 1-2 minutes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h4 class="h6 mb-0">Part 3</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted mb-2">4-5 minutes</p>
+                                        <p>Two-way discussion. The assessor will ask further questions connected to the topic in Part 2, allowing you to discuss more abstract issues and concepts.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
