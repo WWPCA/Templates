@@ -1,0 +1,414 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .clearscore-header {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .examiner-interface {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid #dee2e6;
+    }
+    
+    .question-display {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-left: 4px solid #007bff;
+    }
+    
+    .recording-controls {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+    
+    .record-btn {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        font-size: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .record-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    .timer-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        margin: 1rem 0;
+    }
+    
+    .progress-indicator {
+        margin: 2rem 0;
+    }
+    
+    .assessment-part {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border: 1px solid #dee2e6;
+    }
+    
+    .audio-visualizer {
+        height: 40px;
+        background: #f8f9fa;
+        border-radius: 20px;
+        margin: 1rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .audio-wave {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+        width: 0%;
+        transition: width 0.1s ease;
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- ClearScore Header -->
+    <div class="elaris-header">
+        <h2><i class="fas fa-microphone-alt me-2"></i>Assessment {{ assessment_number }} - {{ assessment_type.replace('_', ' ').title() }}</h2>
+        <p class="mb-0">Powered by ClearScore® GenAI Technology - The world's only AI IELTS speaking examiner</p>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="assessment-part" id="part1">
+                    <h6>Part 1: Introduction & Interview</h6>
+                    <p class="text-muted mb-0">4-5 minutes</p>
+                    <div class="badge bg-primary mt-2">Current</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="assessment-part" id="part2">
+                    <h6>Part 2: Long Turn Speaking</h6>
+                    <p class="text-muted mb-0">3-4 minutes</p>
+                    <div class="badge bg-secondary mt-2">Upcoming</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="assessment-part" id="part3">
+                    <h6>Part 3: Two-Way Discussion</h6>
+                    <p class="text-muted mb-0">4-5 minutes</p>
+                    <div class="badge bg-secondary mt-2">Upcoming</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Assessment Interface -->
+    <div class="examiner-interface">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="text-center mb-3">
+                    <h5><i class="fas fa-robot me-2"></i>AI Examiner: Maya</h5>
+                    <p class="text-muted">Your AI speaking examiner will guide you through the test</p>
+                </div>
+                
+                <!-- Question Display -->
+                <div class="question-display" id="questionDisplay">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-comment-dots text-primary me-2"></i>
+                        <strong>Examiner:</strong>
+                    </div>
+                    <p id="currentQuestion">Good morning/afternoon. My name is Maya, and I'll be your examiner today. Let's start with some questions about yourself. Can you tell me your name and where you're from?</p>
+                </div>
+
+                <!-- Audio Visualizer -->
+                <div class="audio-visualizer">
+                    <div class="audio-wave" id="audioWave"></div>
+                </div>
+
+                <!-- Recording Controls -->
+                <div class="recording-controls">
+                    <button class="btn btn-success record-btn" id="recordBtn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button class="btn btn-danger record-btn" id="stopBtn" style="display: none;">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                </div>
+
+                <!-- Timer Display -->
+                <div class="timer-display" id="timerDisplay">
+                    Click record to begin speaking
+                </div>
+
+                <!-- Instructions -->
+                <div class="alert alert-info mt-3">
+                    <h6><i class="fas fa-info-circle me-2"></i>Instructions:</h6>
+                    <ul class="mb-0">
+                        <li>Listen carefully to each question</li>
+                        <li>Click the record button and speak your answer</li>
+                        <li>The AI examiner will provide immediate feedback</li>
+                        <li>Take your time - this is a natural conversation</li>
+                    </ul>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-secondary me-2" id="playQuestionBtn">
+                        <i class="fas fa-volume-up me-2"></i>Replay Question
+                    </button>
+                    <button class="btn btn-primary" id="nextQuestionBtn" style="display: none;">
+                        <i class="fas fa-arrow-right me-2"></i>Next Question
+                    </button>
+                    <button class="btn btn-outline-danger" id="exitBtn">
+                        <i class="fas fa-times me-2"></i>Exit Assessment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let isRecording = false;
+    let recordingTimer = null;
+    let recordingSeconds = 0;
+    let currentPart = 1;
+    let currentQuestionIndex = 0;
+    let mediaRecorder = null;
+    let audioStream = null;
+    
+    const recordBtn = document.getElementById('recordBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const audioWave = document.getElementById('audioWave');
+    const questionDisplay = document.getElementById('currentQuestion');
+    const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+    const playQuestionBtn = document.getElementById('playQuestionBtn');
+    const exitBtn = document.getElementById('exitBtn');
+    
+    // Sample questions for demonstration
+    const questions = {
+        part1: [
+            "Good morning/afternoon. My name is Maya, and I'll be your examiner today. Let's start with some questions about yourself. Can you tell me your name and where you're from?",
+            "What do you do for work or study?",
+            "Do you enjoy your work/studies? Why or why not?",
+            "Let's talk about your hobbies. What do you like to do in your free time?",
+            "How long have you been interested in this hobby?"
+        ],
+        part2: [
+            "Now I'm going to give you a topic and I'd like you to talk about it for 2 minutes. You have 1 minute to prepare. Here's your topic: Describe a place you would like to visit. You should say: where it is, why you want to go there, what you would do there, and explain why this place is special to you."
+        ],
+        part3: [
+            "We've been talking about places to visit. Let's discuss travel in general. How has travel changed in recent years?",
+            "What are the benefits of traveling to different countries?",
+            "Do you think virtual reality could replace actual travel in the future? Why or why not?"
+        ]
+    };
+    
+    // Record button functionality
+    recordBtn.addEventListener('click', async function() {
+        try {
+            audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(audioStream);
+            
+            mediaRecorder.start();
+            isRecording = true;
+            recordingSeconds = 0;
+            
+            recordBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            
+            // Start timer
+            recordingTimer = setInterval(() => {
+                recordingSeconds++;
+                const minutes = Math.floor(recordingSeconds / 60);
+                const seconds = recordingSeconds % 60;
+                timerDisplay.textContent = `Recording: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Simulate audio level visualization
+                const randomLevel = Math.random() * 100;
+                audioWave.style.width = randomLevel + '%';
+            }, 1000);
+            
+            mediaRecorder.ondataavailable = function(event) {
+                // Handle recorded data here
+                console.log('Recording completed');
+            };
+            
+        } catch (err) {
+            alert('Could not access microphone. Please check your permissions.');
+        }
+    });
+    
+    // Stop button functionality
+    stopBtn.addEventListener('click', function() {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            isRecording = false;
+            
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
+            }
+            
+            clearInterval(recordingTimer);
+            
+            recordBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            nextQuestionBtn.style.display = 'inline-block';
+            
+            timerDisplay.textContent = 'Recording completed! Processing your response...';
+            audioWave.style.width = '0%';
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                timerDisplay.textContent = 'Great response! Click "Next Question" to continue.';
+            }, 2000);
+        }
+    });
+    
+    // Next question functionality
+    nextQuestionBtn.addEventListener('click', function() {
+        currentQuestionIndex++;
+        nextQuestionBtn.style.display = 'none';
+        
+        let currentQuestions = questions[`part${currentPart}`];
+        
+        if (currentQuestionIndex >= currentQuestions.length) {
+            if (currentPart < 3) {
+                // Move to next part
+                currentPart++;
+                currentQuestionIndex = 0;
+                updatePartProgress();
+                currentQuestions = questions[`part${currentPart}`];
+            } else {
+                // Assessment complete
+                timerDisplay.textContent = 'Assessment completed! Thank you.';
+                questionDisplay.textContent = 'Congratulations! You have completed your IELTS speaking assessment. Your results will be processed and available in your profile shortly.';
+                return;
+            }
+        }
+        
+        questionDisplay.textContent = currentQuestions[currentQuestionIndex];
+        timerDisplay.textContent = 'Listen to the question, then click record to answer.';
+        
+        // Auto-play question (simulated)
+        playQuestion();
+    });
+    
+    // Play question functionality
+    playQuestionBtn.addEventListener('click', function() {
+        playQuestion();
+    });
+    
+    async function playQuestion() {
+        const currentQuestionText = questionDisplay.textContent;
+        
+        if (!currentQuestionText) {
+            console.log('No question to play');
+            return;
+        }
+        
+        try {
+            timerDisplay.textContent = 'ClearScore® is speaking...';
+            playQuestionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Playing...';
+            playQuestionBtn.disabled = true;
+            
+            const response = await fetch('/api/generate_speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: currentQuestionText
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success && result.audio_url) {
+                const audio = new Audio(result.audio_url);
+                
+                audio.onloadeddata = () => {
+                    audio.play().then(() => {
+                        console.log('ClearScore® speaking question with British accent');
+                    }).catch(err => {
+                        console.error('Audio playback failed:', err);
+                        timerDisplay.textContent = 'Audio playback failed. Click record to begin your answer.';
+                    });
+                };
+                
+                audio.onended = () => {
+                    timerDisplay.textContent = 'Click record to begin your answer.';
+                    playQuestionBtn.innerHTML = '<i class="fas fa-volume-up"></i> Play Question';
+                    playQuestionBtn.disabled = false;
+                };
+                
+                audio.onerror = () => {
+                    console.error('Audio loading failed');
+                    timerDisplay.textContent = 'Click record to begin your answer.';
+                    playQuestionBtn.innerHTML = '<i class="fas fa-volume-up"></i> Play Question';
+                    playQuestionBtn.disabled = false;
+                };
+                
+            } else {
+                throw new Error(result.error || 'Speech generation failed');
+            }
+            
+        } catch (error) {
+            console.error('Speech generation error:', error);
+            timerDisplay.textContent = 'Click record to begin your answer.';
+            playQuestionBtn.innerHTML = '<i class="fas fa-volume-up"></i> Play Question';
+            playQuestionBtn.disabled = false;
+        }
+    }
+    
+    function updatePartProgress() {
+        // Update part indicators
+        for (let i = 1; i <= 3; i++) {
+            const partElement = document.getElementById(`part${i}`);
+            const badge = partElement.querySelector('.badge');
+            
+            if (i < currentPart) {
+                badge.className = 'badge bg-success mt-2';
+                badge.textContent = 'Completed';
+            } else if (i === currentPart) {
+                badge.className = 'badge bg-primary mt-2';
+                badge.textContent = 'Current';
+            } else {
+                badge.className = 'badge bg-secondary mt-2';
+                badge.textContent = 'Upcoming';
+            }
+        }
+    }
+    
+    // Exit button functionality
+    exitBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to exit the assessment? Your progress will be lost.')) {
+            window.location.href = '/profile';
+        }
+    });
+    
+    // Initialize
+    playQuestion();
+});
+</script>
+{% endblock %}
