@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recovery System Demo - IELTS GenAI Prep</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        .demo-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .assessment-mockup {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            min-height: 200px;
+        }
+        .connection-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            animation: pulse 2s infinite;
+        }
+        .save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1050;
+        }
+        .manual-save-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1050;
+        }
+        .recovery-option {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .recovery-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+        .recovery-option.recommended {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
+        }
+        .progress-indicator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        .cost-impact {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .cost-impact.low { background: #fff3cd; color: #856404; }
+        .cost-impact.none { background: #e2e3e5; color: #383d41; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .demo-step {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 25px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .btn-demo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-demo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container demo-container">
+        <div class="text-center mb-4">
+            <h1 class="text-white display-4">🔄 Recovery System Demo</h1>
+            <p class="text-white lead">See how the system protects users during connection issues</p>
+        </div>
+
+        <!-- Step 1: Normal Assessment in Progress -->
+        <div class="demo-section">
+            <div class="demo-step">
+                <i class="fas fa-play-circle me-2"></i>Step 1: User Taking Speaking Assessment
+            </div>
+            
+            <div class="assessment-mockup">
+                <h4><i class="fas fa-microphone text-primary me-2"></i>Speaking Assessment 2 - Part 2</h4>
+                <p class="text-muted">Assessment in progress...</p>
+                <div class="progress mb-3">
+                    <div class="progress-bar bg-success" style="width: 60%"></div>
+                </div>
+                <p><strong>Current Topic:</strong> "Describe a memorable journey you have taken"</p>
+                <small class="text-muted">User has been speaking for 2 minutes...</small>
+            </div>
+
+            <!-- Normal save indicator -->
+            <div class="save-indicator">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>Progress saved</span>
+                </div>
+            </div>
+
+            <!-- Manual save button -->
+            <button class="btn btn-sm btn-outline-primary manual-save-btn">
+                <i class="fas fa-save me-1"></i>Save Progress
+            </button>
+        </div>
+
+        <!-- Step 2: Connection Lost -->
+        <div class="demo-section">
+            <div class="demo-step">
+                <i class="fas fa-wifi-slash me-2"></i>Step 2: Connection Issue Detected
+            </div>
+            
+            <div class="assessment-mockup">
+                <h4><i class="fas fa-microphone text-muted me-2"></i>Speaking Assessment 2 - Part 2</h4>
+                <p class="text-danger">Connection interrupted...</p>
+                <div class="progress mb-3">
+                    <div class="progress-bar bg-warning" style="width: 60%"></div>
+                </div>
+                
+                <!-- Connection warning appears -->
+                <div class="connection-warning">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-wifi text-warning me-2"></i>
+                        <span>Connection lost. Your progress is being saved automatically when reconnected.</span>
+                        <button type="button" class="btn-close ms-auto"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Recovery Options Page -->
+        <div class="demo-section">
+            <div class="demo-step">
+                <i class="fas fa-route me-2"></i>Step 3: Recovery Options Presented
+            </div>
+
+            <!-- Progress Information -->
+            <div class="progress-indicator">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4><i class="fas fa-chart-line me-2"></i>Your Progress</h4>
+                        <p class="mb-1">Part 2 - 60% Complete</p>
+                        <p class="mb-0">3 questions answered • 5 minutes elapsed</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="badge bg-light text-dark fs-6 px-3 py-2">
+                            <i class="fas fa-clock me-1"></i>
+                            Recovery expires in 24 hours
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recovery Options -->
+            <h4 class="mb-3"><i class="fas fa-route me-2"></i>Choose Your Recovery Option</h4>
+            
+            <!-- Resume Option -->
+            <div class="recovery-option recommended">
+                <div class="row align-items-center">
+                    <div class="col-1">
+                        <input type="radio" name="recovery_choice" value="resume" checked>
+                    </div>
+                    <div class="col-8">
+                        <h5><i class="fas fa-play me-2"></i>Resume Assessment</h5>
+                        <p class="mb-1">Continue from Part 2 where you left off</p>
+                        <small class="text-muted">Continue exactly where you left off with all your progress intact</small>
+                    </div>
+                    <div class="col-3 text-end">
+                        <span class="badge bg-success mb-2">Recommended</span><br>
+                        <span class="cost-impact low">Low Impact</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restart Option -->
+            <div class="recovery-option">
+                <div class="row align-items-center">
+                    <div class="col-1">
+                        <input type="radio" name="recovery_choice" value="restart">
+                    </div>
+                    <div class="col-8">
+                        <h5><i class="fas fa-refresh me-2"></i>Start Fresh Assessment</h5>
+                        <p class="mb-1">Begin a completely new assessment with different questions</p>
+                        <small class="text-muted">Begin a completely new assessment with different questions</small>
+                    </div>
+                    <div class="col-3 text-end">
+                        <span class="cost-impact none">No Additional Cost</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="button" class="btn btn-demo btn-lg" onclick="showStep4()">
+                    <i class="fas fa-arrow-right me-2"></i>Continue Assessment
+                </button>
+            </div>
+
+            <!-- Help Information -->
+            <div class="mt-4 p-3 bg-light rounded">
+                <h6><i class="fas fa-question-circle me-2"></i>Need Help?</h6>
+                <p class="mb-0">
+                    <strong>Resume:</strong> Perfect if you want to continue from where you stopped. All your previous answers are saved.<br>
+                    <strong>Restart:</strong> Best if you prefer a fresh start or experienced technical issues during the assessment.<br>
+                    <em>Both options are included in your package with no additional charges.</em>
+                </p>
+            </div>
+        </div>
+
+        <!-- Step 4: Recovery Success -->
+        <div class="demo-section" id="step4" style="display: none;">
+            <div class="demo-step">
+                <i class="fas fa-check-circle me-2"></i>Step 4: Assessment Resumed Successfully
+            </div>
+            
+            <div class="assessment-mockup">
+                <div class="alert alert-success text-center mb-4">
+                    <i class="fas fa-thumbs-up me-2"></i>
+                    <strong>Welcome back! Continuing from Part 2 where you left off</strong>
+                </div>
+                
+                <h4><i class="fas fa-microphone text-primary me-2"></i>Speaking Assessment 2 - Part 2</h4>
+                <p class="text-success">Assessment resumed successfully!</p>
+                <div class="progress mb-3">
+                    <div class="progress-bar bg-success" style="width: 60%"></div>
+                </div>
+                <p><strong>Continuing Topic:</strong> "Describe a memorable journey you have taken"</p>
+                <small class="text-muted">Ready to continue speaking...</small>
+            </div>
+        </div>
+
+        <!-- Cost Analysis Summary -->
+        <div class="demo-section">
+            <div class="demo-step">
+                <i class="fas fa-chart-pie me-2"></i>Business Impact Summary
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="text-center p-3 bg-light rounded">
+                        <h3 class="text-primary">$0.0002</h3>
+                        <p class="mb-0">Maximum recovery cost</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center p-3 bg-light rounded">
+                        <h3 class="text-success">0.001%</h3>
+                        <p class="mb-0">Impact on profit margin</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center p-3 bg-light rounded">
+                        <h3 class="text-info">24 hrs</h3>
+                        <p class="mb-0">Recovery window</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    <strong>Result:</strong> Complete user protection with virtually zero business impact
+                </p>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-demo btn-lg" onclick="resetDemo()">
+                <i class="fas fa-redo me-2"></i>View Demo Again
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showStep4() {
+            document.getElementById('step4').style.display = 'block';
+            document.getElementById('step4').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function resetDemo() {
+            document.getElementById('step4').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Add some interactive elements
+        document.querySelectorAll('.recovery-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove selected class from all options
+                document.querySelectorAll('.recovery-option').forEach(opt => {
+                    opt.classList.remove('border-primary');
+                });
+                
+                // Add selected class to clicked option
+                this.classList.add('border-primary');
+                
+                // Check the radio button
+                this.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+    </script>
+</body>
+</html>
