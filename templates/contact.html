@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="fas fa-envelope me-2"></i>Contact Support</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Need help with IELTS GenAI Prep?</strong> Our support team is here to assist you.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4><i class="fas fa-headset text-primary me-2"></i>Support Information</h4>
+                            <p>For technical support, assessment questions, or general inquiries:</p>
+                            
+                            <div class="mb-3">
+                                <strong>Email Support:</strong><br>
+                                <a href="mailto:support@ieltsaiprep.com" class="text-primary">support@ieltsaiprep.com</a>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Response Time:</strong><br>
+                                We typically respond within 24 hours during business days.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h4><i class="fas fa-question-circle text-success me-2"></i>Common Questions</h4>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-chevron-right text-muted me-2"></i>
+                                    <strong>Assessment Issues:</strong> If your assessment is interrupted, you can restart it without losing credits.
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-chevron-right text-muted me-2"></i>
+                                    <strong>Payment Questions:</strong> All payments are processed securely through Stripe.
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-chevron-right text-muted me-2"></i>
+                                    <strong>Technical Requirements:</strong> Check our <a href="{{ url_for('device_specs') }}">device requirements</a> page.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <h5><i class="fas fa-users text-info me-2"></i>Account & Privacy</h5>
+                        <p class="mb-3">For account-related requests, data privacy concerns, or GDPR inquiries:</p>
+                        
+                        {% if current_user.is_authenticated %}
+                        <div class="d-grid gap-2 d-md-block">
+                            <a href="{{ url_for('profile') }}" class="btn btn-primary">
+                                <i class="fas fa-user me-2"></i>My Profile
+                            </a>
+                            <a href="{{ url_for('privacy_policy') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-shield-alt me-2"></i>Privacy Policy
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="d-grid gap-2 d-md-block">
+                            <a href="{{ url_for('register') }}" class="btn btn-success">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </a>
+                            <a href="{{ url_for('login') }}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
