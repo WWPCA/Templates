@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+
+{% block scripts %}
+<script>
+   // This handles cleanup for any error messages
+   document.addEventListener('DOMContentLoaded', function() {
+     // Fix for "ERROR: Invalid details" message that appears in bottom-right corner
+     // Remove any error notifications that might be showing
+     const cleanupErrors = function() {
+       // Find and remove any elements with error messages
+       document.querySelectorAll('div[style*="position:fixed"], div[style*="position: fixed"]').forEach(function(el) {
+         if (el.textContent && (el.textContent.includes('ERROR') || el.textContent.includes('Invalid details'))) {
+           el.remove();
+         }
+       });
+       
+       // Also remove any elements with error classes
+       document.querySelectorAll('.alert-danger, .alert-error').forEach(function(el) {
+         if (el.textContent && (el.textContent.includes('ERROR') || el.textContent.includes('Invalid details'))) {
+           el.remove();
+         }
+       });
+     };
+     
+     // Run cleanup immediately
+     cleanupErrors();
+     
+     // Also run cleanup periodically
+     setInterval(cleanupErrors, 1000);
+   });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mt-md-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h4 mb-0">Complete Your Purchase</h1>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5 class="mb-2"><i class="fas fa-info-circle"></i> Complete Your Purchase</h5>
+                        <p>To continue with your purchase, please let us know if you already have an account or if you're new to IELTS GenAI Prep.</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h3 class="h5 mb-3">I'm a New User</h3>
+                                    <p>Create a new account to access your assessments after purchase.</p>
+                                    <form id="email-check-form" method="POST" action="{{ url_for('cart.check_email') }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <div class="form-group mb-3">
+                                            <label for="email" class="form-label">Enter your email</label>
+                                            <input type="email" class="form-control" id="email" name="email" required placeholder="your.email@example.com">
+                                        </div>
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary">Continue</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h3 class="h5 mb-3">I Have an Account</h3>
+                                    <p>Log in to your existing account to complete your purchase.</p>
+                                    <div class="d-grid">
+                                        <a href="{{ url_for('login', next='checkout') }}" class="btn btn-success">Log In & Continue</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Order Summary</h5>
+                        <ul class="list-group mb-3">
+                            {% for item in cart_items %}
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div>
+                                    <h6 class="my-0">{{ item.name }}</h6>
+                                    <small class="text-muted">{{ item.description }}</small>
+                                </div>
+                                <span class="text-muted">${{ item.price }}</span>
+                            </li>
+                            {% endfor %}
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Subtotal</span>
+                                <strong>${{ cart_total }}</strong>
+                            </li>
+                            <li class="list-group-item text-muted small">
+                                <i class="fas fa-info-circle"></i> Taxes will be calculated at checkout based on your billing address
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('cart.view_cart') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
